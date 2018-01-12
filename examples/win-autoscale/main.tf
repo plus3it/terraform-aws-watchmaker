@@ -4,17 +4,15 @@ provider "aws" {
   profile = "test123prof"
 }
 
-module "lx-instance" {
-  source = "../../modules/lx-instance/"
+module "win-autoscale" {
+  source = "../../modules/win-autoscale/"
 
-  Name                   ="test123lxstack"
-  AmiId                  = "ami-1c8ee466"
-  AmiDistro              = "CentOS"
+  Name                   ="test123winautostack"
+  AmiId                  = "ami-0a792a70"
   AppVolumeSize          = "10"
   KeyPairName            = "test123key"
   InstanceRole           = "test123role"
-  PrivateIp              = ""
   NoPublicIp             = "false"
   SecurityGroupIds       = "sg-12345678"
-  SubnetId               = "subnet-12345678"
+  SubnetIds               = "subnet-12345678,subnet-87654321"
 }

@@ -1,4 +1,6 @@
-# Parameters associtated with the Linux Instance Terraform module.
+# ------------------------------------------------------------------------------------------------------------------------
+# This file contains variables associated with the Linux instance Terraform module.
+# ------------------------------------------------------------------------------------------------------------------------
 
 variable "Name" {
   type        = "string"

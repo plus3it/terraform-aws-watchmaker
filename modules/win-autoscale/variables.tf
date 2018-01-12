@@ -1,21 +1,13 @@
-# ------------------------------------------------------------------------------------------------------------------------
-# This file contains variables associated with the Linux instance Terraform module.  It is only for example purposes
-# as part of the root 'main.tf'.  For other modules, use the accompanying 'variables.tf' file in that subdirectory.
-# ------------------------------------------------------------------------------------------------------------------------
+# Parameters associated with the Windows Autoscale Terraform module.
 
 variable "Name" {
   type        = "string"
-  description = "Name of CloudFormation Stack"
+  description = "Name of Instance"
 }
 
 variable "AmiId" {
   type        = "string"
   description = "ID of the AMI to launch"
-}
-
-variable "AmiDistro" {
-  type        = "string"
-  description = "Linux distro of the AMI"
 }
 
 variable "AppScriptParams" {
@@ -24,28 +16,16 @@ variable "AppScriptParams" {
   default     = ""
 }
 
-variable "AppScriptShell" {
-  type        = "string"
-  description = "Shell with which to execute the application script. Ignored if AppScriptUrl is blank"
-  default     = "bash"
-}
-
 variable "AppScriptUrl" {
   type        = "string"
-  description = "(Optional) S3 URL to the application script in an S3 bucket (s3://). Leave blank to launch without an application script. If specified, an appropriate InstanceRole is required"
+  description = "(Optional) S3 URL to the .ps1 or .bat application script in an S3 bucket (s3://). Leave blank to launch without an application script. If specified, an appropriate InstanceRole is required"
   default     = ""
 }
 
 variable "AppVolumeDevice" {
   type        = "string"
-  description = "(Optional) Device to mount an extra EBS volume. Leave blank to launch without an extra application volume"
+  description = "#(Optional) Device to mount an extra EBS volume. Leave blank to launch without an extra application volume"
   default     = ""
-}
-
-variable "AppVolumeMountPath" {
-  type        = "string"
-  description = "Filesystem path to mount the extra app volume. Ignored if AppVolumeDevice is blank"
-  default     = "/opt/data"
 }
 
 variable "AppVolumeType" {
@@ -77,10 +57,22 @@ variable "InstanceRole" {
   default     = ""
 }
 
-variable "PrivateIp" {
+variable "MinCapacity" {
   type        = "string"
-  description = "(Optional) Set a static, primary private IP. Leave blank to auto-select a free IP"
-  default     = ""
+  description = "Minimum number of instances in the Autoscaling Group"
+  default     = "1"
+}
+
+variable "MaxCapacity" {
+  type        = "string"
+  description = "Maximum number of instances in the Autoscaling Group"
+  default     = "2"
+}
+
+variable "DesiredCapacity" {
+  type        = "string"
+  description = "Desired number of instances in the Autoscaling Group"
+  default     = "1"
 }
 
 variable "NoPublicIp" {
@@ -95,26 +87,32 @@ variable "NoReboot" {
   default     = "false"
 }
 
-variable "NoUpdates" {
-  type        = "string"
-  description = "Controls whether to run yum update during a stack update (On the initial instance launch, Watchmaker _always_ installs updates)"
-  default     = "false"
-}
-
 variable "SecurityGroupIds" {
   type        = "string"
   description = "List of security groups to apply to the instance"
 }
 
-variable "SubnetId" {
+variable "SubnetIds" {
   type        = "string"
-  description = "ID of the subnet to assign to the instance"
+  description = "List of subnets to associate to the Autoscaling Group"
 }
 
 variable "PypiIndexUrl" {
   type        = "string"
   description = "URL to the PyPi Index"
   default     = "https://pypi.org/simple"
+}
+
+variable "PythonInstaller" {
+  type        = "string"
+  description = "URL to the Python Installer Executable"
+  default     = "https://www.python.org/ftp/python/3.6.3/python-3.6.3-amd64.exe"
+}
+
+variable "WatchmakerBootstrapper" {
+  type        = "string"
+  description = "URL to the Watchmaker PowerShell bootstrapper for Windows"
+  default     = "https://raw.githubusercontent.com/plus3it/watchmaker/master/docs/files/bootstrap/watchmaker-bootstrap.ps1"
 }
 
 variable "WatchmakerConfig" {
@@ -135,21 +133,9 @@ variable "WatchmakerOuPath" {
   default     = ""
 }
 
-variable "WatchmakerComputerName" {
-  type        = "string"
-  description = "(Optional) Sets the hostname/computername within the OS"
-  default     = ""
-}
-
 variable "WatchmakerAdminGroups" {
   type        = "string"
   description = "(Optional) Colon-separated list of domain groups that should have admin permissions on the EC2 instance"
-  default     = ""
-}
-
-variable "WatchmakerAdminUsers" {
-  type        = "string"
-  description = "(Optional) Colon-separated list of domain users that should have admin permissions on the EC2 instance"
   default     = ""
 }
 
@@ -165,20 +151,14 @@ variable "CfnEndpointUrl" {
   default     = "https://cloudformation.us-east-1.amazonaws.com"
 }
 
-variable "CfnGetPipUrl" {
-  type        = "string"
-  description = "URL to get-pip.py"
-  default     = "https://bootstrap.pypa.io/get-pip.py"
-}
-
-variable "CfnBootstrapUtilsUrl" {
-  type        = "string"
-  description = "URL to aws-cfn-bootstrap-latest.tar.gz"
-  default     = "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz"
-}
-
 variable "ToggleCfnInitUpdate" {
   type        = "string"
   description = "A/B toggle that forces a change to instance metadata, triggering the cfn-init update sequence"
+  default     = "A"
+}
+
+variable "ToggleNewInstances" {
+  type        = "string"
+  description = "A/B toggle that forces a change to instance userdata, triggering new instances via the Autoscale update policy"
   default     = "A"
 }

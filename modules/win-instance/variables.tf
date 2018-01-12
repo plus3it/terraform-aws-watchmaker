@@ -1,21 +1,15 @@
 # ------------------------------------------------------------------------------------------------------------------------
-# This file contains variables associated with the Linux instance Terraform module.  It is only for example purposes
-# as part of the root 'main.tf'.  For other modules, use the accompanying 'variables.tf' file in that subdirectory.
+# This file contains variables associated with the Windows instance Terraform module.
 # ------------------------------------------------------------------------------------------------------------------------
 
 variable "Name" {
   type        = "string"
-  description = "Name of CloudFormation Stack"
+  description = "Name of Instance"
 }
 
 variable "AmiId" {
   type        = "string"
   description = "ID of the AMI to launch"
-}
-
-variable "AmiDistro" {
-  type        = "string"
-  description = "Linux distro of the AMI"
 }
 
 variable "AppScriptParams" {
@@ -24,28 +18,16 @@ variable "AppScriptParams" {
   default     = ""
 }
 
-variable "AppScriptShell" {
-  type        = "string"
-  description = "Shell with which to execute the application script. Ignored if AppScriptUrl is blank"
-  default     = "bash"
-}
-
 variable "AppScriptUrl" {
   type        = "string"
-  description = "(Optional) S3 URL to the application script in an S3 bucket (s3://). Leave blank to launch without an application script. If specified, an appropriate InstanceRole is required"
+  description = "(Optional) S3 URL to the .ps1 or .bat application script in an S3 bucket (s3://). Leave blank to launch without an application script. If specified, an appropriate InstanceRole is required"
   default     = ""
 }
 
 variable "AppVolumeDevice" {
   type        = "string"
-  description = "(Optional) Device to mount an extra EBS volume. Leave blank to launch without an extra application volume"
+  description = "#(Optional) Device to mount an extra EBS volume. Leave blank to launch without an extra application volume"
   default     = ""
-}
-
-variable "AppVolumeMountPath" {
-  type        = "string"
-  description = "Filesystem path to mount the extra app volume. Ignored if AppVolumeDevice is blank"
-  default     = "/opt/data"
 }
 
 variable "AppVolumeType" {
@@ -95,12 +77,6 @@ variable "NoReboot" {
   default     = "false"
 }
 
-variable "NoUpdates" {
-  type        = "string"
-  description = "Controls whether to run yum update during a stack update (On the initial instance launch, Watchmaker _always_ installs updates)"
-  default     = "false"
-}
-
 variable "SecurityGroupIds" {
   type        = "string"
   description = "List of security groups to apply to the instance"
@@ -115,6 +91,18 @@ variable "PypiIndexUrl" {
   type        = "string"
   description = "URL to the PyPi Index"
   default     = "https://pypi.org/simple"
+}
+
+variable "PythonInstaller" {
+  type        = "string"
+  description = "URL to the Python Installer Executable"
+  default     = "https://www.python.org/ftp/python/3.6.3/python-3.6.3-amd64.exe"
+}
+
+variable "WatchmakerBootstrapper" {
+  type        = "string"
+  description = "URL to the Watchmaker PowerShell bootstrapper for Windows"
+  default     = "https://raw.githubusercontent.com/plus3it/watchmaker/master/docs/files/bootstrap/watchmaker-bootstrap.ps1"
 }
 
 variable "WatchmakerConfig" {
@@ -163,18 +151,6 @@ variable "CfnEndpointUrl" {
   type        = "string"
   description = "(Optional) URL to the CloudFormation Endpoint. e.g. https://cloudformation.us-east-1.amazonaws.com"
   default     = "https://cloudformation.us-east-1.amazonaws.com"
-}
-
-variable "CfnGetPipUrl" {
-  type        = "string"
-  description = "URL to get-pip.py"
-  default     = "https://bootstrap.pypa.io/get-pip.py"
-}
-
-variable "CfnBootstrapUtilsUrl" {
-  type        = "string"
-  description = "URL to aws-cfn-bootstrap-latest.tar.gz"
-  default     = "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz"
 }
 
 variable "ToggleCfnInitUpdate" {
