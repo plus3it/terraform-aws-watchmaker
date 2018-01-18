@@ -5,7 +5,7 @@ provider "aws" {
 }
 
 module "lx-instance" {
-  source = "../../modules/lx-instance/"
+  source = "git::https://github.com/plus3it/terraform-aws-watchmaker//modules/lx-instance/"
 
   Name                   ="test123lxstack"
   AmiId                  = "ami-1c8ee466"

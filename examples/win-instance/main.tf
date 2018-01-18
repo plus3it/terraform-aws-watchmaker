@@ -5,7 +5,7 @@ provider "aws" {
 }
 
 module "win-instance" {
-  source = "../../modules/win-instance/"
+  source = "git::https://github.com/plus3it/terraform-aws-watchmaker//modules/win-instance/"
 
   Name                   ="test123winstack"
   AmiId                  = "ami-0a792a70"

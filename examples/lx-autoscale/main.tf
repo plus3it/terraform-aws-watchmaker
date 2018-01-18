@@ -5,7 +5,7 @@ provider "aws" {
 }
 
 module "lx-autoscale" {
-  source = "../../modules/lx-autoscale/"
+  source = "git::https://github.com/plus3it/terraform-aws-watchmaker//modules/lx-autoscale/"
 
   Name                   ="test123autostack"
   AmiId                  = "ami-1c8ee466"

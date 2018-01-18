@@ -5,7 +5,7 @@ provider "aws" {
 }
 
 module "win-autoscale" {
-  source = "../../modules/win-autoscale/"
+  source = "git::https://github.com/plus3it/terraform-aws-watchmaker//modules/win-autoscale/"
 
   Name                   ="test123winautostack"
   AmiId                  = "ami-0a792a70"

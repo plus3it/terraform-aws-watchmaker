@@ -23,7 +23,7 @@ This repo is structured as follows:
 
 To use this module, create a Terraform file with the same format as ```main.tf``` in the root or example directories with variables set to your desired configuration.
 
-Run the following Terraform commands:
+In your Terraform working directory, run the following commands:
 
 ```bash
 $ terraform init
