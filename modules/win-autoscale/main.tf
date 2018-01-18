@@ -1,5 +1,5 @@
-# Terraform module to create a Watchmaker Windows Autoscaling Group using a CloudFormation template
-# Assumes that watchmaker-win-autoscale.template is stored in the same directory as main.tf of the module.
+# Terraform module to create a Watchmaker Windows Autoscaling Group using a CloudFormation cfn.json
+# Assumes that watchmaker-win-autoscale.cfn.json is stored in the same directory as main.tf of the module.
 
 resource "aws_cloudformation_stack" "watchmaker-win-autoscale" {
   name = "${var.Name}"
@@ -34,8 +34,7 @@ resource "aws_cloudformation_stack" "watchmaker-win-autoscale" {
     ToggleNewInstances     = "${var.ToggleNewInstances}"
   }
 
-  #on_failure = "DO_NOTHING" #DO_NOTHING , ROLLBACK, DELETE
+  on_failure = "${var.OnFailureAction}"
 
-  #Assumes that watchmaker-win-autoscale.template is stored in same directory as watchmaker-win-autoscale.tf
-  template_body = "${file("${path.module}/watchmaker-win-autoscale.template")}"
+  template_body = "${file("${path.module}/watchmaker-win-autoscale.cfn.json")}"
 }

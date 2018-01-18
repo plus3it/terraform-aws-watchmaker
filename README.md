@@ -1,5 +1,5 @@
 
-[![License](https://img.shields.io/github/license/plus3it/watchmaker.svg)](./LICENSE)
+[![License](https://img.shields.io/github/license/plus3it/terraform-aws-watchmaker.svg)](./LICENSE)
 
 # Watchmaker AWS Terraform Module
 
@@ -21,4 +21,12 @@ This repo is structured as follows:
 * [Modules](https://github.com/eemperor/terraform-aws-watchmaker/tree/master/modules): This folder contains the Terrafrom modules that are used to create the Watchmaker resources.
 * [Examples](https://github.com/eemperor/terraform-aws-watchmaker/tree/master/examples): This folder contains working examples of how to use the modules.  Users will need to modify the parameters for their specific AWS environment.
 
-To use this module, users can download this repository and modify the ```main.tf``` in the root directory to match their desired configuration.  Ensure that the source is pointing to the appropriate module folder.
+To use this module, create a Terraform file with the same format as ```main.tf``` in the root or example directories with variables set to your desired configuration.
+
+Run the following Terraform commands:
+
+```bash
+$ terraform init
+$ terraform plan
+$ terraform apply
+```

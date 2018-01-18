@@ -1,5 +1,5 @@
-# Terraform module to create a Watchmaker Linux Autoscaling Group using a CloudFormation template
-# Assumes that watchmaker-lx-autoscale.template is stored in the same directory as main.tf of the module.
+# Terraform module to create a Watchmaker Linux Autoscaling Group using a CloudFormation cfn.json
+# Assumes that watchmaker-lx-autoscale.cfn.json is stored in the same directory as main.tf of the module.
 
 resource "aws_cloudformation_stack" "watchmaker-lx-autoscale" {
   name = "${var.Name}"
@@ -39,8 +39,7 @@ resource "aws_cloudformation_stack" "watchmaker-lx-autoscale" {
     ToggleNewInstances    = "${var.ToggleNewInstances}"
   }
 
-  on_failure = "DO_NOTHING" //DO_NOTHING , ROLLBACK, DELETE
+  on_failure = "${var.OnFailureAction}"
 
-  #Assumes that watchmaker-lx-autoscale.template is stored in same directory as watchmaker-lx-autoscale.tf
-  template_body = "${file("${path.module}/watchmaker-lx-autoscale.template")}"
+  template_body = "${file("${path.module}/watchmaker-lx-autoscale.cfn.json")}"
 }

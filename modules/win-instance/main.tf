@@ -1,5 +1,5 @@
-# Terraform module to create a Watchmaker Windows instance using a CloudFormation template
-# Assumes that watchmaker-win-instance.template is stored in the same directory as main.tf of the module.
+# Terraform module to create a Watchmaker Windows instance using a CloudFormation cfn.json
+# Assumes that watchmaker-win-instance.cfn.json is stored in the same directory as main.tf of the module.
 
 resource "aws_cloudformation_stack" "watchmaker-win-instance" {
   name = "${var.Name}"
@@ -33,8 +33,7 @@ resource "aws_cloudformation_stack" "watchmaker-win-instance" {
     ToggleCfnInitUpdate    = "${var.ToggleCfnInitUpdate}"
   }
 
-  on_failure = "DO_NOTHING" #DO_NOTHING , ROLLBACK, DELETE
+  on_failure = "${var.OnFailureAction}"
 
-  #Assumes that watchmaker-win-instance.template is stored in same directory as watchmaker-win-instance.tf
-  template_body = "${file("${path.module}/watchmaker-win-instance.template")}"
+  template_body = "${file("${path.module}/watchmaker-win-instance.cfn.json")}"
 }

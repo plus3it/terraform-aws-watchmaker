@@ -181,3 +181,9 @@ variable "ToggleCfnInitUpdate" {
   description = "A/B toggle that forces a change to instance metadata, triggering the cfn-init update sequence"
   default     = "A"
 }
+
+variable "OnFailureAction" {
+  type        = "string"
+  description = "Setting to determine action after stack creation fails.  Appropriate values:  DO_NOTHING, ROLLBACK, DELETE"
+  default     = "DO_NOTHING"
+}
