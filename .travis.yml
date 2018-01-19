@@ -17,7 +17,4 @@ before_script:
 
 script:
   - echo 'script'
-  - terraform init
   - terraform fmt -check=true
-  - terraform validate -var "region=${AWS_REGION}" -var "Name=testlxinstance" -var "AmiId=ami-1c8ee466" -var "AmiDistro=CentOS"
-
