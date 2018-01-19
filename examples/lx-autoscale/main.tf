@@ -7,7 +7,7 @@ provider "aws" {
 module "lx-autoscale" {
   source = "git::https://github.com/plus3it/terraform-aws-watchmaker//modules/lx-autoscale/"
 
-  Name             ="test123autostack"
+  Name             = "test123autostack"
   AmiId            = "ami-1c8ee466"
   AmiDistro        = "CentOS"
   AppVolumeSize    = "10"
