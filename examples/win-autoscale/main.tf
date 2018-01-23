@@ -1,4 +1,4 @@
-# Cloudformation Terraform module for a Linux Watchmaker instance
+# Cloudformation Terraform module for a Windows Watchmaker AutoScaling Group
 
 provider "aws" {
   profile = "test123prof"
