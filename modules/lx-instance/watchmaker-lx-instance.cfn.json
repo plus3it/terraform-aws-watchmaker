@@ -46,29 +46,25 @@
         },
         "AppVolumeDevice" :
         {
-            "Description" : "(Optional) Device to mount an extra EBS volume. Leave blank to launch without an extra application volume",
+            "Description" : "Decision on whether to mount an extra EBS volume. Leave as default (\"false\") to launch without an extra application volume",
             "Type" : "String",
-            "Default" : "",
+            "Default" : "false",
             "AllowedValues" :
             [
-                "",
-                "/dev/xvdf",
-                "/dev/xvdg",
-                "/dev/xvdh",
-                "/dev/xvdi",
-                "/dev/xvdj"
+                "true",
+                "false"
             ]
         },
         "AppVolumeMountPath" :
         {
-            "Description" : "Filesystem path to mount the extra app volume. Ignored if \"AppVolumeDevice\" is blank",
+            "Description" : "Filesystem path to mount the extra app volume. Ignored if \"AppVolumeDevice\" is false",
             "Type" : "String",
             "Default" : "/opt/data",
             "AllowedPattern" : "/.*"
         },
         "AppVolumeType" :
         {
-            "Description" : "Type of EBS volume to create. Ignored if \"AppVolumeDevice\" is blank",
+            "Description" : "Type of EBS volume to create. Ignored if \"AppVolumeDevice\" is false",
             "Type" : "String",
             "Default" : "gp2",
             "AllowedValues" :
@@ -82,7 +78,7 @@
         },
         "AppVolumeSize" :
         {
-            "Description" : "Size in GB of the EBS volume to create. Ignored if \"AppVolumeDevice\" is blank",
+            "Description" : "Size in GB of the EBS volume to create. Ignored if \"AppVolumeDevice\" is false",
             "Type" : "Number",
             "Default" : "1",
             "MinValue": "1",
@@ -105,10 +101,15 @@
                 "t2.small",
                 "t2.medium",
                 "t2.large",
+                "t2.xlarge",
                 "c4.large",
                 "c4.xlarge",
                 "m4.large",
-                "m4.xlarge"
+                "m4.xlarge",
+                "c5.large",
+                "c5.xlarge",
+                "m5.large",
+                "m5.xlarge"
             ]
         },
         "InstanceRole" :
@@ -270,7 +271,7 @@
         },
         "CreateAppVolume" :
         {
-            "Fn::Not" : [ { "Fn::Equals" : [ { "Ref" : "AppVolumeDevice" }, "" ] } ]
+            "Fn::Equals" : [ { "Ref" : "AppVolumeDevice" }, "true" ]
         },
         "UseWamConfig" :
         {
@@ -332,6 +333,74 @@
             "AmazonLinux" : { "DeviceName" : "xvda" },
             "RedHat" : { "DeviceName" : "sda1" },
             "CentOS" : { "DeviceName" : "sda1" }
+        },
+        "InstanceTypeCapabilities" :
+        {
+            "t2.micro" :
+            {
+                "ExternDeviceName" : "/dev/xvdf",
+                "InternDeviceName" : "/dev/xvdf"
+            },
+            "t2.small" :
+            {
+                "ExternDeviceName" : "/dev/xvdf",
+                "InternDeviceName" : "/dev/xvdf"
+            },
+            "t2.medium" :
+            {
+                "ExternDeviceName" : "/dev/xvdf",
+                "InternDeviceName" : "/dev/xvdf"
+            },
+            "t2.large" :
+            {
+                "ExternDeviceName" : "/dev/xvdf",
+                "InternDeviceName" : "/dev/xvdf"
+            },
+            "t2.xlarge" :
+            {
+                "ExternDeviceName" : "/dev/xvdf",
+                "InternDeviceName" : "/dev/xvdf"
+            },
+            "c4.large" :
+            {
+                "ExternDeviceName" : "/dev/xvdf",
+                "InternDeviceName" : "/dev/xvdf"
+            },
+            "c4.xlarge" :
+            {
+                "ExternDeviceName" : "/dev/xvdf",
+                "InternDeviceName" : "/dev/xvdf"
+            },
+            "m4.large" :
+            {
+                "ExternDeviceName" : "/dev/xvdf",
+                "InternDeviceName" : "/dev/xvdf"
+            },
+            "m4.xlarge" :
+            {
+                "ExternDeviceName" : "/dev/xvdf",
+                "InternDeviceName" : "/dev/xvdf"
+            },
+            "c5.large" :
+            {
+                "ExternDeviceName" : "/dev/xvdf",
+                "InternDeviceName" : "/dev/nvme1n1"
+            },
+            "c5.xlarge" :
+            {
+                "ExternDeviceName" : "/dev/xvdf",
+                "InternDeviceName" : "/dev/nvme1n1"
+            },
+            "m5.large" :
+            {
+                "ExternDeviceName" : "/dev/xvdf",
+                "InternDeviceName" : "/dev/nvme1n1"
+            },
+            "m5.xlarge" :
+            {
+                "ExternDeviceName" : "/dev/xvdf",
+                "InternDeviceName" : "/dev/nvme1n1"
+            }
         }
     },
     "Metadata" :
@@ -981,7 +1050,15 @@
                         [
                             "CreateAppVolume",
                             {
-                                "DeviceName" : { "Ref" : "AppVolumeDevice" },
+                                "DeviceName" :
+                                {
+                                    "Fn::FindInMap" :
+                                    [
+                                        "InstanceTypeCapabilities",
+                                        { "Ref" : "InstanceType"},
+                                        "ExternDeviceName"
+                                    ]
+                                },
                                 "Ebs" :
                                 {
                                     "VolumeSize" : { "Ref" : "AppVolumeSize" },
@@ -1046,11 +1123,26 @@
                                 { "Fn::Join" : [ "", [
                                     "bootcmd:\n",
                                     "- cloud-init-per instance mkfs-appvolume mkfs -t ext4 ",
-                                    { "Ref" : "AppVolumeDevice" },
+                                    {
+                                        "Fn::FindInMap" :
+                                        [
+                                            "InstanceTypeCapabilities",
+                                            { "Ref" : "InstanceType"},
+                                            "InternDeviceName"
+                                        ]
+                                    },
                                     "\n",
                                     "mounts:\n",
                                     "- [ ",
-                                    { "Ref" : "AppVolumeDevice" }, ", ",
+                                    {
+                                        "Fn::FindInMap" :
+                                        [
+                                            "InstanceTypeCapabilities",
+                                            { "Ref" : "InstanceType"},
+                                            "InternDeviceName"
+                                        ]
+                                    },
+                                    ", ",
                                     { "Ref" : "AppVolumeMountPath" },
                                     " ]\n"
                                 ]]},
