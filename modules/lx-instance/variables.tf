@@ -37,25 +37,25 @@ variable "AppScriptUrl" {
 
 variable "AppVolumeDevice" {
   type        = "string"
-  description = "(Optional) Device to mount an extra EBS volume. Leave blank to launch without an extra application volume"
-  default     = ""
+  description = "Decision whether to mount an extra EBS volume. Leave as default (\"false\") to launch without an extra application volume"
+  default     = "false"
 }
 
 variable "AppVolumeMountPath" {
   type        = "string"
-  description = "Filesystem path to mount the extra app volume. Ignored if AppVolumeDevice is blank"
+  description = "Filesystem path to mount the extra app volume. Ignored if AppVolumeDevice is false"
   default     = "/opt/data"
 }
 
 variable "AppVolumeType" {
   type        = "string"
-  description = "Type of EBS volume to create. Ignored if AppVolumeDevice is blank"
+  description = "Type of EBS volume to create. Ignored if AppVolumeDevice is false"
   default     = "gp2"
 }
 
 variable "AppVolumeSize" {
   type        = "string"
-  description = "Size in GB of the EBS volume to create. Ignored if AppVolumeDevice is blank"
+  description = "Size in GB of the EBS volume to create. Ignored if AppVolumeDevice is false"
   default     = "1"
 }
 
