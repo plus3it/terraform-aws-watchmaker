@@ -27,4 +27,5 @@ jobs:
         - terraform fmt -check=true
     - # stage name not required, will continue to use `test`
       script:
+        - echo 'JSON Format Check'
         - find $TRAVIS_BUILD_DIR -name '*.json' -type f -print0 | xargs -0 -n1 -I {} -t jq --exit-status . {} > /dev/null
