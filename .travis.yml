@@ -1,20 +1,48 @@
-language: bash
+language: shell
 sudo: false
 
 before_install:
-  - echo "before_install"
+  - echo 'before_install'
 
 install:
-  - echo "install"
+  - echo 'install'
 
-before_script:
-  - echo 'before_script'
-  - curl --silent --output terraform.zip https://releases.hashicorp.com/terraform/0.11.2/terraform_0.11.2_linux_amd64.zip
-  - sha256sum terraform.zip  | grep "f728fa73ff2a4c4235a28de4019802531758c7c090b6ca4c024d48063ab8537b" -q
-  - unzip terraform.zip ; rm -f terraform.zip; chmod +x terraform
-  - mkdir -p ${HOME}/bin ; export PATH=${PATH}:${HOME}/bin; mv terraform ${HOME}/bin/
-  - terraform -v
-
-script:
-  - echo 'script'
-  - terraform fmt -check=true
+jobs:
+  include:
+    - stage: test
+      # Begin Terraform Format Verfiication Job
+      before_script:
+        # Download Terraform
+        - curl --silent --output terraform.zip https://releases.hashicorp.com/terraform/0.11.3/terraform_0.11.3_linux_amd64.zip
+        - sha256sum terraform.zip  | grep "6b8a7b83954597d36bbed23913dd51bc253906c612a070a21db373eab71b277b" -q
+        - unzip terraform.zip ; rm -f terraform.zip; chmod +x terraform
+        - mkdir -p ${HOME}/bin ; export PATH=${PATH}:${HOME}/bin; mv terraform ${HOME}/bin/
+        - terraform -v
+      script:
+        - echo 'Terraform Format Check'
+        - terraform fmt -check=true
+    - # Begin JSON Verification Job
+      before_script:
+        # Download JSON Parser - JQ
+        - curl -sO http://stedolan.github.io/jq/download/linux64/jq
+        - chmod +x $PWD/jq
+      script:
+        - echo 'JSON Format Check'
+        - find $TRAVIS_BUILD_DIR -name '*.json' -type f -print0 | xargs -0 -n1 -I {} -t jq --exit-status . {} > /dev/null
+    - # Begin JSON Diff Job
+      before_script:
+        # Download JSON Parser - JQ
+        - curl -sO http://stedolan.github.io/jq/download/linux64/jq
+        - chmod +x $PWD/jq
+        # Download original files to perform diff test
+        - git clone --branch=master https://github.com/$TRAVIS_REPO_SLUG.git master
+      script:
+        - echo 'JSON Diff'
+        - jq --exit-status --argfile a $TRAVIS_BUILD_DIR/modules/lx-autoscale/watchmaker-lx-autoscale.cfn.json --argfile b $TRAVIS_BUILD_DIR/master/modules/lx-autoscale/watchmaker-lx-autoscale.cfn.json -n '$a == $b'
+        - jq --exit-status --argfile a $TRAVIS_BUILD_DIR/modules/lx-autoscale/watchmaker-lx-autoscale.params.cfn.json --argfile b $TRAVIS_BUILD_DIR/master/modules/lx-autoscale/watchmaker-lx-autoscale.params.cfn.json -n '$a == $b'
+        - jq --exit-status --argfile a $TRAVIS_BUILD_DIR/modules/lx-instance/watchmaker-lx-instance.cfn.json --argfile b $TRAVIS_BUILD_DIR/master/modules/lx-instance/watchmaker-lx-instance.cfn.json -n '$a == $b'
+        - jq --exit-status --argfile a $TRAVIS_BUILD_DIR/modules/lx-instance/watchmaker-lx-instance.params.cfn.json --argfile b $TRAVIS_BUILD_DIR/master/modules/lx-instance/watchmaker-lx-instance.params.cfn.json -n '$a == $b'
+        - jq --exit-status --argfile a $TRAVIS_BUILD_DIR/modules/win-autoscale/watchmaker-win-autoscale.cfn.json --argfile b $TRAVIS_BUILD_DIR/master/modules/win-autoscale/watchmaker-win-autoscale.cfn.json -n '$a == $b'
+        - jq --exit-status --argfile a $TRAVIS_BUILD_DIR/modules/win-autoscale/watchmaker-win-autoscale.params.cfn.json --argfile b $TRAVIS_BUILD_DIR/master/modules/win-autoscale/watchmaker-win-autoscale.params.cfn.json -n '$a == $b'
+        - jq --exit-status --argfile a $TRAVIS_BUILD_DIR/modules/win-instance/watchmaker-win-instance.cfn.json --argfile b $TRAVIS_BUILD_DIR/master/modules/win-instance/watchmaker-win-instance.cfn.json -n '$a == $b'
+        - jq --exit-status --argfile a $TRAVIS_BUILD_DIR/modules/win-instance/watchmaker-win-instance.params.cfn.json --argfile b $TRAVIS_BUILD_DIR/master/modules/win-instance/watchmaker-win-instance.params.cfn.json -n '$a == $b'
