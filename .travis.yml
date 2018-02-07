@@ -10,19 +10,18 @@ install:
 jobs:
   include:
     - stage: test
-      # Begin Terraform Test Job
+      # Begin Terraform Format Verfiication Job
       before_script:
         # Download Terraform
-        - curl --silent --output terraform.zip https://releases.hashicorp.com/terraform/0.11.2/terraform_0.11.2_linux_amd64.zip
-        - sha256sum terraform.zip  | grep "f728fa73ff2a4c4235a28de4019802531758c7c090b6ca4c024d48063ab8537b" -q
+        - curl --silent --output terraform.zip https://releases.hashicorp.com/terraform/0.11.3/terraform_0.11.3_linux_amd64.zip
+        - sha256sum terraform.zip  | grep "6b8a7b83954597d36bbed23913dd51bc253906c612a070a21db373eab71b277b" -q
         - unzip terraform.zip ; rm -f terraform.zip; chmod +x terraform
         - mkdir -p ${HOME}/bin ; export PATH=${PATH}:${HOME}/bin; mv terraform ${HOME}/bin/
         - terraform -v
       script:
         - echo 'Terraform Format Check'
         - terraform fmt -check=true
-    - # Stage name not required, will continue to use `test`
-      # Begin JSON Test Job
+    - # Begin JSON Verification Job
       before_script:
         # Download JSON Parser - JQ
         - curl -sO http://stedolan.github.io/jq/download/linux64/jq
@@ -30,8 +29,7 @@ jobs:
       script:
         - echo 'JSON Format Check'
         - find $TRAVIS_BUILD_DIR -name '*.json' -type f -print0 | xargs -0 -n1 -I {} -t jq --exit-status . {} > /dev/null
-    - # Stage name not required, will continue to use `test`
-      # Begin JSON Diff Job
+    - # Begin JSON Diff Job
       before_script:
         # Download JSON Parser - JQ
         - curl -sO http://stedolan.github.io/jq/download/linux64/jq
