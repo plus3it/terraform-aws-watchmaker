@@ -40,7 +40,5 @@ jobs:
       script:
         - echo 'JSON Diff'
         - bash -c "$FIND_JSON" | xargs -0 -n1 -I {} -t echo "{}" >> $TRAVIS_BUILD_DIR/ci/tmp.txt
-        - cat $TRAVIS_BUILD_DIR/ci/tmp.txt
-        - cat $TRAVIS_BUILD_DIR/ci/json_find_diff.sh
         - chmod +x $TRAVIS_BUILD_DIR/ci/json_find_diff.sh
         - bash -c $TRAVIS_BUILD_DIR/ci/json_find_diff.sh
