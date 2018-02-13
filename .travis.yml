@@ -1,5 +1,8 @@
-language: shell
+language: bash
 sudo: false
+
+env:
+  - FIND_JSON="find $TRAVIS_BUILD_DIR -name '*.json' -type f -print0"
 
 before_install:
   - echo 'before_install'
@@ -28,21 +31,16 @@ jobs:
         - chmod +x $PWD/jq
       script:
         - echo 'JSON Format Check'
-        - find $TRAVIS_BUILD_DIR -name '*.json' -type f -print0 | xargs -0 -n1 -I {} -t jq --exit-status . {} > /dev/null
+        - bash -c "$FIND_JSON" | xargs -0 -n1 -I {} -t jq --exit-status . {} > /dev/null
     - # Begin JSON Diff Job
       before_script:
         # Download JSON Parser - JQ
         - curl -sO http://stedolan.github.io/jq/download/linux64/jq
         - chmod +x $PWD/jq
-        # Download original files to perform diff test
-        - git clone --branch=master https://github.com/$TRAVIS_REPO_SLUG.git master
       script:
         - echo 'JSON Diff'
-        - jq --exit-status --argfile a $TRAVIS_BUILD_DIR/modules/lx-autoscale/watchmaker-lx-autoscale.cfn.json --argfile b $TRAVIS_BUILD_DIR/master/modules/lx-autoscale/watchmaker-lx-autoscale.cfn.json -n '$a == $b'
-        - jq --exit-status --argfile a $TRAVIS_BUILD_DIR/modules/lx-autoscale/watchmaker-lx-autoscale.params.cfn.json --argfile b $TRAVIS_BUILD_DIR/master/modules/lx-autoscale/watchmaker-lx-autoscale.params.cfn.json -n '$a == $b'
-        - jq --exit-status --argfile a $TRAVIS_BUILD_DIR/modules/lx-instance/watchmaker-lx-instance.cfn.json --argfile b $TRAVIS_BUILD_DIR/master/modules/lx-instance/watchmaker-lx-instance.cfn.json -n '$a == $b'
-        - jq --exit-status --argfile a $TRAVIS_BUILD_DIR/modules/lx-instance/watchmaker-lx-instance.params.cfn.json --argfile b $TRAVIS_BUILD_DIR/master/modules/lx-instance/watchmaker-lx-instance.params.cfn.json -n '$a == $b'
-        - jq --exit-status --argfile a $TRAVIS_BUILD_DIR/modules/win-autoscale/watchmaker-win-autoscale.cfn.json --argfile b $TRAVIS_BUILD_DIR/master/modules/win-autoscale/watchmaker-win-autoscale.cfn.json -n '$a == $b'
-        - jq --exit-status --argfile a $TRAVIS_BUILD_DIR/modules/win-autoscale/watchmaker-win-autoscale.params.cfn.json --argfile b $TRAVIS_BUILD_DIR/master/modules/win-autoscale/watchmaker-win-autoscale.params.cfn.json -n '$a == $b'
-        - jq --exit-status --argfile a $TRAVIS_BUILD_DIR/modules/win-instance/watchmaker-win-instance.cfn.json --argfile b $TRAVIS_BUILD_DIR/master/modules/win-instance/watchmaker-win-instance.cfn.json -n '$a == $b'
-        - jq --exit-status --argfile a $TRAVIS_BUILD_DIR/modules/win-instance/watchmaker-win-instance.params.cfn.json --argfile b $TRAVIS_BUILD_DIR/master/modules/win-instance/watchmaker-win-instance.params.cfn.json -n '$a == $b'
+        - bash -c "$FIND_JSON" | xargs -0 -n1 -I {} -t echo "{}" >> $TRAVIS_BUILD_DIR/ci/tmp.txt
+        - cat $TRAVIS_BUILD_DIR/ci/tmp.txt
+        - cat $TRAVIS_BUILD_DIR/ci/json_find_diff.sh
+        - chmod +x $TRAVIS_BUILD_DIR/ci/json_find_diff.sh
+        - bash -c $TRAVIS_BUILD_DIR/ci/json_find_diff.sh
