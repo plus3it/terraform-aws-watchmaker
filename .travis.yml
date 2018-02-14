@@ -16,6 +16,8 @@ jobs:
   include:
     - stage: test
       # Begin Terraform Format Verfiication Job
+      env:
+        - JOB="Terraform Format Verification"
       before_script:
         # Download Terraform
         - curl --silent --output terraform.zip https://releases.hashicorp.com/terraform/0.11.3/terraform_0.11.3_linux_amd64.zip
@@ -27,6 +29,8 @@ jobs:
         - echo 'Terraform Format Check'
         - terraform fmt -check=true
     - # Begin JSON Verification Job
+      env:
+        - JOB="JSON Syntax Verification"
       before_script:
         # Download JSON Parser - JQ
         - curl -sO http://stedolan.github.io/jq/download/linux64/jq
@@ -35,6 +39,8 @@ jobs:
         - echo 'JSON Format Check'
         - bash -c "$FIND_JSON" | $XARGS_CMD jq --exit-status . {} > /dev/null
     - # Begin JSON Diff Job
+      env:
+        - JOB="JSON Lint/Format Verification"
       before_script:
         # Download JSON Parser - JQ
         - curl -sO http://stedolan.github.io/jq/download/linux64/jq
