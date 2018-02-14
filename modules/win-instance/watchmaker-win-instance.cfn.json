@@ -1,318 +1,194 @@
 {
-    "AWSTemplateFormatVersion" : "2010-09-09",
-    "Description" : "This template deploys a Windows instance using Watchmaker, which applies the DISA STIG.",
-    "Parameters" :
-    {
-        "AmiId" :
-        {
-            "Description" : "ID of the AMI to launch",
-            "Type" : "String",
-            "AllowedPattern" : "^ami-[0-9a-z]{8}$|^ami-[0-9a-z]{17}$"
-        },
-        "AppScriptParams" :
-        {
-            "Description" : "Parameter string to pass to the application script. Ignored if \"AppScriptUrl\" is blank",
-            "Type" : "String"
-        },
-        "AppScriptUrl" :
-        {
-            "Description" : "(Optional) S3 URL to the .ps1 or .bat application script in an S3 bucket (s3://). Leave blank to launch without an application script. If specified, an appropriate \"InstanceRole\" is required",
-            "Type" : "String",
-            "Default" : "",
-            "AllowedPattern" : "^$|^s3://(.*)/(.*)\\.(bat|ps1)$",
-            "ConstraintDescription" : "Must use an S3 URL (starts with \"s3://\") to a .bat or .ps1 file"
-        },
-        "AppVolumeDevice" :
-        {
-            "Description" : "(Optional) Device to mount an extra EBS volume. Leave blank to launch without an extra application volume",
-            "Type" : "String",
-            "Default" : "",
-            "AllowedValues" :
-            [
-                "",
-                "xvdf",
-                "xvde",
-                "xvdg",
-                "xvdh",
-                "xvdi"
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Conditions": {
+        "AssignInstanceRole": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "InstanceRole"
+                        },
+                        ""
+                    ]
+                }
             ]
         },
-        "AppVolumeType" :
-        {
-            "Description" : "Type of EBS volume to create. Ignored if \"AppVolumeDevice\" is blank",
-            "Type" : "String",
-            "Default" : "gp2",
-            "AllowedValues" :
-            [
-                "gp2",
-                "io1",
-                "sc1",
-                "st1",
-                "standard"
+        "AssignPublicIp": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "NoPublicIp"
+                        },
+                        "true"
+                    ]
+                }
             ]
         },
-        "AppVolumeSize" :
-        {
-            "Description" : "Size in GB of the EBS volume to create. Ignored if \"AppVolumeDevice\" is blank",
-            "Type" : "Number",
-            "Default" : "1",
-            "MinValue": "1",
-            "MaxValue": "16384",
-            "ConstraintDescription" : "Must be between 1GB and 16384GB."
-        },
-        "KeyPairName" :
-        {
-            "Description" : "Public/private key pairs allow you to securely connect to your instance after it launches",
-            "Type" : "AWS::EC2::KeyPair::KeyName"
-        },
-        "InstanceType" :
-        {
-            "Description" : "Amazon EC2 instance type",
-            "Type" : "String",
-            "Default" : "t2.micro",
-            "AllowedValues" :
-            [
-                "t2.micro",
-                "t2.small",
-                "t2.medium",
-                "t2.large",
-                "t2.xlarge",
-                "c4.large",
-                "c4.xlarge",
-                "m4.large",
-                "m4.xlarge",
-                "c5.large",
-                "c5.xlarge",
-                "m5.large",
-                "m5.xlarge"
+        "AssignStaticPrivateIp": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "PrivateIp"
+                        },
+                        ""
+                    ]
+                }
             ]
         },
-        "InstanceRole" :
-        {
-            "Description" : "(Optional) IAM instance role to apply to the instance(s)",
-            "Type" : "String",
-            "Default" : ""
-        },
-        "PrivateIp" :
-        {
-            "Description" : "(Optional) Set a static, primary private IP. Leave blank to auto-select a free IP",
-            "Type" : "String",
-            "Default" : ""
-        },
-        "NoPublicIp" :
-        {
-            "Description" : "Controls whether to assign the instance a public IP. Recommended to leave at \"true\" _unless_ launching in a public subnet",
-            "Type" : "String",
-            "Default" : "true",
-            "AllowedValues" :
-            [
-                "false",
-                "true"
+        "CreateAppVolume": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "AppVolumeDevice"
+                        },
+                        ""
+                    ]
+                }
             ]
         },
-        "NoReboot" :
-        {
-            "Description" : "Controls whether to reboot the instance as the last step of cfn-init execution",
-            "Type" : "String",
-            "Default" : "false",
-            "AllowedValues" :
-            [
-                "false",
-                "true"
+        "ExecuteAppScript": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "AppScriptUrl"
+                        },
+                        ""
+                    ]
+                }
             ]
         },
-        "SecurityGroupIds" :
-        {
-            "Description" : "List of security groups to apply to the instance",
-            "Type" : "List<AWS::EC2::SecurityGroup::Id>"
-        },
-        "SubnetId" :
-        {
-            "Type" : "AWS::EC2::Subnet::Id",
-            "Description" : "ID of the subnet to assign to the instance"
-        },
-        "PypiIndexUrl" :
-        {
-            "Description" : "URL to the PyPi Index",
-            "Type" : "String",
-            "Default" : "https://pypi.org/simple",
-            "AllowedPattern" : "^http[s]?://.*$"
-        },
-        "PythonInstaller" :
-        {
-            "Description" : "URL to the Python Installer Executable",
-            "Type" : "String",
-            "Default" : "https://www.python.org/ftp/python/3.6.3/python-3.6.3-amd64.exe",
-            "AllowedPattern" : "^http[s]?://.*\\.exe$"
-        },
-        "WatchmakerBootstrapper" :
-        {
-            "Description" : "URL to the Watchmaker PowerShell bootstrapper for Windows",
-            "Type" : "String",
-            "Default" : "https://raw.githubusercontent.com/plus3it/watchmaker/master/docs/files/bootstrap/watchmaker-bootstrap.ps1",
-            "AllowedPattern" : "^$|^http[s]?://.*\\.ps1$"
-        },
-        "WatchmakerConfig" :
-        {
-            "Description" : "(Optional) URL to a Watchmaker config file",
-            "Type" : "String",
-            "Default" : "",
-            "AllowedPattern" : "^$|^http[s]?://.*$"
-        },
-        "WatchmakerEnvironment" :
-        {
-            "Description" : "Environment in which the instance is being deployed",
-            "Type" : "String",
-            "Default" : "",
-            "AllowedValues" :
-            [
-                "",
-                "dev",
-                "test",
-                "prod"
+        "Reboot": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "NoReboot"
+                        },
+                        "true"
+                    ]
+                }
             ]
         },
-        "WatchmakerOuPath" :
-        {
-            "Description" : "(Optional) DN of the OU to place the instance when joining a domain. If blank and \"WatchmakerEnvironment\" enforces a domain join, the instance will be placed in a default container. Leave blank if not joining a domain, or if \"WatchmakerEnvironment\" is \"$false\"",
-            "Type" : "String",
-            "Default" : "",
-            "AllowedPattern" : "^$|^(OU=.+,)+(DC=.+)+$"
-        },
-        "WatchmakerComputerName" :
-        {
-            "Description" : "(Optional) Sets the hostname/computername within the OS",
-            "Type" : "String",
-            "Default" : ""
-        },
-        "WatchmakerAdminGroups" :
-        {
-            "Description" : "(Optional) Colon-separated list of domain groups that should have admin permissions on the EC2 instance",
-            "Type" : "String",
-            "Default" : ""
-        },
-        "WatchmakerAdminUsers" :
-        {
-            "Description" : "(Optional) Colon-separated list of domain users that should have admin permissions on the EC2 instance",
-            "Type" : "String",
-            "Default" : ""
-        },
-        "WatchmakerS3Source" :
-        {
-            "Description" : "Flag that tells watchmaker to use its instance role to retrieve watchmaker content from S3",
-            "Type" : "String",
-            "Default" : "false",
-            "AllowedValues" :
-            [
-                "false",
-                "true"
+        "UseAdminGroups": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "WatchmakerAdminGroups"
+                        },
+                        ""
+                    ]
+                }
             ]
         },
-        "CfnEndpointUrl" :
-        {
-            "Description" : "(Optional) URL to the CloudFormation Endpoint. e.g. https://cloudformation.us-east-1.amazonaws.com",
-            "Type" : "String",
-            "Default" : "https://cloudformation.us-east-1.amazonaws.com",
-            "AllowedPattern" : "^$|^http[s]?://.*$"
+        "UseAdminUsers": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "WatchmakerAdminUsers"
+                        },
+                        ""
+                    ]
+                }
+            ]
         },
-        "ToggleCfnInitUpdate" :
-        {
-            "Description" : "A/B toggle that forces a change to instance metadata, triggering the cfn-init update sequence",
-            "Type" : "String",
-            "Default" : "A",
-            "AllowedValues" :
-            [
-                "A",
-                "B"
+        "UseCfnUrl": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "CfnEndpointUrl"
+                        },
+                        ""
+                    ]
+                }
+            ]
+        },
+        "UseComputerName": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "WatchmakerComputerName"
+                        },
+                        ""
+                    ]
+                }
+            ]
+        },
+        "UseEnvironment": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "WatchmakerEnvironment"
+                        },
+                        ""
+                    ]
+                }
+            ]
+        },
+        "UseOuPath": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "WatchmakerOuPath"
+                        },
+                        ""
+                    ]
+                }
+            ]
+        },
+        "UseS3Source": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "WatchmakerS3Source"
+                        },
+                        "false"
+                    ]
+                }
+            ]
+        },
+        "UseWamConfig": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Ref": "WatchmakerConfig"
+                        },
+                        ""
+                    ]
+                }
             ]
         }
     },
-    "Conditions" :
-    {
-        "ExecuteAppScript" :
-        {
-            "Fn::Not" : [ { "Fn::Equals" : [ { "Ref" : "AppScriptUrl" }, "" ] } ]
-        },
-        "CreateAppVolume" :
-        {
-            "Fn::Not" : [ { "Fn::Equals" : [ { "Ref" : "AppVolumeDevice" }, "" ] } ]
-        },
-        "UseWamConfig" :
-        {
-            "Fn::Not" : [ { "Fn::Equals" : [ { "Ref" : "WatchmakerConfig" }, "" ] } ]
-        },
-        "UseOuPath" :
-        {
-            "Fn::Not" : [ { "Fn::Equals" : [ { "Ref" : "WatchmakerOuPath" }, "" ] } ]
-        },
-        "UseComputerName" :
-        {
-            "Fn::Not" : [ { "Fn::Equals" : [ { "Ref" : "WatchmakerComputerName" }, "" ] } ]
-        },
-        "UseAdminGroups" :
-        {
-            "Fn::Not" : [ { "Fn::Equals" : [ { "Ref" : "WatchmakerAdminGroups" }, "" ] } ]
-        },
-        "UseAdminUsers" :
-        {
-            "Fn::Not" : [ { "Fn::Equals" : [ { "Ref" : "WatchmakerAdminUsers" }, "" ] } ]
-        },
-        "UseS3Source" :
-        {
-            "Fn::Not" : [ { "Fn::Equals" : [ { "Ref" : "WatchmakerS3Source" }, "false" ] } ]
-        },
-        "UseEnvironment" :
-        {
-            "Fn::Not" : [ { "Fn::Equals" : [ { "Ref" : "WatchmakerEnvironment" }, "" ] } ]
-        },
-        "UseCfnUrl" :
-        {
-            "Fn::Not" : [ { "Fn::Equals" : [ { "Ref" : "CfnEndpointUrl" }, "" ] } ]
-        },
-        "Reboot" :
-        {
-            "Fn::Not" : [ { "Fn::Equals" : [ { "Ref" : "NoReboot" }, "true" ] } ]
-        },
-        "AssignInstanceRole" :
-        {
-            "Fn::Not" : [ { "Fn::Equals" : [ { "Ref" : "InstanceRole" }, "" ] } ]
-        },
-        "AssignStaticPrivateIp" :
-        {
-            "Fn::Not" : [ { "Fn::Equals" : [ { "Ref" : "PrivateIp" }, "" ] } ]
-        },
-        "AssignPublicIp" :
-        {
-            "Fn::Not" : [ { "Fn::Equals" : [ { "Ref" : "NoPublicIp" }, "true" ] } ]
-        }
-    },
-    "Mappings" :
-    {
-        "ShellCommandMap" :
-        {
-            "powershell" :
-            {
-                "command" : "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass"
+    "Description": "This template deploys a Windows instance using Watchmaker, which applies the DISA STIG.",
+    "Mappings": {
+        "ShellCommandMap": {
+            "cmd": {
+                "command": "cmd.exe"
             },
-            "cmd" :
-            {
-                "command" : "cmd.exe"
+            "powershell": {
+                "command": "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass"
             }
         }
     },
-    "Metadata" :
-    {
-        "AWS::CloudFormation::Interface" :
-        {
-            "ParameterGroups" :
-            [
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
                 {
-                    "Label" :
-                    {
-                      "default" : "EC2 Instance Configuration"
+                    "Label": {
+                        "default": "EC2 Instance Configuration"
                     },
-                    "Parameters" :
-                    [
+                    "Parameters": [
                         "AmiId",
                         "InstanceType",
                         "InstanceRole",
@@ -324,12 +200,10 @@
                     ]
                 },
                 {
-                    "Label" :
-                    {
-                      "default" : "EC2 Watchmaker Configuration"
+                    "Label": {
+                        "default": "EC2 Watchmaker Configuration"
                     },
-                    "Parameters" :
-                    [
+                    "Parameters": [
                         "PythonInstaller",
                         "PypiIndexUrl",
                         "WatchmakerBootstrapper",
@@ -343,232 +217,576 @@
                     ]
                 },
                 {
-                    "Label" :
-                    {
-                        "default" : "EC2 Application Configuration"
+                    "Label": {
+                        "default": "EC2 Application Configuration"
                     },
-                    "Parameters" :
-                    [
+                    "Parameters": [
                         "AppScriptUrl",
                         "AppScriptParams",
                         "AppScriptShell"
                     ]
                 },
                 {
-                    "Label" :
-                    {
-                        "default" : "EC2 Application EBS Volume"
+                    "Label": {
+                        "default": "EC2 Application EBS Volume"
                     },
-                    "Parameters" :
-                    [
+                    "Parameters": [
                         "AppVolumeDevice",
                         "AppVolumeSize",
                         "AppVolumeType"
                     ]
                 },
                 {
-                    "Label" :
-                    {
-                        "default" : "Network Configuration"
+                    "Label": {
+                        "default": "Network Configuration"
                     },
-                    "Parameters" :
-                    [
+                    "Parameters": [
                         "PrivateIp",
                         "SubnetId"
                     ]
                 },
                 {
-                    "Label" :
-                    {
-                        "default" : "CloudFormation Configuration"
+                    "Label": {
+                        "default": "CloudFormation Configuration"
                     },
-                    "Parameters" :
-                    [
+                    "Parameters": [
                         "CfnEndpointUrl",
                         "ToggleCfnInitUpdate"
                     ]
                 }
             ],
-            "ParameterLabels" :
-            {
-                "ToggleCfnInitUpdate" :
-                {
-                    "default" : "Force Cfn Init Update"
+            "ParameterLabels": {
+                "ToggleCfnInitUpdate": {
+                    "default": "Force Cfn Init Update"
                 }
             }
         }
     },
-    "Resources" :
-    {
-        "WatchmakerInstance" :
-        {
-            "Type" : "AWS::EC2::Instance",
-            "CreationPolicy" :
-            {
-                "ResourceSignal" :
-                {
-                    "Count" : "1",
-                    "Timeout" : "PT60M"
+    "Outputs": {
+        "WatchmakerInstanceId": {
+            "Description": "Instance ID",
+            "Value": {
+                "Ref": "WatchmakerInstance"
+            }
+        }
+    },
+    "Parameters": {
+        "AmiId": {
+            "AllowedPattern": "^ami-[0-9a-z]{8}$|^ami-[0-9a-z]{17}$",
+            "Description": "ID of the AMI to launch",
+            "Type": "String"
+        },
+        "AppScriptParams": {
+            "Description": "Parameter string to pass to the application script. Ignored if \"AppScriptUrl\" is blank",
+            "Type": "String"
+        },
+        "AppScriptUrl": {
+            "AllowedPattern": "^$|^s3://(.*)/(.*)\\.(bat|ps1)$",
+            "ConstraintDescription": "Must use an S3 URL (starts with \"s3://\") to a .bat or .ps1 file",
+            "Default": "",
+            "Description": "(Optional) S3 URL to the .ps1 or .bat application script in an S3 bucket (s3://). Leave blank to launch without an application script. If specified, an appropriate \"InstanceRole\" is required",
+            "Type": "String"
+        },
+        "AppVolumeDevice": {
+            "AllowedValues": [
+                "",
+                "xvdf",
+                "xvde",
+                "xvdg",
+                "xvdh",
+                "xvdi"
+            ],
+            "Default": "",
+            "Description": "(Optional) Device to mount an extra EBS volume. Leave blank to launch without an extra application volume",
+            "Type": "String"
+        },
+        "AppVolumeSize": {
+            "ConstraintDescription": "Must be between 1GB and 16384GB.",
+            "Default": "1",
+            "Description": "Size in GB of the EBS volume to create. Ignored if \"AppVolumeDevice\" is blank",
+            "MaxValue": "16384",
+            "MinValue": "1",
+            "Type": "Number"
+        },
+        "AppVolumeType": {
+            "AllowedValues": [
+                "gp2",
+                "io1",
+                "sc1",
+                "st1",
+                "standard"
+            ],
+            "Default": "gp2",
+            "Description": "Type of EBS volume to create. Ignored if \"AppVolumeDevice\" is blank",
+            "Type": "String"
+        },
+        "CfnEndpointUrl": {
+            "AllowedPattern": "^$|^http[s]?://.*$",
+            "Default": "https://cloudformation.us-east-1.amazonaws.com",
+            "Description": "(Optional) URL to the CloudFormation Endpoint. e.g. https://cloudformation.us-east-1.amazonaws.com",
+            "Type": "String"
+        },
+        "InstanceRole": {
+            "Default": "",
+            "Description": "(Optional) IAM instance role to apply to the instance(s)",
+            "Type": "String"
+        },
+        "InstanceType": {
+            "AllowedValues": [
+                "t2.micro",
+                "t2.small",
+                "t2.medium",
+                "t2.large",
+                "t2.xlarge",
+                "c4.large",
+                "c4.xlarge",
+                "m4.large",
+                "m4.xlarge",
+                "c5.large",
+                "c5.xlarge",
+                "m5.large",
+                "m5.xlarge"
+            ],
+            "Default": "t2.micro",
+            "Description": "Amazon EC2 instance type",
+            "Type": "String"
+        },
+        "KeyPairName": {
+            "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "NoPublicIp": {
+            "AllowedValues": [
+                "false",
+                "true"
+            ],
+            "Default": "true",
+            "Description": "Controls whether to assign the instance a public IP. Recommended to leave at \"true\" _unless_ launching in a public subnet",
+            "Type": "String"
+        },
+        "NoReboot": {
+            "AllowedValues": [
+                "false",
+                "true"
+            ],
+            "Default": "false",
+            "Description": "Controls whether to reboot the instance as the last step of cfn-init execution",
+            "Type": "String"
+        },
+        "PrivateIp": {
+            "Default": "",
+            "Description": "(Optional) Set a static, primary private IP. Leave blank to auto-select a free IP",
+            "Type": "String"
+        },
+        "PypiIndexUrl": {
+            "AllowedPattern": "^http[s]?://.*$",
+            "Default": "https://pypi.org/simple",
+            "Description": "URL to the PyPi Index",
+            "Type": "String"
+        },
+        "PythonInstaller": {
+            "AllowedPattern": "^http[s]?://.*\\.exe$",
+            "Default": "https://www.python.org/ftp/python/3.6.3/python-3.6.3-amd64.exe",
+            "Description": "URL to the Python Installer Executable",
+            "Type": "String"
+        },
+        "SecurityGroupIds": {
+            "Description": "List of security groups to apply to the instance",
+            "Type": "List<AWS::EC2::SecurityGroup::Id>"
+        },
+        "SubnetId": {
+            "Description": "ID of the subnet to assign to the instance",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "ToggleCfnInitUpdate": {
+            "AllowedValues": [
+                "A",
+                "B"
+            ],
+            "Default": "A",
+            "Description": "A/B toggle that forces a change to instance metadata, triggering the cfn-init update sequence",
+            "Type": "String"
+        },
+        "WatchmakerAdminGroups": {
+            "Default": "",
+            "Description": "(Optional) Colon-separated list of domain groups that should have admin permissions on the EC2 instance",
+            "Type": "String"
+        },
+        "WatchmakerAdminUsers": {
+            "Default": "",
+            "Description": "(Optional) Colon-separated list of domain users that should have admin permissions on the EC2 instance",
+            "Type": "String"
+        },
+        "WatchmakerBootstrapper": {
+            "AllowedPattern": "^$|^http[s]?://.*\\.ps1$",
+            "Default": "https://raw.githubusercontent.com/plus3it/watchmaker/master/docs/files/bootstrap/watchmaker-bootstrap.ps1",
+            "Description": "URL to the Watchmaker PowerShell bootstrapper for Windows",
+            "Type": "String"
+        },
+        "WatchmakerComputerName": {
+            "Default": "",
+            "Description": "(Optional) Sets the hostname/computername within the OS",
+            "Type": "String"
+        },
+        "WatchmakerConfig": {
+            "AllowedPattern": "^$|^http[s]?://.*$",
+            "Default": "",
+            "Description": "(Optional) URL to a Watchmaker config file",
+            "Type": "String"
+        },
+        "WatchmakerEnvironment": {
+            "AllowedValues": [
+                "",
+                "dev",
+                "test",
+                "prod"
+            ],
+            "Default": "",
+            "Description": "Environment in which the instance is being deployed",
+            "Type": "String"
+        },
+        "WatchmakerOuPath": {
+            "AllowedPattern": "^$|^(OU=.+,)+(DC=.+)+$",
+            "Default": "",
+            "Description": "(Optional) DN of the OU to place the instance when joining a domain. If blank and \"WatchmakerEnvironment\" enforces a domain join, the instance will be placed in a default container. Leave blank if not joining a domain, or if \"WatchmakerEnvironment\" is \"$false\"",
+            "Type": "String"
+        },
+        "WatchmakerS3Source": {
+            "AllowedValues": [
+                "false",
+                "true"
+            ],
+            "Default": "false",
+            "Description": "Flag that tells watchmaker to use its instance role to retrieve watchmaker content from S3",
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "WatchmakerInstance": {
+            "CreationPolicy": {
+                "ResourceSignal": {
+                    "Count": "1",
+                    "Timeout": "PT60M"
                 }
             },
-            "Metadata" : {
-                "ToggleCfnInitUpdate" : { "Ref" : "ToggleCfnInitUpdate" },
-                "AWS::CloudFormation::Init" :
-                {
-                    "configSets" :
-                    {
-                        "launch" :
-                        [
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "configSets": {
+                        "launch": [
                             "setup",
                             "watchmaker-launch",
                             {
-                                "Fn::If" :
-                                [
+                                "Fn::If": [
                                     "ExecuteAppScript",
                                     "make-app",
-                                    { "Ref" : "AWS::NoValue" }
+                                    {
+                                        "Ref": "AWS::NoValue"
+                                    }
                                 ]
                             },
                             {
-                                "Fn::If" :
-                                [
+                                "Fn::If": [
                                     "Reboot",
                                     "reboot",
-                                    { "Ref" : "AWS::NoValue" }
+                                    {
+                                        "Ref": "AWS::NoValue"
+                                    }
                                 ]
                             },
                             "finalize"
                         ],
-                        "update" :
-                        [
+                        "update": [
                             "setup",
                             "watchmaker-update",
                             {
-                                "Fn::If" :
-                                [
+                                "Fn::If": [
                                     "ExecuteAppScript",
                                     "make-app",
-                                    { "Ref" : "AWS::NoValue" }
+                                    {
+                                        "Ref": "AWS::NoValue"
+                                    }
                                 ]
                             },
                             {
-                                "Fn::If" :
-                                [
+                                "Fn::If": [
                                     "Reboot",
                                     "reboot",
-                                    { "Ref" : "AWS::NoValue" }
+                                    {
+                                        "Ref": "AWS::NoValue"
+                                    }
                                 ]
                             },
                             "finalize"
                         ]
                     },
-                    "setup" :
-                    {
-                        "files" :
-                        {
-                            "c:\\cfn\\cfn-hup.conf" :
-                            {
-                                "content" :
-                                { "Fn::Join" : ["", [
-                                    "[main]\n",
-                                    "stack=", { "Ref" : "AWS::StackId" }, "\n",
-                                    "region=", { "Ref" : "AWS::Region" }, "\n",
-                                    {
-                                        "Fn::If" :
+                    "finalize": {
+                        "commands": {
+                            "10-signal-success": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
                                         [
-                                            "AssignInstanceRole",
-                                            { "Fn::Join" : [ "", [
-                                                "role=",
-                                                { "Ref" : "InstanceRole" },
-                                                "\n"
-                                            ] ] },
-                                            ""
+                                            "cfn-signal.exe -e 0",
+                                            " --stack ",
+                                            {
+                                                "Ref": "AWS::StackName"
+                                            },
+                                            " --resource WatchmakerInstance",
+                                            {
+                                                "Fn::If": [
+                                                    "AssignInstanceRole",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --role ",
+                                                                {
+                                                                    "Ref": "InstanceRole"
+                                                                }
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            {
+                                                "Fn::If": [
+                                                    "UseCfnUrl",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --url ",
+                                                                {
+                                                                    "Ref": "CfnEndpointUrl"
+                                                                }
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            " --region ",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            "\n"
                                         ]
-                                    },
-                                    {
-                                        "Fn::If" :
+                                    ]
+                                },
+                                "ignoreErrors": "true",
+                                "waitAfterCompletion": "0"
+                            }
+                        }
+                    },
+                    "make-app": {
+                        "commands": {
+                            "10-make-app": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
                                         [
-                                            "UseCfnUrl",
-                                            { "Fn::Join" : [ "", [
-                                                "url=",
-                                                { "Ref" : "CfnEndpointUrl" },
-                                                "\n"
-                                            ] ] },
-                                            ""
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "ShellCommandMap",
+                                                    "powershell",
+                                                    "command"
+                                                ]
+                                            },
+                                            " \"& { ",
+                                            "$AppScriptUri = [System.Uri]'",
+                                            {
+                                                "Ref": "AppScriptUrl"
+                                            },
+                                            "'; ",
+                                            "$AppScriptDir = 'c:\\cfn\\scripts'; ",
+                                            "$AppScript = Join-Path $AppScriptDir $AppScriptUri.Segments[($AppScriptUri.Segments.Length-1)]; ",
+                                            "$Null = New-Item $AppScriptDir -Type Directory -Force; ",
+                                            "Read-S3Object",
+                                            " -BucketName $AppScriptUri.Host",
+                                            " -Key ($AppScriptUri.Segments[1..($AppScriptUri.Segments.Length-1)] -Join '')",
+                                            " -File $AppScript",
+                                            " -Region ",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            "; ",
+                                            "iex $AppScript; ",
+                                            "}\""
                                         ]
-                                    },
-                                    "interval=1", "\n",
-                                    "verbose=true", "\n"
-                                ]]}
+                                    ]
+                                },
+                                "waitAfterCompletion": "0"
+                            }
+                        }
+                    },
+                    "reboot": {
+                        "commands": {
+                            "10-reboot": {
+                                "command": "powershell.exe \"Restart-Computer -Force -Verbose\"",
+                                "waitAfterCompletion": "forever"
+                            }
+                        }
+                    },
+                    "setup": {
+                        "files": {
+                            "c:\\cfn\\cfn-hup.conf": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "[main]\n",
+                                            "stack=",
+                                            {
+                                                "Ref": "AWS::StackId"
+                                            },
+                                            "\n",
+                                            "region=",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            "\n",
+                                            {
+                                                "Fn::If": [
+                                                    "AssignInstanceRole",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                "role=",
+                                                                {
+                                                                    "Ref": "InstanceRole"
+                                                                },
+                                                                "\n"
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            {
+                                                "Fn::If": [
+                                                    "UseCfnUrl",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                "url=",
+                                                                {
+                                                                    "Ref": "CfnEndpointUrl"
+                                                                },
+                                                                "\n"
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            "interval=1",
+                                            "\n",
+                                            "verbose=true",
+                                            "\n"
+                                        ]
+                                    ]
+                                }
                             },
-                            "c:\\cfn\\hooks.d\\cfn-auto-reloader.conf" :
-                            {
-                                "content" :
-                                { "Fn::Join" : ["", [
-                                    "[cfn-auto-reloader-hook]\n",
-                                    "triggers=post.update\n",
-                                    "path=Resources.WatchmakerInstance.Metadata\n",
-                                    "action=cfn-init.exe -v -c update",
-                                    " --stack ", { "Ref" : "AWS::StackName" },
-                                    " --resource WatchmakerInstance",
-                                    {
-                                        "Fn::If" :
+                            "c:\\cfn\\hooks.d\\cfn-auto-reloader.conf": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
                                         [
-                                            "AssignInstanceRole",
-                                            { "Fn::Join" : [ "", [
-                                                " --role ",
-                                                { "Ref" : "InstanceRole" }
-                                            ] ] },
-                                            ""
+                                            "[cfn-auto-reloader-hook]\n",
+                                            "triggers=post.update\n",
+                                            "path=Resources.WatchmakerInstance.Metadata\n",
+                                            "action=cfn-init.exe -v -c update",
+                                            " --stack ",
+                                            {
+                                                "Ref": "AWS::StackName"
+                                            },
+                                            " --resource WatchmakerInstance",
+                                            {
+                                                "Fn::If": [
+                                                    "AssignInstanceRole",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --role ",
+                                                                {
+                                                                    "Ref": "InstanceRole"
+                                                                }
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            {
+                                                "Fn::If": [
+                                                    "UseCfnUrl",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --url ",
+                                                                {
+                                                                    "Ref": "CfnEndpointUrl"
+                                                                }
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            " --region ",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            "\n"
                                         ]
-                                    },
-                                    {
-                                        "Fn::If" :
-                                        [
-                                            "UseCfnUrl",
-                                            { "Fn::Join" : [ "", [
-                                                " --url ",
-                                                { "Ref" : "CfnEndpointUrl" }
-                                            ] ] },
-                                            ""
-                                        ]
-                                    },
-                                    " --region ", { "Ref" : "AWS::Region" }, "\n"
-                                ]]}
+                                    ]
+                                }
                             },
-                            "c:\\cfn\\scripts\\watchmaker-install.ps1" :
-                            {
-                                "content" :
-                                { "Fn::Join" : ["", [
-                                    "$BootstrapUrl = \"", { "Ref" : "WatchmakerBootstrapper" }, "\"\n",
-                                    "$PythonUrl = \"", { "Ref" : "PythonInstaller" }, "\"\n",
-                                    "$PypiUrl = \"", { "Ref" : "PypiIndexUrl" }, "\"\n\n",
-
-                                    "# Get the host\n",
-                                    "$PypiHost=\"$(([System.Uri]$PypiUrl).Host)\"\n\n",
-
-                                    "# Download bootstrap file\n",
-                                    "$BootstrapFile = \"${Env:Temp}\\$(${BootstrapUrl}.split('/')[-1])\"\n",
-                                    "(New-Object System.Net.WebClient).DownloadFile(\"$BootstrapUrl\", \"$BootstrapFile\")\n\n",
-
-                                    "# Install python\n",
-                                    "& \"$BootstrapFile\" -PythonUrl \"$PythonUrl\" -Verbose -ErrorAction Stop\n\n",
-
-                                    "# Install watchmaker\n",
-                                    "pip install --index-url=\"$PypiUrl\" --trusted-host=\"$PypiHost\" --upgrade pip setuptools boto3 watchmaker\n\n"
-                                ]]}
+                            "c:\\cfn\\scripts\\watchmaker-install.ps1": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "$BootstrapUrl = \"",
+                                            {
+                                                "Ref": "WatchmakerBootstrapper"
+                                            },
+                                            "\"\n",
+                                            "$PythonUrl = \"",
+                                            {
+                                                "Ref": "PythonInstaller"
+                                            },
+                                            "\"\n",
+                                            "$PypiUrl = \"",
+                                            {
+                                                "Ref": "PypiIndexUrl"
+                                            },
+                                            "\"\n\n",
+                                            "# Get the host\n",
+                                            "$PypiHost=\"$(([System.Uri]$PypiUrl).Host)\"\n\n",
+                                            "# Download bootstrap file\n",
+                                            "$BootstrapFile = \"${Env:Temp}\\$(${BootstrapUrl}.split('/')[-1])\"\n",
+                                            "(New-Object System.Net.WebClient).DownloadFile(\"$BootstrapUrl\", \"$BootstrapFile\")\n\n",
+                                            "# Install python\n",
+                                            "& \"$BootstrapFile\" -PythonUrl \"$PythonUrl\" -Verbose -ErrorAction Stop\n\n",
+                                            "# Install watchmaker\n",
+                                            "pip install --index-url=\"$PypiUrl\" --trusted-host=\"$PypiHost\" --upgrade pip setuptools boto3 watchmaker\n\n"
+                                        ]
+                                    ]
+                                }
                             }
                         },
-                        "services" :
-                        {
-                            "windows" :
-                            {
-                                "cfn-hup" :
-                                {
-                                    "enabled" : "true",
-                                    "ensureRunning" : "true",
-                                    "files" :
-                                    [
+                        "services": {
+                            "windows": {
+                                "cfn-hup": {
+                                    "enabled": "true",
+                                    "ensureRunning": "true",
+                                    "files": [
                                         "c:\\cfn\\cfn-hup.conf",
                                         "c:\\cfn\\hooks.d\\cfn-auto-reloader.conf"
                                     ]
@@ -576,457 +794,500 @@
                             }
                         }
                     },
-                    "watchmaker-launch" :
-                    {
-                        "commands" :
-                        {
-                            "10-watchmaker-launch" :
-                            {
-                                "command" :
-                                { "Fn::Join" : [ "", [
-                                    { "Fn::FindInMap" :
+                    "watchmaker-launch": {
+                        "commands": {
+                            "10-watchmaker-launch": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
                                         [
-                                            "ShellCommandMap",
-                                            "powershell",
-                                            "command"
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "ShellCommandMap",
+                                                    "powershell",
+                                                    "command"
+                                                ]
+                                            },
+                                            " \"& {",
+                                            " c:\\cfn\\scripts\\watchmaker-install.ps1;",
+                                            " watchmaker --log-level debug",
+                                            " --log-dir C:\\Watchmaker\\Logs",
+                                            " --no-reboot",
+                                            {
+                                                "Fn::If": [
+                                                    "UseWamConfig",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --config \\\"",
+                                                                {
+                                                                    "Ref": "WatchmakerConfig"
+                                                                },
+                                                                "\\\""
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            {
+                                                "Fn::If": [
+                                                    "UseEnvironment",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --env \\\"",
+                                                                {
+                                                                    "Ref": "WatchmakerEnvironment"
+                                                                },
+                                                                "\\\""
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            {
+                                                "Fn::If": [
+                                                    "UseOuPath",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --ou-path \\\"",
+                                                                {
+                                                                    "Ref": "WatchmakerOuPath"
+                                                                },
+                                                                "\\\""
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            {
+                                                "Fn::If": [
+                                                    "UseComputerName",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --computer-name \"",
+                                                                {
+                                                                    "Ref": "WatchmakerComputerName"
+                                                                },
+                                                                "\""
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            {
+                                                "Fn::If": [
+                                                    "UseAdminGroups",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --admin-groups \\\"",
+                                                                {
+                                                                    "Ref": "WatchmakerAdminGroups"
+                                                                },
+                                                                "\\\""
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            {
+                                                "Fn::If": [
+                                                    "UseAdminUsers",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --admin-users \"",
+                                                                {
+                                                                    "Ref": "WatchmakerAdminUsers"
+                                                                },
+                                                                "\""
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            {
+                                                "Fn::If": [
+                                                    "UseS3Source",
+                                                    " --s3-source",
+                                                    ""
+                                                ]
+                                            },
+                                            " }\""
                                         ]
-                                    },
-                                    " \"& {",
-                                    " c:\\cfn\\scripts\\watchmaker-install.ps1;",
-                                    " watchmaker --log-level debug",
-                                    " --log-dir C:\\Watchmaker\\Logs",
-                                    " --no-reboot",
-                                    {
-                                        "Fn::If" :
-                                        [
-                                            "UseWamConfig",
-                                            { "Fn::Join" : [ "", [
-                                                " --config \\\"",
-                                                { "Ref" : "WatchmakerConfig" },
-                                                "\\\""
-                                            ]]},
-                                            ""
-                                        ]
-                                    },
-                                    {
-                                        "Fn::If" :
-                                        [
-                                            "UseEnvironment",
-                                            { "Fn::Join" : [ "", [
-                                                " --env \\\"",
-                                                { "Ref" : "WatchmakerEnvironment" },
-                                                "\\\""
-                                            ]]},
-                                            ""
-                                        ]
-                                    },
-                                    {
-                                        "Fn::If" :
-                                        [
-                                            "UseOuPath",
-                                            { "Fn::Join" : [ "", [
-                                                " --ou-path \\\"",
-                                                { "Ref" : "WatchmakerOuPath" },
-                                                "\\\""
-                                            ]]},
-                                            ""
-                                        ]
-                                    },
-                                    {
-                                        "Fn::If" :
-                                        [
-                                            "UseComputerName",
-                                            { "Fn::Join" : [ "", [
-                                                " --computer-name \"",
-                                                { "Ref" : "WatchmakerComputerName" },
-                                                "\""
-                                            ]]},
-                                            ""
-                                        ]
-                                    },
-                                    {
-                                        "Fn::If" :
-                                        [
-                                            "UseAdminGroups",
-                                            { "Fn::Join" : [ "", [
-                                                " --admin-groups \\\"",
-                                                { "Ref" : "WatchmakerAdminGroups" },
-                                                "\\\""
-                                            ]]},
-                                            ""
-                                        ]
-                                    },
-                                    {
-                                        "Fn::If" :
-                                        [
-                                            "UseAdminUsers",
-                                            { "Fn::Join" : [ "", [
-                                                " --admin-users \"",
-                                                { "Ref" : "WatchmakerAdminUsers" },
-                                                "\""
-                                            ]]},
-                                            ""
-                                        ]
-                                    },
-                                    {
-                                        "Fn::If" :
-                                        [
-                                            "UseS3Source",
-                                            " --s3-source",
-                                            ""
-                                        ]
-                                    },
-                                    " }\""
-                                ]]}
+                                    ]
+                                }
                             }
                         }
                     },
-                    "watchmaker-update" :
-                    {
-                        "commands" :
-                        {
-                            "10-watchmaker-update" :
-                            {
-                                "command" :
-                                { "Fn::Join" : [ "", [
-                                    { "Fn::FindInMap" :
+                    "watchmaker-update": {
+                        "commands": {
+                            "10-watchmaker-update": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
                                         [
-                                            "ShellCommandMap",
-                                            "powershell",
-                                            "command"
+                                            {
+                                                "Fn::FindInMap": [
+                                                    "ShellCommandMap",
+                                                    "powershell",
+                                                    "command"
+                                                ]
+                                            },
+                                            " \"& {",
+                                            " c:\\cfn\\scripts\\watchmaker-install.ps1;",
+                                            " watchmaker --log-level debug",
+                                            " --log-dir C:\\Watchmaker\\Logs",
+                                            " --salt-states None",
+                                            " --no-reboot",
+                                            {
+                                                "Fn::If": [
+                                                    "UseWamConfig",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --config \\\"",
+                                                                {
+                                                                    "Ref": "WatchmakerConfig"
+                                                                },
+                                                                "\\\""
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            {
+                                                "Fn::If": [
+                                                    "UseEnvironment",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --env \\\"",
+                                                                {
+                                                                    "Ref": "WatchmakerEnvironment"
+                                                                },
+                                                                "\\\""
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            {
+                                                "Fn::If": [
+                                                    "UseOuPath",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --ou-path \\\"",
+                                                                {
+                                                                    "Ref": "WatchmakerOuPath"
+                                                                },
+                                                                "\\\""
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            {
+                                                "Fn::If": [
+                                                    "UseComputerName",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --computer-name \"",
+                                                                {
+                                                                    "Ref": "WatchmakerComputerName"
+                                                                },
+                                                                "\""
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            {
+                                                "Fn::If": [
+                                                    "UseAdminGroups",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --admin-groups \\\"",
+                                                                {
+                                                                    "Ref": "WatchmakerAdminGroups"
+                                                                },
+                                                                "\\\""
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            {
+                                                "Fn::If": [
+                                                    "UseAdminUsers",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --admin-users \"",
+                                                                {
+                                                                    "Ref": "WatchmakerAdminUsers"
+                                                                },
+                                                                "\""
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            {
+                                                "Fn::If": [
+                                                    "UseS3Source",
+                                                    " --s3-source",
+                                                    ""
+                                                ]
+                                            },
+                                            " }\""
                                         ]
-                                    },
-                                    " \"& {",
-                                    " c:\\cfn\\scripts\\watchmaker-install.ps1;",
-                                    " watchmaker --log-level debug",
-                                    " --log-dir C:\\Watchmaker\\Logs",
-                                    " --salt-states None",
-                                    " --no-reboot",
-                                    {
-                                        "Fn::If" :
-                                        [
-                                            "UseWamConfig",
-                                            { "Fn::Join" : [ "", [
-                                                " --config \\\"",
-                                                { "Ref" : "WatchmakerConfig" },
-                                                "\\\""
-                                            ]]},
-                                            ""
-                                        ]
-                                    },
-                                    {
-                                        "Fn::If" :
-                                        [
-                                            "UseEnvironment",
-                                            { "Fn::Join" : [ "", [
-                                                " --env \\\"",
-                                                { "Ref" : "WatchmakerEnvironment" },
-                                                "\\\""
-                                            ]]},
-                                            ""
-                                        ]
-                                    },
-                                    {
-                                        "Fn::If" :
-                                        [
-                                            "UseOuPath",
-                                            { "Fn::Join" : [ "", [
-                                                " --ou-path \\\"",
-                                                { "Ref" : "WatchmakerOuPath" },
-                                                "\\\""
-                                            ]]},
-                                            ""
-                                        ]
-                                    },
-                                    {
-                                        "Fn::If" :
-                                        [
-                                            "UseComputerName",
-                                            { "Fn::Join" : [ "", [
-                                                " --computer-name \"",
-                                                { "Ref" : "WatchmakerComputerName" },
-                                                "\""
-                                            ]]},
-                                            ""
-                                        ]
-                                    },
-                                    {
-                                        "Fn::If" :
-                                        [
-                                            "UseAdminGroups",
-                                            { "Fn::Join" : [ "", [
-                                                " --admin-groups \\\"",
-                                                { "Ref" : "WatchmakerAdminGroups" },
-                                                "\\\""
-                                            ]]},
-                                            ""
-                                        ]
-                                    },
-                                    {
-                                        "Fn::If" :
-                                        [
-                                            "UseAdminUsers",
-                                            { "Fn::Join" : [ "", [
-                                                " --admin-users \"",
-                                                { "Ref" : "WatchmakerAdminUsers" },
-                                                "\""
-                                            ]]},
-                                            ""
-                                        ]
-                                    },
-                                    {
-                                        "Fn::If" :
-                                        [
-                                            "UseS3Source",
-                                            " --s3-source",
-                                            ""
-                                        ]
-                                    },
-                                    " }\""
-                                ]]}
-                            }
-                        }
-                    },
-                    "make-app" :
-                    {
-                        "commands" :
-                        {
-                            "10-make-app" :
-                            {
-                                "command" :
-                                { "Fn::Join" : [ "", [
-                                    { "Fn::FindInMap" :
-                                        [
-                                            "ShellCommandMap",
-                                            "powershell",
-                                            "command"
-                                        ]
-                                    },
-                                    " \"& { ",
-                                    "$AppScriptUri = [System.Uri]'", { "Ref" : "AppScriptUrl" }, "'; ",
-                                    "$AppScriptDir = 'c:\\cfn\\scripts'; ",
-                                    "$AppScript = Join-Path $AppScriptDir $AppScriptUri.Segments[($AppScriptUri.Segments.Length-1)]; ",
-                                    "$Null = New-Item $AppScriptDir -Type Directory -Force; ",
-                                    "Read-S3Object",
-                                    " -BucketName $AppScriptUri.Host",
-                                    " -Key ($AppScriptUri.Segments[1..($AppScriptUri.Segments.Length-1)] -Join '')",
-                                    " -File $AppScript",
-                                    " -Region ", { "Ref" : "AWS::Region" }, "; ",
-                                    "iex $AppScript; ",
-                                    "}\""
-                                ]]},
-                                "waitAfterCompletion" : "0"
-                            }
-                        }
-                    },
-                    "reboot" :
-                    {
-                        "commands" :
-                        {
-                            "10-reboot" :
-                            {
-                                "command" : "powershell.exe \"Restart-Computer -Force -Verbose\"",
-                                "waitAfterCompletion" : "forever"
-                            }
-                        }
-                    },
-                    "finalize" :
-                    {
-                        "commands" :
-                        {
-                            "10-signal-success" :
-                            {
-                                "command" :
-                                { "Fn::Join" : [ "", [
-                                    "cfn-signal.exe -e 0",
-                                    " --stack ", { "Ref" : "AWS::StackName" },
-                                    " --resource WatchmakerInstance",
-                                    {
-                                        "Fn::If" :
-                                        [
-                                            "AssignInstanceRole",
-                                            { "Fn::Join" : [ "", [
-                                                " --role ",
-                                                { "Ref" : "InstanceRole" }
-                                            ] ] },
-                                            ""
-                                        ]
-                                    },
-                                    {
-                                        "Fn::If" :
-                                        [
-                                            "UseCfnUrl",
-                                            { "Fn::Join" : [ "", [
-                                                " --url ",
-                                                { "Ref" : "CfnEndpointUrl" }
-                                            ] ] },
-                                            ""
-                                        ]
-                                    },
-                                    " --region ", { "Ref" : "AWS::Region"}, "\n"
-                                ]]},
-                                "ignoreErrors" : "true",
-                                "waitAfterCompletion" : "0"
+                                    ]
+                                }
                             }
                         }
                     }
+                },
+                "ToggleCfnInitUpdate": {
+                    "Ref": "ToggleCfnInitUpdate"
                 }
             },
-            "Properties" :
-            {
-                "ImageId" : { "Ref" : "AmiId" },
-                "InstanceType" : { "Ref" : "InstanceType" },
-                "IamInstanceProfile" :
-                {
-                    "Fn::If" :
-                    [
-                        "AssignInstanceRole",
-                        { "Ref" : "InstanceRole" },
-                        { "Ref" : "AWS::NoValue" }
-                    ]
-                },
-                "Tags" :
-                [
+            "Properties": {
+                "BlockDeviceMappings": [
                     {
-                        "Key" : "Name",
-                        "Value" :
-                        { "Fn::Join" : [ "", [
-                            { "Ref" : "AWS::StackName" }
-                        ]]}
-                    }
-                ],
-                "BlockDeviceMappings" :
-                [
-                    {
-                        "DeviceName" : "/dev/sda1",
-                        "Ebs" :
-                        {
-                            "VolumeType" : "gp2",
-                            "DeleteOnTermination" : "true"
+                        "DeviceName": "/dev/sda1",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeType": "gp2"
                         }
                     },
                     {
-                        "Fn::If" :
-                        [
+                        "Fn::If": [
                             "CreateAppVolume",
                             {
-                                "DeviceName" : { "Ref" : "AppVolumeDevice" },
-                                "Ebs" :
-                                {
-                                    "VolumeSize" : { "Ref" : "AppVolumeSize" },
-                                    "VolumeType" : { "Ref" : "AppVolumeType" },
-                                    "DeleteOnTermination" : "true"
+                                "DeviceName": {
+                                    "Ref": "AppVolumeDevice"
+                                },
+                                "Ebs": {
+                                    "DeleteOnTermination": "true",
+                                    "VolumeSize": {
+                                        "Ref": "AppVolumeSize"
+                                    },
+                                    "VolumeType": {
+                                        "Ref": "AppVolumeType"
+                                    }
                                 }
                             },
-                            { "Ref" : "AWS::NoValue" }
+                            {
+                                "Ref": "AWS::NoValue"
+                            }
                         ]
                     }
                 ],
-                "KeyName" :
-                {
-                    "Ref" : "KeyPairName"
-                },
-                "NetworkInterfaces":
-                [
-                    {
-                        "DeviceIndex" : "0",
-                        "AssociatePublicIpAddress" :
+                "IamInstanceProfile": {
+                    "Fn::If": [
+                        "AssignInstanceRole",
                         {
-                            "Fn::If" :
-                            [
+                            "Ref": "InstanceRole"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "ImageId": {
+                    "Ref": "AmiId"
+                },
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                },
+                "KeyName": {
+                    "Ref": "KeyPairName"
+                },
+                "NetworkInterfaces": [
+                    {
+                        "AssociatePublicIpAddress": {
+                            "Fn::If": [
                                 "AssignPublicIp",
                                 "true",
                                 "false"
                             ]
                         },
-                        "PrivateIpAddress" :
-                        {
-                            "Fn::If" :
-                            [
+                        "DeviceIndex": "0",
+                        "GroupSet": {
+                            "Ref": "SecurityGroupIds"
+                        },
+                        "PrivateIpAddress": {
+                            "Fn::If": [
                                 "AssignStaticPrivateIp",
-                                { "Ref" : "PrivateIp" },
-                                { "Ref" : "AWS::NoValue" }
+                                {
+                                    "Ref": "PrivateIp"
+                                },
+                                {
+                                    "Ref": "AWS::NoValue"
+                                }
                             ]
                         },
-                        "GroupSet" : { "Ref": "SecurityGroupIds" },
-                        "SubnetId": { "Ref" : "SubnetId" }
+                        "SubnetId": {
+                            "Ref": "SubnetId"
+                        }
                     }
                 ],
-                "UserData" :
-                {
-                    "Fn::Base64" :
-                    { "Fn::Join" : [ "", [
-                        "<script>", "\n",
-
-                        "cfn-init.exe -v -c launch",
-                        " --stack ", { "Ref" : "AWS::StackName" },
-                        " --resource WatchmakerInstance ",
-                        {
-                            "Fn::If" :
-                            [
-                                "AssignInstanceRole",
-                                { "Fn::Join" : [ "", [
-                                    " --role ", { "Ref" : "InstanceRole" }
-                                ] ] },
-                                ""
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    }
+                                ]
                             ]
-                        },
-                        {
-                            "Fn::If" :
+                        }
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
                             [
-                                "UseCfnUrl",
-                                { "Fn::Join" : [ "", [
-                                    " --url ", { "Ref" : "CfnEndpointUrl" }
-                                ] ] },
-                                ""
+                                "<script>",
+                                "\n",
+                                "cfn-init.exe -v -c launch",
+                                " --stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --resource WatchmakerInstance ",
+                                {
+                                    "Fn::If": [
+                                        "AssignInstanceRole",
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    " --role ",
+                                                    {
+                                                        "Ref": "InstanceRole"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        ""
+                                    ]
+                                },
+                                {
+                                    "Fn::If": [
+                                        "UseCfnUrl",
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    " --url ",
+                                                    {
+                                                        "Ref": "CfnEndpointUrl"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        ""
+                                    ]
+                                },
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n",
+                                "if %ERRORLEVEL% equ 0 goto success\n\n",
+                                ":error\n",
+                                "cfn-signal.exe -e 1",
+                                " --stack ",
+                                {
+                                    "Ref": "AWS::StackName"
+                                },
+                                " --resource WatchmakerInstance ",
+                                {
+                                    "Fn::If": [
+                                        "AssignInstanceRole",
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    " --role ",
+                                                    {
+                                                        "Ref": "InstanceRole"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        ""
+                                    ]
+                                },
+                                {
+                                    "Fn::If": [
+                                        "UseCfnUrl",
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    " --url ",
+                                                    {
+                                                        "Ref": "CfnEndpointUrl"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        ""
+                                    ]
+                                },
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n",
+                                "echo \"ERROR: cfn-init failed! Aborting!\"",
+                                "\n",
+                                "exit /b 1\n\n",
+                                ":success\n",
+                                "</script>"
                             ]
-                        },
-                        " --region ", { "Ref" : "AWS::Region" }, "\n",
-
-                        "if %ERRORLEVEL% equ 0 goto success\n\n",
-
-                        ":error\n",
-                        "cfn-signal.exe -e 1",
-                        " --stack ", { "Ref" : "AWS::StackName" },
-                        " --resource WatchmakerInstance ",
-                        {
-                            "Fn::If" :
-                            [
-                                "AssignInstanceRole",
-                                { "Fn::Join" : [ "", [
-                                    " --role ", { "Ref" : "InstanceRole"}
-                                ] ] },
-                                ""
-                            ]
-                        },
-                        {
-                            "Fn::If" :
-                            [
-                                "UseCfnUrl",
-                                { "Fn::Join" : [ "", [
-                                    " --url ", { "Ref" : "CfnEndpointUrl" }
-                                ] ] },
-                                ""
-                            ]
-                        },
-                        " --region ", { "Ref" : "AWS::Region" }, "\n",
-                        "echo \"ERROR: cfn-init failed! Aborting!\"", "\n",
-                        "exit /b 1\n\n",
-
-                        ":success\n",
-
-                        "</script>"
-                    ] ] }
+                        ]
+                    }
                 }
-            }
-        }
-    },
-    "Outputs" :
-    {
-        "WatchmakerInstanceId" :
-        {
-            "Value" : { "Ref" : "WatchmakerInstance" },
-            "Description" : "Instance ID"
+            },
+            "Type": "AWS::EC2::Instance"
         }
     }
 }

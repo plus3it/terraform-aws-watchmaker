@@ -1,20 +1,50 @@
 language: bash
 sudo: false
 
+env:
+  global:
+    - FIND_JSON="find $TRAVIS_BUILD_DIR -name '*.json' -type f -print0"
+    - XARGS_CMD="xargs -0 -n1 -I {} -t"
+
 before_install:
-  - echo "before_install"
+  - echo 'before_install'
 
 install:
-  - echo "install"
+  - echo 'install'
 
-before_script:
-  - echo 'before_script'
-  - curl --silent --output terraform.zip https://releases.hashicorp.com/terraform/0.11.2/terraform_0.11.2_linux_amd64.zip
-  - sha256sum terraform.zip  | grep "f728fa73ff2a4c4235a28de4019802531758c7c090b6ca4c024d48063ab8537b" -q
-  - unzip terraform.zip ; rm -f terraform.zip; chmod +x terraform
-  - mkdir -p ${HOME}/bin ; export PATH=${PATH}:${HOME}/bin; mv terraform ${HOME}/bin/
-  - terraform -v
-
-script:
-  - echo 'script'
-  - terraform fmt -check=true
+jobs:
+  include:
+    - stage: test
+      # Begin Terraform Format Verfiication Job
+      env:
+        - JOB="Terraform Format Verification"
+      before_script:
+        # Download Terraform
+        - curl --silent --output terraform.zip https://releases.hashicorp.com/terraform/0.11.3/terraform_0.11.3_linux_amd64.zip
+        - sha256sum terraform.zip  | grep "6b8a7b83954597d36bbed23913dd51bc253906c612a070a21db373eab71b277b" -q
+        - unzip terraform.zip ; rm -f terraform.zip; chmod +x terraform
+        - mkdir -p ${HOME}/bin ; export PATH=${PATH}:${HOME}/bin; mv terraform ${HOME}/bin/
+        - terraform -v
+      script:
+        - echo 'Terraform Format Check'
+        - terraform fmt -check=true
+    - # Begin JSON Verification Job
+      env:
+        - JOB="JSON Syntax Verification"
+      before_script:
+        # Download JSON Parser - JQ
+        - curl -sO http://stedolan.github.io/jq/download/linux64/jq
+        - chmod +x $PWD/jq
+      script:
+        - echo 'JSON Format Check'
+        - bash -c "$FIND_JSON" | $XARGS_CMD jq --exit-status . {} > /dev/null
+    - # Begin JSON Diff Job
+      env:
+        - JOB="JSON Lint/Format Verification"
+      before_script:
+        # Download JSON Parser - JQ
+        - curl -sO http://stedolan.github.io/jq/download/linux64/jq
+        - chmod +x $PWD/jq
+      script:
+        - echo 'JSON Diff'
+        - bash -c "$FIND_JSON" | $XARGS_CMD bash -c 'cmp {} <(jq --indent 4 -S . {})'
