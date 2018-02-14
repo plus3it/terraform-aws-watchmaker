@@ -2,7 +2,9 @@ language: bash
 sudo: false
 
 env:
-  - FIND_JSON="find $TRAVIS_BUILD_DIR -name '*.json' -type f -print0"
+  global:
+    - FIND_JSON="find $TRAVIS_BUILD_DIR -name '*.json' -type f -print0"
+    - XARGS_CMD="xargs -0 -n1 -I {} -t"
 
 before_install:
   - echo 'before_install'
@@ -31,7 +33,7 @@ jobs:
         - chmod +x $PWD/jq
       script:
         - echo 'JSON Format Check'
-        - bash -c "$FIND_JSON" | xargs -0 -n1 -I {} -t jq --exit-status . {} > /dev/null
+        - bash -c "$FIND_JSON" | $XARGS_CMD jq --exit-status . {} > /dev/null
     - # Begin JSON Diff Job
       before_script:
         # Download JSON Parser - JQ
@@ -39,6 +41,4 @@ jobs:
         - chmod +x $PWD/jq
       script:
         - echo 'JSON Diff'
-        - bash -c "$FIND_JSON" | xargs -0 -n1 -I {} -t echo "{}" >> $TRAVIS_BUILD_DIR/ci/tmp.txt
-        - chmod +x $TRAVIS_BUILD_DIR/ci/json_find_diff.sh
-        - bash -c $TRAVIS_BUILD_DIR/ci/json_find_diff.sh
+        - bash -c "$FIND_JSON" | $XARGS_CMD bash -c 'cmp {} <(jq --indent 4 -S . {})'
