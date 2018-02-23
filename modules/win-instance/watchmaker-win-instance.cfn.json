@@ -429,9 +429,8 @@
             "Type": "String"
         },
         "WatchmakerConfig": {
-            "AllowedPattern": "^$|^http[s]?://.*$",
             "Default": "",
-            "Description": "(Optional) URL to a Watchmaker config file",
+            "Description": "(Optional) Path to a Watchmaker config file.  The path can be a remote source (i.e. http[s]://, s3://) or local directory (i.e. /<foldernamer>/)",
             "Type": "String"
         },
         "WatchmakerEnvironment": {
