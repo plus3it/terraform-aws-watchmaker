@@ -141,12 +141,6 @@ variable "WatchmakerAdminUsers" {
   default     = ""
 }
 
-variable "WatchmakerS3Source" {
-  type        = "string"
-  description = "Flag that tells watchmaker to use its instance role to retrieve watchmaker content from S3"
-  default     = "false"
-}
-
 variable "CfnEndpointUrl" {
   type        = "string"
   description = "(Optional) URL to the CloudFormation Endpoint. e.g. https://cloudformation.us-east-1.amazonaws.com"

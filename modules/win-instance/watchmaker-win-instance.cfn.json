@@ -145,18 +145,6 @@
                 }
             ]
         },
-        "UseS3Source": {
-            "Fn::Not": [
-                {
-                    "Fn::Equals": [
-                        {
-                            "Ref": "WatchmakerS3Source"
-                        },
-                        "false"
-                    ]
-                }
-            ]
-        },
         "UseWamConfig": {
             "Fn::Not": [
                 {
@@ -212,8 +200,7 @@
                         "WatchmakerOuPath",
                         "WatchmakerComputerName",
                         "WatchmakerAdminGroups",
-                        "WatchmakerAdminUsers",
-                        "WatchmakerS3Source"
+                        "WatchmakerAdminUsers"
                     ]
                 },
                 {
@@ -448,15 +435,6 @@
             "AllowedPattern": "^$|^(OU=.+,)+(DC=.+)+$",
             "Default": "",
             "Description": "(Optional) DN of the OU to place the instance when joining a domain. If blank and \"WatchmakerEnvironment\" enforces a domain join, the instance will be placed in a default container. Leave blank if not joining a domain, or if \"WatchmakerEnvironment\" is \"$false\"",
-            "Type": "String"
-        },
-        "WatchmakerS3Source": {
-            "AllowedValues": [
-                "false",
-                "true"
-            ],
-            "Default": "false",
-            "Description": "Flag that tells watchmaker to use its instance role to retrieve watchmaker content from S3",
             "Type": "String"
         }
     },
@@ -920,13 +898,6 @@
                                                     ""
                                                 ]
                                             },
-                                            {
-                                                "Fn::If": [
-                                                    "UseS3Source",
-                                                    " --s3-source",
-                                                    ""
-                                                ]
-                                            },
                                             " }\""
                                         ]
                                     ]
@@ -1059,13 +1030,6 @@
                                                             ]
                                                         ]
                                                     },
-                                                    ""
-                                                ]
-                                            },
-                                            {
-                                                "Fn::If": [
-                                                    "UseS3Source",
-                                                    " --s3-source",
                                                     ""
                                                 ]
                                             },
