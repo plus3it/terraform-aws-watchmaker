@@ -106,7 +106,7 @@ variable "PypiIndexUrl" {
 variable "PythonInstaller" {
   type        = "string"
   description = "URL to the Python Installer Executable"
-  default     = "https://www.python.org/ftp/python/3.6.3/python-3.6.3-amd64.exe"
+  default     = "https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe"
 }
 
 variable "WatchmakerBootstrapper" {
