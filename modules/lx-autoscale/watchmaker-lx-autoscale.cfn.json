@@ -506,8 +506,9 @@
             "Type": "String"
         },
         "WatchmakerConfig": {
+            "AllowedPattern": "^$|^(http[s]?|s3|file)://.*$",
             "Default": "",
-            "Description": "(Optional) Path to a Watchmaker config file.  The path can be a remote source (i.e. http[s]://, s3://) or local directory (i.e. /<foldernamer>/)",
+            "Description": "(Optional) Path to a Watchmaker config file.  The config file path can be a remote source (i.e. http[s]://, s3://) or local directory (i.e. file://)",
             "Type": "String"
         },
         "WatchmakerEnvironment": {
