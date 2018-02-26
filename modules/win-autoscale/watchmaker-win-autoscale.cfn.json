@@ -109,18 +109,6 @@
                 }
             ]
         },
-        "UseS3Source": {
-            "Fn::Not": [
-                {
-                    "Fn::Equals": [
-                        {
-                            "Ref": "WatchmakerS3Source"
-                        },
-                        "false"
-                    ]
-                }
-            ]
-        },
         "UseWamConfig": {
             "Fn::Not": [
                 {
@@ -174,8 +162,7 @@
                         "WatchmakerConfig",
                         "WatchmakerEnvironment",
                         "WatchmakerOuPath",
-                        "WatchmakerAdminGroups",
-                        "WatchmakerS3Source"
+                        "WatchmakerAdminGroups"
                     ]
                 },
                 {
@@ -363,7 +350,7 @@
         },
         "PythonInstaller": {
             "AllowedPattern": "^http[s]?://.*\\.exe$",
-            "Default": "https://www.python.org/ftp/python/3.6.3/python-3.6.3-amd64.exe",
+            "Default": "https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe",
             "Description": "URL to the Python Installer Executable",
             "Type": "String"
         },
@@ -405,9 +392,9 @@
             "Type": "String"
         },
         "WatchmakerConfig": {
-            "AllowedPattern": "^$|^http[s]?://.*$",
+            "AllowedPattern": "^$|^(http[s]?|s3|file)://.*$",
             "Default": "",
-            "Description": "(Optional) URL to a Watchmaker config file",
+            "Description": "(Optional) Path to a Watchmaker config file.  The config file path can be a remote source (i.e. http[s]://, s3://) or local directory (i.e. file://)",
             "Type": "String"
         },
         "WatchmakerEnvironment": {
@@ -425,15 +412,6 @@
             "AllowedPattern": "^$|^(OU=.+,)+(DC=.+)+$",
             "Default": "",
             "Description": "(Optional) DN of the OU to place the instance when joining a domain. If blank and \"WatchmakerEnvironment\" enforces a domain join, the instance will be placed in a default container. Leave blank if not joining a domain, or if \"WatchmakerEnvironment\" is \"$false\"",
-            "Type": "String"
-        },
-        "WatchmakerS3Source": {
-            "AllowedValues": [
-                "false",
-                "true"
-            ],
-            "Default": "false",
-            "Description": "Flag that tells watchmaker to use its instance role to retrieve watchmaker content from S3",
             "Type": "String"
         }
     },
@@ -907,13 +885,6 @@
                                                     ""
                                                 ]
                                             },
-                                            {
-                                                "Fn::If": [
-                                                    "UseS3Source",
-                                                    " --s3-source",
-                                                    ""
-                                                ]
-                                            },
                                             " }\""
                                         ]
                                     ]
@@ -1010,13 +981,6 @@
                                                             ]
                                                         ]
                                                     },
-                                                    ""
-                                                ]
-                                            },
-                                            {
-                                                "Fn::If": [
-                                                    "UseS3Source",
-                                                    " --s3-source",
                                                     ""
                                                 ]
                                             },

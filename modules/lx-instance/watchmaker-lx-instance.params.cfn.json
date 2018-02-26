@@ -84,10 +84,6 @@
         "ParameterValue": "__WATCHMAKERADMINUSERS__"
     },
     {
-        "ParameterKey": "WatchmakerS3Source",
-        "ParameterValue": "__WATCHMAKERS3SOURCE__"
-    },
-    {
         "ParameterKey": "WatchmakerComputerName",
         "ParameterValue": "__COMPUTERNAME__"
     },

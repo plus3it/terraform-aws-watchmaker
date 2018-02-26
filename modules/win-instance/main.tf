@@ -28,7 +28,6 @@ resource "aws_cloudformation_stack" "watchmaker-win-instance" {
     WatchmakerComputerName = "${var.WatchmakerComputerName}"
     WatchmakerAdminGroups  = "${var.WatchmakerAdminGroups}"
     WatchmakerAdminUsers   = "${var.WatchmakerAdminUsers}"
-    WatchmakerS3Source     = "${var.WatchmakerS3Source}"
     CfnEndpointUrl         = "${var.CfnEndpointUrl}"
     ToggleCfnInitUpdate    = "${var.ToggleCfnInitUpdate}"
   }
