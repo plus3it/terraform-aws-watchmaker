@@ -57,6 +57,50 @@
                 }
             ]
         },
+        "NotGenFive": {
+            "Fn::Not": [
+                {
+                    "Fn::Or": [
+                        {
+                            "Fn::Equals": [
+                                {
+                                    "Fn::Select": [
+                                        "0",
+                                        {
+                                            "Fn::Split": [
+                                                ".",
+                                                {
+                                                    "Ref": "InstanceType"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "c5"
+                            ]
+                        },
+                        {
+                            "Fn::Equals": [
+                                {
+                                    "Fn::Select": [
+                                        "0",
+                                        {
+                                            "Fn::Split": [
+                                                ".",
+                                                {
+                                                    "Ref": "InstanceType"
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                "m5"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
         "Reboot": {
             "Fn::Not": [
                 {
@@ -156,55 +200,11 @@
             }
         },
         "InstanceTypeCapabilities": {
-            "c4.large": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
-            },
-            "c4.xlarge": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
-            },
-            "c5.large": {
+            "IsGenFive": {
                 "ExternDeviceName": "/dev/xvdf",
                 "InternDeviceName": "/dev/nvme1n1"
             },
-            "c5.xlarge": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/nvme1n1"
-            },
-            "m4.large": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
-            },
-            "m4.xlarge": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
-            },
-            "m5.large": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/nvme1n1"
-            },
-            "m5.xlarge": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/nvme1n1"
-            },
-            "t2.large": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
-            },
-            "t2.medium": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
-            },
-            "t2.micro": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
-            },
-            "t2.small": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
-            },
-            "t2.xlarge": {
+            "PreGenFive": {
                 "ExternDeviceName": "/dev/xvdf",
                 "InternDeviceName": "/dev/xvdf"
             }
@@ -1201,12 +1201,22 @@
                             "CreateAppVolume",
                             {
                                 "DeviceName": {
-                                    "Fn::FindInMap": [
-                                        "InstanceTypeCapabilities",
+                                    "Fn::If": [
+                                        "NotGenFive",
                                         {
-                                            "Ref": "InstanceType"
+                                            "Fn::FindInMap": [
+                                                "InstanceTypeCapabilities",
+                                                "PreGenFive",
+                                                "ExternDeviceName"
+                                            ]
                                         },
-                                        "ExternDeviceName"
+                                        {
+                                            "Fn::FindInMap": [
+                                                "InstanceTypeCapabilities",
+                                                "IsGenFive",
+                                                "ExternDeviceName"
+                                            ]
+                                        }
                                     ]
                                 },
                                 "Ebs": {
@@ -1273,24 +1283,44 @@
                                                     "bootcmd:\n",
                                                     "- cloud-init-per instance mkfs-appvolume mkfs -t ext4 ",
                                                     {
-                                                        "Fn::FindInMap": [
-                                                            "InstanceTypeCapabilities",
+                                                        "Fn::If": [
+                                                            "NotGenFive",
                                                             {
-                                                                "Ref": "InstanceType"
+                                                                "Fn::FindInMap": [
+                                                                    "InstanceTypeCapabilities",
+                                                                    "PreGenFive",
+                                                                    "InternDeviceName"
+                                                                ]
                                                             },
-                                                            "InternDeviceName"
+                                                            {
+                                                                "Fn::FindInMap": [
+                                                                    "InstanceTypeCapabilities",
+                                                                    "IsGenFive",
+                                                                    "InternDeviceName"
+                                                                ]
+                                                            }
                                                         ]
                                                     },
                                                     "\n",
                                                     "mounts:\n",
                                                     "- [ ",
                                                     {
-                                                        "Fn::FindInMap": [
-                                                            "InstanceTypeCapabilities",
+                                                        "Fn::If": [
+                                                            "NotGenFive",
                                                             {
-                                                                "Ref": "InstanceType"
+                                                                "Fn::FindInMap": [
+                                                                    "InstanceTypeCapabilities",
+                                                                    "PreGenFive",
+                                                                    "InternDeviceName"
+                                                                ]
                                                             },
-                                                            "InternDeviceName"
+                                                            {
+                                                                "Fn::FindInMap": [
+                                                                    "InstanceTypeCapabilities",
+                                                                    "IsGenFive",
+                                                                    "InternDeviceName"
+                                                                ]
+                                                            }
                                                         ]
                                                     },
                                                     ", ",
