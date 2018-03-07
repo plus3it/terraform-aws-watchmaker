@@ -28,7 +28,8 @@ jobs:
       script:
         - echo 'Terraform Format Check'
         - terraform fmt -check=true
-    - # Begin JSON Verification Job
+    - stage: test
+      # Begin JSON Verification Job
       env:
         - JOB="JSON Syntax Verification"
       before_script:
@@ -38,7 +39,8 @@ jobs:
       script:
         - echo 'JSON Format Check'
         - bash -c "$FIND_JSON" | $XARGS_CMD jq --exit-status . {} > /dev/null
-    - # Begin JSON Diff Job
+    - stage: test
+      # Begin JSON Diff Job
       env:
         - JOB="JSON Lint/Format Verification"
       before_script:
@@ -48,3 +50,22 @@ jobs:
       script:
         - echo 'JSON Diff'
         - bash -c "$FIND_JSON" | $XARGS_CMD bash -c 'cmp {} <(jq --indent 4 -S . {})'
+    - stage: deploy
+      if: env(PRIOR_VERSION) IS present and env(PRIOR_VERSION) != env(RELEASE_VERSION) and branch = master and type = push AND repo = plus3it/terraform-aws-watchmaker
+      env:
+        - PRIOR_VERSION=$(git describe --abbrev=0 --tags)
+        - RELEASE_VERSION=$(cat $TRAVIS_BUILD_DIR/.bumpversion.cfg | grep current_version | sed 's/^.*= //')
+        - RELEASE_BODY="* [terraform-aws-watchmaker v$RELEASE_VERSION changes](https://github.com/plus3it/terraform-aws-watchmaker/compare/$PRIOR_VERSION...$RELEASE_VERSION)"
+      script: skip
+      before_deploy:
+        - echo PRIOR_VERSION=$PRIOR_VERSION
+        - echo RELEASE_VERSION=$RELEASE_VERSION
+        - echo RELEASE_BODY=$RELEASE_BODY
+      deploy:
+        provider: releases
+        api_key:
+          secure: YiERskfBT8Kq8fDI5IJsV4vd+HM2OUc64A0WuYcqBQ9RRQaAJ71uWfXTa5IC3YhABtsmGpKOOxBET+UXtXOQHN6+M+0wTLl88jdRAWIOPtCzUnxmNbOJX3zbSbyIyj/M+yTruXGMRhQcaIpXICM+LG+zVkadXsKSkVoCU6owcoGukSxPvpI68b5XBEezOKY/LnzJkIWoDEM0MxOsQ+AKJLBchamuQ3FI2IZYEkm3PIlIHuPTmagS5yLBEmhP5N/nPR5cKVXFsqKJ7YPYsGo7mi0PYZb2MGlhO3PPm3wAE0PME7nW4DEFTMtHx0r6U3eiNzvj9IE1D+hv+4/+LWE5Rw3NftXUFRd2FT1yQFRCVDooWoxRM7ddy+dSbEWX0wRLWWznr8GQ5NyJV3GR0YPnqu99B0qT/XXsr7oqHZ0EPUGq78IJd7t5cg50RC4zdrPiVE63ocZt1kHa0gRa9vlkj1B4JZNuBEk2M28QM0i06NMTihli31BKBxkArW3B9oGe1HxiQM33WrvGChGOJzvxzpWv+UyVmXynWWoDO44iAQW0KDxNG/eCGvQ+YZejMontr26cWbbiZ0+55pNK5Gh8gOQMEpBiBFoRhjY2slhWSdo/EC3hjdq0448sWpg+OZUGNe/6ozzrIpw28N/Vpy/dprkGlAa54A5MTOKBzJvfxK8=
+        name: $RELEASE_VERSION
+        tag_name: $RELEASE_VERSION
+        body: $RELEASE_BODY
+        draft: false
