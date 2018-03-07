@@ -69,50 +69,6 @@
                 }
             ]
         },
-        "NotGenFive": {
-            "Fn::Not": [
-                {
-                    "Fn::Or": [
-                        {
-                            "Fn::Equals": [
-                                {
-                                    "Fn::Select": [
-                                        "0",
-                                        {
-                                            "Fn::Split": [
-                                                ".",
-                                                {
-                                                    "Ref": "InstanceType"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                "c5"
-                            ]
-                        },
-                        {
-                            "Fn::Equals": [
-                                {
-                                    "Fn::Select": [
-                                        "0",
-                                        {
-                                            "Fn::Split": [
-                                                ".",
-                                                {
-                                                    "Ref": "InstanceType"
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                "m5"
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
         "Reboot": {
             "Fn::Not": [
                 {
@@ -123,6 +79,20 @@
                         "true"
                     ]
                 }
+            ]
+        },
+        "SupportsNvme": {
+            "Fn::Equals": [
+                {
+                    "Fn::FindInMap": [
+                        "InstanceTypeMap",
+                        {
+                            "Ref": "InstanceType"
+                        },
+                        "SupportsNvme"
+                    ]
+                },
+                "true"
             ]
         },
         "UseAdminGroups": {
@@ -223,14 +193,45 @@
                 "DeviceName": "sda1"
             }
         },
-        "InstanceTypeCapabilities": {
-            "IsGenFive": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/nvme1n1"
+        "InstanceTypeMap": {
+            "c4.large": {
+                "SupportsNvme": "false"
             },
-            "PreGenFive": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
+            "c4.xlarge": {
+                "SupportsNvme": "false"
+            },
+            "c5.large": {
+                "SupportsNvme": "true"
+            },
+            "c5.xlarge": {
+                "SupportsNvme": "true"
+            },
+            "m4.large": {
+                "SupportsNvme": "false"
+            },
+            "m4.xlarge": {
+                "SupportsNvme": "false"
+            },
+            "m5.large": {
+                "SupportsNvme": "true"
+            },
+            "m5.xlarge": {
+                "SupportsNvme": "true"
+            },
+            "t2.large": {
+                "SupportsNvme": "false"
+            },
+            "t2.medium": {
+                "SupportsNvme": "false"
+            },
+            "t2.micro": {
+                "SupportsNvme": "false"
+            },
+            "t2.small": {
+                "SupportsNvme": "false"
+            },
+            "t2.xlarge": {
+                "SupportsNvme": "false"
             }
         }
     },
@@ -1189,25 +1190,7 @@
                         "Fn::If": [
                             "CreateAppVolume",
                             {
-                                "DeviceName": {
-                                    "Fn::If": [
-                                        "NotGenFive",
-                                        {
-                                            "Fn::FindInMap": [
-                                                "InstanceTypeCapabilities",
-                                                "PreGenFive",
-                                                "ExternDeviceName"
-                                            ]
-                                        },
-                                        {
-                                            "Fn::FindInMap": [
-                                                "InstanceTypeCapabilities",
-                                                "IsGenFive",
-                                                "ExternDeviceName"
-                                            ]
-                                        }
-                                    ]
-                                },
+                                "DeviceName": "/dev/xvdf",
                                 "Ebs": {
                                     "DeleteOnTermination": "true",
                                     "VolumeSize": {
@@ -1314,21 +1297,9 @@
                                                     "- cloud-init-per instance mkfs-appvolume mkfs -t ext4 ",
                                                     {
                                                         "Fn::If": [
-                                                            "NotGenFive",
-                                                            {
-                                                                "Fn::FindInMap": [
-                                                                    "InstanceTypeCapabilities",
-                                                                    "PreGenFive",
-                                                                    "InternDeviceName"
-                                                                ]
-                                                            },
-                                                            {
-                                                                "Fn::FindInMap": [
-                                                                    "InstanceTypeCapabilities",
-                                                                    "IsGenFive",
-                                                                    "InternDeviceName"
-                                                                ]
-                                                            }
+                                                            "SupportsNvme",
+                                                            "/dev/nvme1n1",
+                                                            "/dev/xvdf"
                                                         ]
                                                     },
                                                     "\n",
@@ -1336,21 +1307,9 @@
                                                     "- [ ",
                                                     {
                                                         "Fn::If": [
-                                                            "NotGenFive",
-                                                            {
-                                                                "Fn::FindInMap": [
-                                                                    "InstanceTypeCapabilities",
-                                                                    "PreGenFive",
-                                                                    "InternDeviceName"
-                                                                ]
-                                                            },
-                                                            {
-                                                                "Fn::FindInMap": [
-                                                                    "InstanceTypeCapabilities",
-                                                                    "IsGenFive",
-                                                                    "InternDeviceName"
-                                                                ]
-                                                            }
+                                                            "SupportsNvme",
+                                                            "/dev/nvme1n1",
+                                                            "/dev/xvdf"
                                                         ]
                                                     },
                                                     ", ",
