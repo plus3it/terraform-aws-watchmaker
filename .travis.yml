@@ -54,7 +54,7 @@ jobs:
       if: env(PRIOR_VERSION) IS present and env(PRIOR_VERSION) != env(RELEASE_VERSION) and branch = master and type = push AND repo = plus3it/terraform-aws-watchmaker
       env:
         - PRIOR_VERSION=$(git describe --abbrev=0 --tags)
-        - RELEASE_VERSION=$(cat $TRAVIS_BUILD_DIR/.bumpversion.cfg | grep current_version | sed 's/^.*= //')
+        - RELEASE_VERSION=$(grep current_version <$TRAVIS_BUILD_DIR/.bumpversion.cfg | sed 's/^.*= //')
         - RELEASE_BODY="* [terraform-aws-watchmaker v$RELEASE_VERSION changes](https://github.com/plus3it/terraform-aws-watchmaker/compare/$PRIOR_VERSION...$RELEASE_VERSION)"
       script: skip
       before_deploy:
@@ -64,7 +64,7 @@ jobs:
       deploy:
         provider: releases
         api_key:
-          secure: YiERskfBT8Kq8fDI5IJsV4vd+HM2OUc64A0WuYcqBQ9RRQaAJ71uWfXTa5IC3YhABtsmGpKOOxBET+UXtXOQHN6+M+0wTLl88jdRAWIOPtCzUnxmNbOJX3zbSbyIyj/M+yTruXGMRhQcaIpXICM+LG+zVkadXsKSkVoCU6owcoGukSxPvpI68b5XBEezOKY/LnzJkIWoDEM0MxOsQ+AKJLBchamuQ3FI2IZYEkm3PIlIHuPTmagS5yLBEmhP5N/nPR5cKVXFsqKJ7YPYsGo7mi0PYZb2MGlhO3PPm3wAE0PME7nW4DEFTMtHx0r6U3eiNzvj9IE1D+hv+4/+LWE5Rw3NftXUFRd2FT1yQFRCVDooWoxRM7ddy+dSbEWX0wRLWWznr8GQ5NyJV3GR0YPnqu99B0qT/XXsr7oqHZ0EPUGq78IJd7t5cg50RC4zdrPiVE63ocZt1kHa0gRa9vlkj1B4JZNuBEk2M28QM0i06NMTihli31BKBxkArW3B9oGe1HxiQM33WrvGChGOJzvxzpWv+UyVmXynWWoDO44iAQW0KDxNG/eCGvQ+YZejMontr26cWbbiZ0+55pNK5Gh8gOQMEpBiBFoRhjY2slhWSdo/EC3hjdq0448sWpg+OZUGNe/6ozzrIpw28N/Vpy/dprkGlAa54A5MTOKBzJvfxK8=
+          secure: R/w2zqcS5EQI8TrCbDuLJUIox6hhJYyOnVYCzjO5pDh2CnzC8ohWk1XXoLMJAzz6Nnk/WG4PcowTOKVU5JULXzWjoAuNPEMhdI1AQqv5FGQH2dHJ20sq4bvEkRzQbYn76oJtaer2alxGeKK1/ArwkpuSNYPI4kBS1IUOtDbm7ALEEGaY7IOsECcVuwT5Xsd3PTULTWuY61yWmpjsF/+CDiHEVgRdvAJxbrfa6e4k7gh0iFkWqk/4Q/8oVbhjUaljkKmH/5LP/jl2LymbkzH5qolT2uXpH4VrN4IC0NjewS/npV2PX0D0+we0iZAtlyOycnwHyu1te+77ibytwaG2Ls5/8Ydzyp9wqQ4rkMt2YByEnZ/386FK20Y2LxTD8hEFlJjUGXbXmSTtfOjTXqMTkhRASRntTtQ6t7i4w0fosg4/DqXoJXr48eVxf7NN70ismoMuSeZfCGYNsEW4xx4eMF9pTcpV+ApIVl2Jsv+gtRBozj/uUfg3n8BH99DmWwlAz3mYiMhhkWi89hk1Mx1Gbt2vPgJOZCukANbIIfhdwcWeHwlKWsdagwxoMFd3+WioRHM9E0PJeOR9yCC/Fu/JRGoqJIdydyC6BkxWa8J254fRefEWCamjBBhvpKCk8wT66AW8BOSTHUXls++qjS6/+nKhAcU3z+RqxpCL8X67eQc=
         name: $RELEASE_VERSION
         tag_name: $RELEASE_VERSION
         body: $RELEASE_BODY
