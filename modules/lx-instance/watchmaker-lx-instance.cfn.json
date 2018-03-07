@@ -81,6 +81,20 @@
                 }
             ]
         },
+        "SupportsNvme": {
+            "Fn::Equals": [
+                {
+                    "Fn::FindInMap": [
+                        "InstanceTypeMap",
+                        {
+                            "Ref": "InstanceType"
+                        },
+                        "SupportsNvme"
+                    ]
+                },
+                "true"
+            ]
+        },
         "UseAdminGroups": {
             "Fn::Not": [
                 {
@@ -179,58 +193,45 @@
                 "DeviceName": "sda1"
             }
         },
-        "InstanceTypeCapabilities": {
+        "InstanceTypeMap": {
             "c4.large": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
+                "SupportsNvme": "false"
             },
             "c4.xlarge": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
+                "SupportsNvme": "false"
             },
             "c5.large": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/nvme1n1"
+                "SupportsNvme": "true"
             },
             "c5.xlarge": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/nvme1n1"
+                "SupportsNvme": "true"
             },
             "m4.large": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
+                "SupportsNvme": "false"
             },
             "m4.xlarge": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
+                "SupportsNvme": "false"
             },
             "m5.large": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/nvme1n1"
+                "SupportsNvme": "true"
             },
             "m5.xlarge": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/nvme1n1"
+                "SupportsNvme": "true"
             },
             "t2.large": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
+                "SupportsNvme": "false"
             },
             "t2.medium": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
+                "SupportsNvme": "false"
             },
             "t2.micro": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
+                "SupportsNvme": "false"
             },
             "t2.small": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
+                "SupportsNvme": "false"
             },
             "t2.xlarge": {
-                "ExternDeviceName": "/dev/xvdf",
-                "InternDeviceName": "/dev/xvdf"
+                "SupportsNvme": "false"
             }
         }
     },
@@ -1189,15 +1190,7 @@
                         "Fn::If": [
                             "CreateAppVolume",
                             {
-                                "DeviceName": {
-                                    "Fn::FindInMap": [
-                                        "InstanceTypeCapabilities",
-                                        {
-                                            "Ref": "InstanceType"
-                                        },
-                                        "ExternDeviceName"
-                                    ]
-                                },
+                                "DeviceName": "/dev/xvdf",
                                 "Ebs": {
                                     "DeleteOnTermination": "true",
                                     "VolumeSize": {
@@ -1303,24 +1296,20 @@
                                                     "bootcmd:\n",
                                                     "- cloud-init-per instance mkfs-appvolume mkfs -t ext4 ",
                                                     {
-                                                        "Fn::FindInMap": [
-                                                            "InstanceTypeCapabilities",
-                                                            {
-                                                                "Ref": "InstanceType"
-                                                            },
-                                                            "InternDeviceName"
+                                                        "Fn::If": [
+                                                            "SupportsNvme",
+                                                            "/dev/nvme1n1",
+                                                            "/dev/xvdf"
                                                         ]
                                                     },
                                                     "\n",
                                                     "mounts:\n",
                                                     "- [ ",
                                                     {
-                                                        "Fn::FindInMap": [
-                                                            "InstanceTypeCapabilities",
-                                                            {
-                                                                "Ref": "InstanceType"
-                                                            },
-                                                            "InternDeviceName"
+                                                        "Fn::If": [
+                                                            "SupportsNvme",
+                                                            "/dev/nvme1n1",
+                                                            "/dev/xvdf"
                                                         ]
                                                     },
                                                     ", ",

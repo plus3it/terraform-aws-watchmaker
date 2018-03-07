@@ -629,6 +629,39 @@
                         }
                     },
                     "setup": {
+                        "commands": {
+                            "10-initialize-disks": {
+                                "command": {
+                                    "Fn::If": [
+                                        "CreateAppVolume",
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    {
+                                                        "Fn::FindInMap": [
+                                                            "ShellCommandMap",
+                                                            "powershell",
+                                                            "command"
+                                                        ]
+                                                    },
+                                                    " \"& { ",
+                                                    "$EC2LaunchInitDiskScript = \"${Env:ProgramData}\"+'\\Amazon\\EC2-Windows\\Launch\\Scripts\\InitializeDisks.ps1';",
+                                                    "$EC2LaunchInitDiskConfig = \"${Env:ProgramData}\"+'\\Amazon\\EC2-Windows\\Launch\\Config\\DriveLetterMappingConfig.json';",
+                                                    "if (Test-Path $EC2LaunchInitDiskScript) {",
+                                                    "if (Test-Path $EC2LaunchInitDiskConfig) {",
+                                                    "iex $EC2LaunchInitDiskScript;",
+                                                    "} }",
+                                                    "}\""
+                                                ]
+                                            ]
+                                        },
+                                        ""
+                                    ]
+                                },
+                                "waitAfterCompletion": "0"
+                            }
+                        },
                         "files": {
                             "c:\\cfn\\cfn-hup.conf": {
                                 "content": {
