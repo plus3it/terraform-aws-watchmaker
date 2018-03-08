@@ -51,7 +51,7 @@ jobs:
         - echo 'JSON Diff'
         - bash -c "$FIND_JSON" | $XARGS_CMD bash -c 'cmp {} <(jq --indent 4 -S . {})'
     - stage: deploy
-      if: env(PRIOR_VERSION) IS present and env(PRIOR_VERSION) != env(RELEASE_VERSION) and branch = master and type = push AND repo = plus3it/terraform-aws-watchmaker
+      if: env(PRIOR_VERSION) IS present AND env(PRIOR_VERSION) != env(RELEASE_VERSION) AND branch = master AND type = push AND repo = plus3it/terraform-aws-watchmaker
       env:
         - PRIOR_VERSION=$(git describe --abbrev=0 --tags)
         - RELEASE_VERSION=$(grep current_version <$TRAVIS_BUILD_DIR/.bumpversion.cfg | sed 's/^.*= //')
