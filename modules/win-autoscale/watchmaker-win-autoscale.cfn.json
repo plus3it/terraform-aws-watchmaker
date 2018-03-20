@@ -975,7 +975,7 @@
                                             "# Install python\n",
                                             "& \"$BootstrapFile\" -PythonUrl \"$PythonUrl\" -Verbose -ErrorAction Stop\n\n",
                                             "# Install watchmaker\n",
-                                            "pip install --index-url=\"$PypiUrl\" --trusted-host=\"$PypiHost\" --upgrade pip setuptools boto3 watchmaker\n\n"
+                                            "pip install --index-url=\"$PypiUrl\" --trusted-host=\"$PypiHost\" --upgrade setuptools boto3 watchmaker\n\n"
                                         ]
                                     ]
                                 }
