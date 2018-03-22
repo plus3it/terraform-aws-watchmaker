@@ -100,6 +100,10 @@
         "ParameterValue": "__WATCHMAKEROUPATH__"
     },
     {
+        "ParameterKey": "CloudWatchAgentUrl",
+        "ParameterValue": "__CWAGENTURL__"
+    },
+    {
         "ParameterKey": "CfnBootstrapUtilsUrl",
         "ParameterValue": "__CFNBOOTSTRAPUTILSURL__"
     },
