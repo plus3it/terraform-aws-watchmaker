@@ -96,6 +96,10 @@
         "ParameterValue": "__WATCHMAKEROUPATH__"
     },
     {
+        "ParameterKey": "CloudWatchAgentUrl",
+        "ParameterValue": "__CWAGENTURL__"
+    },
+    {
         "ParameterKey": "CfnEndpointUrl",
         "ParameterValue": "__CFNENDPOINTURL__"
     },

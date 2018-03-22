@@ -11,6 +11,7 @@ resource "aws_cloudformation_stack" "watchmaker-win-autoscale" {
     AppVolumeDevice        = "${var.AppVolumeDevice}"
     AppVolumeType          = "${var.AppVolumeType}"
     AppVolumeSize          = "${var.AppVolumeSize}"
+    CloudWatchAgentUrl     = "${var.CloudWatchAgentUrl}"
     KeyPairName            = "${var.KeyPairName}"
     InstanceType           = "${var.InstanceType}"
     InstanceRole           = "${var.InstanceRole}"
