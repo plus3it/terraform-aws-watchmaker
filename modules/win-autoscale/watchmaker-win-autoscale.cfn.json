@@ -237,6 +237,27 @@
             }
         }
     },
+    "Outputs": {
+        "WatchmakerAutoScalingGroupId": {
+            "Description": "Autoscaling Group ID",
+            "Value": {
+                "Ref": "WatchmakerAutoScalingGroup"
+            }
+        },
+        "WatchmakerLaunchConfigId": {
+            "Description": "Launch Configuration ID",
+            "Value": {
+                "Ref": "WatchmakerLaunchConfig"
+            }
+        },
+        "WatchmakerLaunchConfigLogGroupName": {
+            "Condition": "InstallCloudWatchAgent",
+            "Description": "Log Group Name",
+            "Value": {
+                "Ref": "WatchmakerLaunchConfigLogGroup"
+            }
+        }
+    },
     "Parameters": {
         "AmiId": {
             "AllowedPattern": "^ami-[0-9a-z]{8}$|^ami-[0-9a-z]{17}$",

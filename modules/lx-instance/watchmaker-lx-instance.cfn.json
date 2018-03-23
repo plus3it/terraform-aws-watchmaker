@@ -742,11 +742,9 @@
                                             " bash -xe install.sh &&",
                                             " systemctl enable amazon-cloudwatch-agent.service &&",
                                             " systemctl start amazon-cloudwatch-agent.service &&",
-                                            " /opt/aws/amazon-cloudwatch-agent/bin/",
-                                            "amazon-cloudwatch-agent-ctl",
+                                            " /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl",
                                             " -a fetch-config -m ec2 -c",
-                                            " file:/opt/aws/amazon-cloudwatch-agent/etc/",
-                                            "amazon-cloudwatch-agent.json -s"
+                                            " file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s"
                                         ]
                                     ]
                                 },

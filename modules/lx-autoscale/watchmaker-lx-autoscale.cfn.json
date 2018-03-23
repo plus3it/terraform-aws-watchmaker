@@ -318,6 +318,27 @@
             }
         }
     },
+    "Outputs": {
+        "WatchmakerAutoScalingGroupId": {
+            "Description": "Autoscaling Group ID",
+            "Value": {
+                "Ref": "WatchmakerAutoScalingGroup"
+            }
+        },
+        "WatchmakerLaunchConfigId": {
+            "Description": "Launch Configuration ID",
+            "Value": {
+                "Ref": "WatchmakerLaunchConfig"
+            }
+        },
+        "WatchmakerLaunchConfigLogGroupName": {
+            "Condition": "InstallCloudWatchAgent",
+            "Description": "Log Group Name",
+            "Value": {
+                "Ref": "WatchmakerLaunchConfigLogGroup"
+            }
+        }
+    },
     "Parameters": {
         "AmiDistro": {
             "AllowedValues": [
@@ -775,11 +796,9 @@
                                             " bash -xe install.sh &&",
                                             " systemctl enable amazon-cloudwatch-agent.service &&",
                                             " systemctl start amazon-cloudwatch-agent.service &&",
-                                            " /opt/aws/amazon-cloudwatch-agent/bin/",
-                                            "amazon-cloudwatch-agent-ctl",
+                                            " /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl",
                                             " -a fetch-config -m ec2 -c",
-                                            " file:/opt/aws/amazon-cloudwatch-agent/etc/",
-                                            "amazon-cloudwatch-agent.json -s"
+                                            " file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s"
                                         ]
                                     ]
                                 },
