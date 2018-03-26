@@ -14,6 +14,7 @@ resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
     AppVolumeMountPath     = "${var.AppVolumeMountPath}"
     AppVolumeType          = "${var.AppVolumeType}"
     AppVolumeSize          = "${var.AppVolumeSize}"
+    CloudWatchAgentUrl     = "${var.CloudWatchAgentUrl}"
     KeyPairName            = "${var.KeyPairName}"
     InstanceType           = "${var.InstanceType}"
     InstanceRole           = "${var.InstanceRole}"

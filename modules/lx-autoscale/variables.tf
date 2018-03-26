@@ -158,6 +158,12 @@ variable "WatchmakerAdminUsers" {
   default     = ""
 }
 
+variable "CloudWatchAgentUrl" {
+  type        = "string"
+  description = "(Optional) S3 URL to CloudWatch Agent installer. Example: s3://amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip"
+  default     = ""
+}
+
 variable "CfnEndpointUrl" {
   type        = "string"
   description = "(Optional) URL to the CloudFormation Endpoint. e.g. https://cloudformation.us-east-1.amazonaws.com"
