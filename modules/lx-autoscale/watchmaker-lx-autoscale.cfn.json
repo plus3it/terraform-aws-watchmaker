@@ -632,7 +632,7 @@
                             {
                                 "Fn::If": [
                                     "InstallCloudWatchAgent",
-                                    "cloudwatch-agent-install",
+                                    "cw-agent-install",
                                     {
                                         "Ref": "AWS::NoValue"
                                     }
@@ -694,7 +694,7 @@
                             }
                         ]
                     },
-                    "cloudwatch-agent-install": {
+                    "cw-agent-install": {
                         "commands": {
                             "01-get-cloudwatch-agent": {
                                 "command": {
