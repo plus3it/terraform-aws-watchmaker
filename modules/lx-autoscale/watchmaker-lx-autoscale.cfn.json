@@ -632,7 +632,7 @@
                             {
                                 "Fn::If": [
                                     "InstallCloudWatchAgent",
-                                    "install-cloudwatch-agent",
+                                    "cloudwatch-agent-install",
                                     {
                                         "Ref": "AWS::NoValue"
                                     }
@@ -694,73 +694,14 @@
                             }
                         ]
                     },
-                    "finalize": {
-                        "commands": {
-                            "10-signal-success": {
-                                "command": {
-                                    "Fn::Join": [
-                                        "",
-                                        [
-                                            "/opt/aws/bin/cfn-signal -e 0",
-                                            " --stack ",
-                                            {
-                                                "Ref": "AWS::StackName"
-                                            },
-                                            " --resource WatchmakerAutoScalingGroup",
-                                            {
-                                                "Fn::If": [
-                                                    "AssignInstanceRole",
-                                                    {
-                                                        "Fn::Join": [
-                                                            "",
-                                                            [
-                                                                " --role ",
-                                                                {
-                                                                    "Ref": "InstanceRole"
-                                                                }
-                                                            ]
-                                                        ]
-                                                    },
-                                                    ""
-                                                ]
-                                            },
-                                            {
-                                                "Fn::If": [
-                                                    "UseCfnUrl",
-                                                    {
-                                                        "Fn::Join": [
-                                                            "",
-                                                            [
-                                                                " --url ",
-                                                                {
-                                                                    "Ref": "CfnEndpointUrl"
-                                                                }
-                                                            ]
-                                                        ]
-                                                    },
-                                                    ""
-                                                ]
-                                            },
-                                            " --region ",
-                                            {
-                                                "Ref": "AWS::Region"
-                                            },
-                                            "\n"
-                                        ]
-                                    ]
-                                },
-                                "ignoreErrors": "true"
-                            }
-                        }
-                    },
-                    "install-cloudwatch-agent": {
+                    "cloudwatch-agent-install": {
                         "commands": {
                             "01-get-cloudwatch-agent": {
                                 "command": {
                                     "Fn::Join": [
                                         "",
                                         [
-                                            "mkdir -p /etc/cfn/scripts/ &&",
+                                            "install -Dbm 700 -o root -g root /dev/null /etc/cfn/scripts/AmazonCloudWatchAgent.zip &&",
                                             " aws s3 cp ",
                                             {
                                                 "Ref": "CloudWatchAgentUrl"
@@ -769,10 +710,7 @@
                                             " --region ",
                                             {
                                                 "Ref": "AWS::Region"
-                                            },
-                                            " &&",
-                                            " chown root:root /etc/cfn/scripts/AmazonCloudWatchAgent.zip &&",
-                                            " chmod 700 /etc/cfn/scripts/AmazonCloudWatchAgent.zip"
+                                            }
                                         ]
                                     ]
                                 }
@@ -913,6 +851,65 @@
                                         ]
                                     ]
                                 }
+                            }
+                        }
+                    },
+                    "finalize": {
+                        "commands": {
+                            "10-signal-success": {
+                                "command": {
+                                    "Fn::Join": [
+                                        "",
+                                        [
+                                            "/opt/aws/bin/cfn-signal -e 0",
+                                            " --stack ",
+                                            {
+                                                "Ref": "AWS::StackName"
+                                            },
+                                            " --resource WatchmakerAutoScalingGroup",
+                                            {
+                                                "Fn::If": [
+                                                    "AssignInstanceRole",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --role ",
+                                                                {
+                                                                    "Ref": "InstanceRole"
+                                                                }
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            {
+                                                "Fn::If": [
+                                                    "UseCfnUrl",
+                                                    {
+                                                        "Fn::Join": [
+                                                            "",
+                                                            [
+                                                                " --url ",
+                                                                {
+                                                                    "Ref": "CfnEndpointUrl"
+                                                                }
+                                                            ]
+                                                        ]
+                                                    },
+                                                    ""
+                                                ]
+                                            },
+                                            " --region ",
+                                            {
+                                                "Ref": "AWS::Region"
+                                            },
+                                            "\n"
+                                        ]
+                                    ]
+                                },
+                                "ignoreErrors": "true"
                             }
                         }
                     },
