@@ -871,7 +871,10 @@
                                             "pip install --index-url=\"$PYPI_URL\" wheel==0.29.0\n",
                                             "pip install",
                                             " --index-url=\"$PYPI_URL\"",
-                                            " --upgrade pip setuptools boto3 watchmaker\n\n"
+                                            " --upgrade pip 'setuptools<37;python_version<\"2.7\"' 'setuptools;python_version>=\"2.7\"' boto3\n",
+                                            "pip install",
+                                            " --index-url=\"$PYPI_URL\"",
+                                            " --upgrade watchmaker\n\n"
                                         ]
                                     ]
                                 },
@@ -1358,7 +1361,7 @@
                                 "\n",
                                 "pip install",
                                 " --index-url=\"$PYPI_URL\"",
-                                " --upgrade pip setuptools\n\n",
+                                " --upgrade pip 'setuptools<37;python_version<\"2.7\"' 'setuptools;python_version>=\"2.7\"'\n\n",
                                 "# Fix python urllib3 warnings\n",
                                 "yum -y install gcc python-devel libffi-devel openssl-devel\n",
                                 "pip install",
