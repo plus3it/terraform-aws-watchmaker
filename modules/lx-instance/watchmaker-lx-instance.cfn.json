@@ -1531,9 +1531,15 @@
                                 "Content-Disposition: attachment; filename=\"script.sh\"\n",
                                 "\n",
                                 "#!/bin/bash -xe\n\n",
-                                "# Export cert bundle ENVs\n",
+                                "# Export AWS ENVs\n",
+                                "test -r /etc/aws/models/endpoints.json && export AWS_DATA_PATH=/etc/aws/models || true\n",
                                 "export AWS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt\n",
-                                "export REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt\n\n",
+                                "export REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt\n",
+                                "export AWS_DEFAULT_REGION=",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n\n",
                                 "# Get pip\n",
                                 "curl --silent --show-error --retry 5 -L ",
                                 {

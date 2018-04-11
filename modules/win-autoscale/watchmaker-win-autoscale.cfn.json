@@ -1280,11 +1280,19 @@
                         "Fn::Join": [
                             "",
                             [
-                                "<script>",
-                                "\n",
+                                "<script>\n",
                                 "REM CFN LaunchConfig Update Toggle: ",
                                 {
                                     "Ref": "ToggleNewInstances"
+                                },
+                                "\n\n",
+                                "# Export AWS ENVs\n",
+                                "set AWS_DATA_PATH=%ProgramFiles%\\Amazon\\cfn-bootstrap\n",
+                                "set AWS_CA_BUNDLE=%ProgramFiles%\\Amazon\\cfn-bootstrap\\cacert.pem\n",
+                                "set REQUESTS_CA_BUNDLE=%ProgramFiles%\\Amazon\\cfn-bootstrap\\cacert.pem\n",
+                                "set AWS_DEFAULT_REGION=",
+                                {
+                                    "Ref": "AWS::Region"
                                 },
                                 "\n\n",
                                 "cfn-init.exe -v -c launch",
