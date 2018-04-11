@@ -51,12 +51,13 @@ jobs:
         - echo 'JSON Diff'
         - bash -c "$FIND_JSON" | $XARGS_CMD bash -c 'cmp {} <(jq --indent 4 -S . {})'
     - stage: deploy
-      if: env(PRIOR_VERSION) IS present AND env(PRIOR_VERSION) != env(RELEASE_VERSION) AND branch = master AND type = push AND repo = plus3it/terraform-aws-watchmaker
+      if: branch = master AND type = push AND repo = plus3it/terraform-aws-watchmaker
       env:
         - PRIOR_VERSION=$(git describe --abbrev=0 --tags)
         - RELEASE_VERSION=$(grep current_version <$TRAVIS_BUILD_DIR/.bumpversion.cfg | sed 's/^.*= //')
         - RELEASE_BODY="* [terraform-aws-watchmaker v$RELEASE_VERSION changes](https://github.com/plus3it/terraform-aws-watchmaker/compare/$PRIOR_VERSION...$RELEASE_VERSION)"
-      script: skip
+      script:
+        - test "$PRIOR_VERSION" = "$RELEASE_VERSION" && travis_terminate
       before_deploy:
         - echo PRIOR_VERSION=$PRIOR_VERSION
         - echo RELEASE_VERSION=$RELEASE_VERSION
