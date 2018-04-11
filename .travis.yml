@@ -61,7 +61,7 @@ jobs:
         - echo RELEASE_VERSION=$RELEASE_VERSION
         - echo RELEASE_BODY=$RELEASE_BODY
       script:
-        - test "$PRIOR_VERSION" = "$RELEASE_VERSION" && travis_terminate
+        - test "$PRIOR_VERSION" = "$RELEASE_VERSION" && travis_terminate || echo "Deploying new version...""
       deploy:
         provider: releases
         api_key:
