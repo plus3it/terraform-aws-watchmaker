@@ -652,11 +652,7 @@
                                             {
                                                 "Ref": "CloudWatchAgentUrl"
                                             },
-                                            " /etc/cfn/scripts/AmazonCloudWatchAgent.zip",
-                                            " --region ",
-                                            {
-                                                "Ref": "AWS::Region"
-                                            }
+                                            " /etc/cfn/scripts/AmazonCloudWatchAgent.zip"
                                         ]
                                     ]
                                 }
@@ -879,19 +875,11 @@
                                                 "Ref": "AppScriptUrl"
                                             },
                                             " /etc/cfn/scripts/make-app",
-                                            " --region ",
-                                            {
-                                                "Ref": "AWS::Region"
-                                            },
                                             " &&",
                                             " chown root:root /etc/cfn/scripts/make-app &&",
                                             " chmod 700 /etc/cfn/scripts/make-app"
                                         ]
                                     ]
-                                },
-                                "env": {
-                                    "AWS_CA_BUNDLE": "/etc/pki/tls/certs/ca-bundle.crt",
-                                    "REQUESTS_CA_BUNDLE": "/etc/pki/tls/certs/ca-bundle.crt"
                                 }
                             },
                             "10-make-app": {
@@ -908,13 +896,6 @@
                                             }
                                         ]
                                     ]
-                                },
-                                "env": {
-                                    "AWS_CA_BUNDLE": "/etc/pki/tls/certs/ca-bundle.crt",
-                                    "AWS_DEFAULT_REGION": {
-                                        "Ref": "AWS::Region"
-                                    },
-                                    "REQUESTS_CA_BUNDLE": "/etc/pki/tls/certs/ca-bundle.crt"
                                 }
                             }
                         }
@@ -1094,14 +1075,7 @@
                     "watchmaker-install": {
                         "commands": {
                             "10-watchmaker-install": {
-                                "command": "bash -xe /etc/cfn/scripts/watchmaker-install.sh",
-                                "env": {
-                                    "AWS_CA_BUNDLE": "/etc/pki/tls/certs/ca-bundle.crt",
-                                    "AWS_DEFAULT_REGION": {
-                                        "Ref": "AWS::Region"
-                                    },
-                                    "REQUESTS_CA_BUNDLE": "/etc/pki/tls/certs/ca-bundle.crt"
-                                }
+                                "command": "bash -xe /etc/cfn/scripts/watchmaker-install.sh"
                             }
                         }
                     },
