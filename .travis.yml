@@ -56,12 +56,12 @@ jobs:
         - PRIOR_VERSION=$(git describe --abbrev=0 --tags)
         - RELEASE_VERSION=$(grep current_version <$TRAVIS_BUILD_DIR/.bumpversion.cfg | sed 's/^.*= //')
         - RELEASE_BODY="* [terraform-aws-watchmaker v$RELEASE_VERSION changes](https://github.com/plus3it/terraform-aws-watchmaker/compare/$PRIOR_VERSION...$RELEASE_VERSION)"
-      script:
-        - test "$PRIOR_VERSION" = "$RELEASE_VERSION" && travis_terminate
-      before_deploy:
+      before_script:
         - echo PRIOR_VERSION=$PRIOR_VERSION
         - echo RELEASE_VERSION=$RELEASE_VERSION
         - echo RELEASE_BODY=$RELEASE_BODY
+      script:
+        - test "$PRIOR_VERSION" = "$RELEASE_VERSION" && travis_terminate
       deploy:
         provider: releases
         api_key:
