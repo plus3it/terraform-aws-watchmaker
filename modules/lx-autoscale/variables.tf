@@ -94,6 +94,18 @@ variable "DesiredCapacity" {
   default     = "1"
 }
 
+variable "ScaleDownSchedule" {
+  type        = "string"
+  description = "(Optional) Scheduled Action in cron-format (UTC) to scale down to MinCapacity; ignored if empty or ScaleUpSchedule is unset (E.g. \"0 0 * * *\")"
+  default     = ""
+}
+
+variable "ScaleUpSchedule" {
+  type        = "string"
+  description = "(Optional) Scheduled Action in cron-format (UTC) to scale up to MaxCapacity; ignored if empty or ScaleDownSchedule is unset (E.g. \"0 10 * * Mon-Fri\")"
+  default     = ""
+}
+
 variable "NoPublicIp" {
   type        = "string"
   description = "Controls whether to assign the instance a public IP. Recommended to leave at true _unless_ launching in a public subnet"

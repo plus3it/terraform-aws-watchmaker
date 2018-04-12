@@ -18,6 +18,8 @@ resource "aws_cloudformation_stack" "watchmaker-win-autoscale" {
     MinCapacity            = "${var.MinCapacity}"
     MaxCapacity            = "${var.MaxCapacity}"
     DesiredCapacity        = "${var.DesiredCapacity}"
+    ScaleDownSchedule      = "${var.ScaleDownSchedule}"
+    ScaleUpSchedule        = "${var.ScaleUpSchedule}"
     NoPublicIp             = "${var.NoPublicIp}"
     NoReboot               = "${var.NoReboot}"
     SecurityGroupIds       = "${var.SecurityGroupIds}"
