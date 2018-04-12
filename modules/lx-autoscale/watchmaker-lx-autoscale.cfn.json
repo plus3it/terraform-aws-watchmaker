@@ -155,6 +155,34 @@
                 }
             ]
         },
+        "UseScheduledAction": {
+            "Fn::And": [
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                {
+                                    "Ref": "ScaleUpSchedule"
+                                },
+                                ""
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                {
+                                    "Ref": "ScaleDownSchedule"
+                                },
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
         "UseWamConfig": {
             "Fn::Not": [
                 {
@@ -283,7 +311,9 @@
                     "Parameters": [
                         "DesiredCapacity",
                         "MinCapacity",
-                        "MaxCapacity"
+                        "MaxCapacity",
+                        "ScaleDownSchedule",
+                        "ScaleUpSchedule"
                     ]
                 },
                 {
@@ -319,6 +349,20 @@
         }
     },
     "Outputs": {
+        "ScaleDownScheduledAction": {
+            "Condition": "UseScheduledAction",
+            "Description": "Scale Down Scheduled Action ID",
+            "Value": {
+                "Ref": "ScaleDownScheduledAction"
+            }
+        },
+        "ScaleUpScheduledAction": {
+            "Condition": "UseScheduledAction",
+            "Description": "Scale Up Scheduled Action ID",
+            "Value": {
+                "Ref": "ScaleUpScheduledAction"
+            }
+        },
         "WatchmakerAutoScalingGroupId": {
             "Description": "Autoscaling Group ID",
             "Value": {
@@ -510,6 +554,16 @@
             "Description": "URL to the PyPi Index",
             "Type": "String"
         },
+        "ScaleDownSchedule": {
+            "Default": "",
+            "Description": "(Optional) Scheduled Action in cron-format (UTC) to scale down to MinCapacity; ignored if empty or ScaleUpSchedule is unset (E.g. \"0 0 * * *\")",
+            "Type": "String"
+        },
+        "ScaleUpSchedule": {
+            "Default": "",
+            "Description": "(Optional) Scheduled Action in cron-format (UTC) to scale up to MaxCapacity; ignored if empty or ScaleDownSchedule is unset (E.g. \"0 10 * * Mon-Fri\")",
+            "Type": "String"
+        },
         "SecurityGroupIds": {
             "Description": "List of security groups to apply to the instance(s)",
             "Type": "List<AWS::EC2::SecurityGroup::Id>"
@@ -571,6 +625,36 @@
         }
     },
     "Resources": {
+        "ScaleDownScheduledAction": {
+            "Condition": "UseScheduledAction",
+            "Properties": {
+                "AutoScalingGroupName": {
+                    "Ref": "WatchmakerAutoScalingGroup"
+                },
+                "DesiredCapacity": {
+                    "Ref": "MinCapacity"
+                },
+                "Recurrence": {
+                    "Ref": "ScaleDownSchedule"
+                }
+            },
+            "Type": "AWS::AutoScaling::ScheduledAction"
+        },
+        "ScaleUpScheduledAction": {
+            "Condition": "UseScheduledAction",
+            "Properties": {
+                "AutoScalingGroupName": {
+                    "Ref": "WatchmakerAutoScalingGroup"
+                },
+                "DesiredCapacity": {
+                    "Ref": "MaxCapacity"
+                },
+                "Recurrence": {
+                    "Ref": "ScaleUpSchedule"
+                }
+            },
+            "Type": "AWS::AutoScaling::ScheduledAction"
+        },
         "WatchmakerAutoScalingGroup": {
             "CreationPolicy": {
                 "ResourceSignal": {
@@ -615,11 +699,8 @@
             },
             "Type": "AWS::AutoScaling::AutoScalingGroup",
             "UpdatePolicy": {
-                "AutoScalingRollingUpdate": {
-                    "MaxBatchSize": "2",
-                    "MinInstancesInService": "1",
-                    "PauseTime": "PT30M",
-                    "WaitOnResourceSignals": "true"
+                "AutoScalingReplacingUpdate": {
+                    "WillReplace": "true"
                 }
             }
         },
