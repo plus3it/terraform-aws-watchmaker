@@ -1179,7 +1179,12 @@
                                                 "Ref": "PypiIndexUrl"
                                             },
                                             "\n",
-                                            "pip install --index-url=\"$PYPI_URL\" wheel==0.29.0\n",
+                                            "curl --silent --show-error --retry 5 -L ",
+                                            {
+                                                "Ref": "CfnGetPipUrl"
+                                            },
+                                            " | python - --index-url=\"$PYPI_URL\" 'wheel<0.30.0;python_version<\"2.7\"' 'wheel;python_version>=\"2.7\"'",
+                                            "\n",
                                             "pip install",
                                             " --index-url=\"$PYPI_URL\"",
                                             " --upgrade pip 'setuptools<37;python_version<\"2.7\"' 'setuptools;python_version>=\"2.7\"' boto3\n",
@@ -1585,39 +1590,41 @@
                                 },
                                 "\n\n",
                                 "# Get pip\n",
+                                "PYPI_URL=",
+                                {
+                                    "Ref": "PypiIndexUrl"
+                                },
+                                "\n",
                                 "curl --silent --show-error --retry 5 -L ",
                                 {
                                     "Ref": "CfnGetPipUrl"
                                 },
-                                " | python - --index-url=",
-                                {
-                                    "Ref": "PypiIndexUrl"
-                                },
+                                " | python - --index-url=\"$PYPI_URL\" 'wheel<0.30.0;python_version<\"2.7\"' 'wheel;python_version>=\"2.7\"'",
                                 "\n\n",
                                 "# Add pip to path\n",
                                 "hash pip 2> /dev/null || ",
                                 "PATH=\"${PATH}:/usr/local/bin\"",
                                 "\n\n",
                                 "# Upgrade pip and setuptools\n",
-                                "PYPI_URL=",
-                                {
-                                    "Ref": "PypiIndexUrl"
-                                },
-                                "\n",
                                 "pip install",
                                 " --index-url=\"$PYPI_URL\"",
-                                " --upgrade pip 'setuptools<37;python_version<\"2.7\"' 'setuptools;python_version>=\"2.7\"'\n\n",
+                                " --upgrade pip 'setuptools<37;python_version<\"2.7\"' 'setuptools;python_version>=\"2.7\"'",
+                                "\n\n",
                                 "# Fix python urllib3 warnings\n",
                                 "yum -y install gcc python-devel libffi-devel openssl-devel\n",
                                 "pip install",
                                 " --index-url=\"$PYPI_URL\"",
-                                " --upgrade pyopenssl ndg-httpsclient pyasn1\n\n",
+                                " --upgrade cffi\n",
+                                "pip install",
+                                " --index-url=\"$PYPI_URL\"",
+                                " --upgrade pyopenssl ndg-httpsclient pyasn1 'cryptography<2.2;python_version<\"2.7\"' 'cryptography;python_version>=\"2.7\"'",
+                                "\n\n",
                                 "if [[ $(rpm --quiet -q aws-cfn-bootstrap || pip show --quiet aws-cfn-bootstrap)$? -ne 0 ]]\n",
                                 "then\n",
                                 "  # Get cfn utils\n",
                                 "  pip install",
                                 " --index-url=\"$PYPI_URL\"",
-                                " --upgrade ",
+                                " --upgrade --upgrade-strategy only-if-needed ",
                                 {
                                     "Ref": "CfnBootstrapUtilsUrl"
                                 },
