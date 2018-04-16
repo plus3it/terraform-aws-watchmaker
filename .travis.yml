@@ -5,57 +5,51 @@ env:
   global:
     - FIND_JSON="find $TRAVIS_BUILD_DIR -name '*.json' -type f -print0"
     - XARGS_CMD="xargs -0 -n1 -I {} -t"
+    - REPO="${TRAVIS_REPO_SLUG#*/}"
+    - OWNER=plus3it
+    - DEPLOY_SLUG=$OWNER/$REPO
 
-before_install:
-  - echo 'before_install'
+before_script:
+  - echo $JOB
+  - echo $TESTCOMMAND
 
-install:
-  - echo 'install'
+script:
+  - bash -c "$TESTCOMMAND"
 
 jobs:
   include:
     - stage: test
-      # Begin Terraform Format Verfiication Job
+      # Begin Terraform Format Verification Job
       env:
         - JOB="Terraform Format Verification"
+        - TESTCOMMAND="terraform fmt -check=true"
       before_script:
         # Download Terraform
-        - curl --silent --output terraform.zip https://releases.hashicorp.com/terraform/0.11.3/terraform_0.11.3_linux_amd64.zip
-        - sha256sum terraform.zip  | grep "6b8a7b83954597d36bbed23913dd51bc253906c612a070a21db373eab71b277b" -q
-        - unzip terraform.zip ; rm -f terraform.zip; chmod +x terraform
-        - mkdir -p ${HOME}/bin ; export PATH=${PATH}:${HOME}/bin; mv terraform ${HOME}/bin/
+        - TERRAFORM_VERSION=$(curl -sSL https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M '.current_version')
+        - TERRAFORM_URL="https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip"
+        - echo "TERRAFORM_URL=${TERRAFORM_URL}"
+        - curl -sSL -o terraform.zip "$TERRAFORM_URL"
+        - unzip terraform.zip && rm -f terraform.zip
+        - chmod +x terraform
+        - mkdir -p ${HOME}/bin ; export PATH=${PATH}:${HOME}/bin ; mv terraform ${HOME}/bin/
         - terraform -v
-      script:
-        - echo 'Terraform Format Check'
-        - terraform fmt -check=true
     - stage: test
       # Begin JSON Verification Job
       env:
         - JOB="JSON Syntax Verification"
-      before_script:
-        # Download JSON Parser - JQ
-        - curl -sO http://stedolan.github.io/jq/download/linux64/jq
-        - chmod +x $PWD/jq
-      script:
-        - echo 'JSON Format Check'
-        - bash -c "$FIND_JSON" | $XARGS_CMD jq --exit-status . {} > /dev/null
+        - TESTCOMMAND="$FIND_JSON | $XARGS_CMD jq --exit-status . {} > /dev/null"
     - stage: test
       # Begin JSON Diff Job
       env:
         - JOB="JSON Lint/Format Verification"
-      before_script:
-        # Download JSON Parser - JQ
-        - curl -sO http://stedolan.github.io/jq/download/linux64/jq
-        - chmod +x $PWD/jq
-      script:
-        - echo 'JSON Diff'
-        - bash -c "$FIND_JSON" | $XARGS_CMD bash -c 'cmp {} <(jq --indent 4 -S . {})'
+        - TESTCOMMAND="$FIND_JSON | $XARGS_CMD bash -c 'cmp {} <(jq --indent 4 -S . {})'"
     - stage: deploy
-      if: branch = master AND type = push AND repo = plus3it/terraform-aws-watchmaker
+      if: branch = master AND type = push AND repo = env(DEPLOY_SLUG)
       env:
+        - JOB="Deploy to GitHub Releases"
         - PRIOR_VERSION=$(git describe --abbrev=0 --tags)
         - RELEASE_VERSION=$(grep current_version <$TRAVIS_BUILD_DIR/.bumpversion.cfg | sed 's/^.*= //')
-        - RELEASE_BODY="* [terraform-aws-watchmaker v$RELEASE_VERSION changes](https://github.com/plus3it/terraform-aws-watchmaker/compare/$PRIOR_VERSION...$RELEASE_VERSION)"
+        - RELEASE_BODY="* [$REPO v$RELEASE_VERSION changes](https://github.com/$OWNER/$REPO/compare/$PRIOR_VERSION...$RELEASE_VERSION)"
       before_script:
         - echo PRIOR_VERSION=$PRIOR_VERSION
         - echo RELEASE_VERSION=$RELEASE_VERSION
