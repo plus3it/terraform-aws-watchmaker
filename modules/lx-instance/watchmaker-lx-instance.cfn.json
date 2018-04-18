@@ -429,7 +429,7 @@
         },
         "CfnGetPipUrl": {
             "AllowedPattern": "^http[s]?://.*\\.py$",
-            "Default": "https://bootstrap.pypa.io/get-pip.py",
+            "Default": "https://bootstrap.pypa.io/2.6/get-pip.py",
             "Description": "URL to get-pip.py",
             "Type": "String"
         },

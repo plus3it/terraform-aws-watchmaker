@@ -168,7 +168,7 @@ variable "CfnEndpointUrl" {
 variable "CfnGetPipUrl" {
   type        = "string"
   description = "URL to get-pip.py"
-  default     = "https://bootstrap.pypa.io/get-pip.py"
+  default     = "https://bootstrap.pypa.io/2.6/get-pip.py"
 }
 
 variable "CfnBootstrapUtilsUrl" {
