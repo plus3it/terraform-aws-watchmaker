@@ -971,9 +971,11 @@
                                             "# Install python\n",
                                             "& \"$BootstrapFile\" -PythonUrl \"$PythonUrl\" -Verbose -ErrorAction Stop\n\n",
                                             "# Install setup dependencies\n",
-                                            "python -m pip install --index-url=\"$PypiUrl\" --trusted-host=\"$PypiHost\" --upgrade pip setuptools\n\n",
+                                            "python -m pip install --index-url=\"$PypiUrl\" --trusted-host=\"$PypiHost\" --upgrade pip setuptools\n",
+                                            "if (-not $?) { throw 'pip failed to install setup dependencies!' }\n\n",
                                             "# Install watchmaker\n",
-                                            "pip install --index-url=\"$PypiUrl\" --trusted-host=\"$PypiHost\" --upgrade boto3 watchmaker\n"
+                                            "pip install --index-url=\"$PypiUrl\" --trusted-host=\"$PypiHost\" --upgrade boto3 watchmaker\n",
+                                            "if (-not $?) { throw 'pip failed to install watchmaker!' }\n"
                                         ]
                                     ]
                                 }
@@ -1121,7 +1123,9 @@
                                                     ""
                                                 ]
                                             },
-                                            "; } -Verbose -ErrorAction Stop",
+                                            "; ",
+                                            "if (-not $?) { throw 'watchmaker execution failed!' } ",
+                                            "} -Verbose -ErrorAction Stop",
                                             "\""
                                         ]
                                     ]
@@ -1260,7 +1264,9 @@
                                                     ""
                                                 ]
                                             },
-                                            "; } -Verbose -ErrorAction Stop",
+                                            "; ",
+                                            "if (-not $?) { throw 'watchmaker execution failed!' } ",
+                                            "} -Verbose -ErrorAction Stop",
                                             "\""
                                         ]
                                     ]
