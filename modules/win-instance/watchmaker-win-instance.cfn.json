@@ -1358,9 +1358,11 @@
                             [
                                 "<script>\n",
                                 "# Export AWS ENVs\n",
-                                "set AWS_DATA_PATH=%ProgramFiles%\\Amazon\\cfn-bootstrap\n",
-                                "set AWS_CA_BUNDLE=%ProgramFiles%\\Amazon\\cfn-bootstrap\\cacert.pem\n",
-                                "set REQUESTS_CA_BUNDLE=%ProgramFiles%\\Amazon\\cfn-bootstrap\\cacert.pem\n",
+                                "IF EXIST %SystemDrive%\\cfn\\endpoints-override.json ( set AWS_DATA_PATH=%SystemDrive%\\cfn )\n",
+                                "IF EXIST %SystemDrive%\\cfn\\ca-override.pem (\n",
+                                "  set AWS_CA_BUNDLE=%SystemDrive%\\cfn\\ca-override.pem\n",
+                                "  set REQUESTS_CA_BUNDLE=%SystemDrive%\\cfn\\ca-override.pem\n",
+                                ")\n",
                                 "set AWS_DEFAULT_REGION=",
                                 {
                                     "Ref": "AWS::Region"
