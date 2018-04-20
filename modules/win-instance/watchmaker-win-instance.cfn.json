@@ -961,8 +961,10 @@
                                             "(New-Object System.Net.WebClient).DownloadFile(\"$BootstrapUrl\", \"$BootstrapFile\")\n\n",
                                             "# Install python\n",
                                             "& \"$BootstrapFile\" -PythonUrl \"$PythonUrl\" -Verbose -ErrorAction Stop\n\n",
+                                            "# Install setup dependencies\n",
+                                            "python -m pip install --index-url=\"$PypiUrl\" --trusted-host=\"$PypiHost\" --upgrade pip setuptools\n\n",
                                             "# Install watchmaker\n",
-                                            "python -m pip install --index-url=\"$PypiUrl\" --trusted-host=\"$PypiHost\" --upgrade pip setuptools boto3 watchmaker"
+                                            "pip install --index-url=\"$PypiUrl\" --trusted-host=\"$PypiHost\" --upgrade boto3 watchmaker\n"
                                         ]
                                     ]
                                 }
@@ -1111,7 +1113,8 @@
                                             " }\""
                                         ]
                                     ]
-                                }
+                                },
+                                "waitAfterCompletion": "0"
                             }
                         }
                     },
@@ -1246,7 +1249,8 @@
                                             " }\""
                                         ]
                                     ]
-                                }
+                                },
+                                "waitAfterCompletion": "0"
                             }
                         }
                     }
