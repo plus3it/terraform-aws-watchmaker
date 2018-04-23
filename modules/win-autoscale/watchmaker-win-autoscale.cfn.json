@@ -169,7 +169,7 @@
                 "command": "cmd.exe"
             },
             "powershell": {
-                "command": "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass"
+                "command": "powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass "
             }
         }
     },
@@ -723,7 +723,9 @@
                                                     "command"
                                                 ]
                                             },
-                                            " \"& { ",
+                                            "-Command \"",
+                                            "Invoke-Command -ScriptBlock { ",
+                                            "$ErrorActionPreference = 'Stop'; ",
                                             "$CloudWatchAgentUri = [System.Uri]'",
                                             {
                                                 "Ref": "CloudWatchAgentUrl"
@@ -741,14 +743,15 @@
                                                 "Ref": "AWS::Region"
                                             },
                                             "; ",
-                                            "$CloudWatchAgentInstallScript =  \"$CloudWatchAgentScriptDir\"+'\\install.ps1';",
-                                            "$CloudWatchAgentConfig =  \"$CloudWatchAgentScriptDir\"+'\\aws-cloudwatch-agent-config.json';",
-                                            " Expand-Archive -Path $CloudWatchAgentZipFile -DestinationPath $CloudWatchAgentScriptDir;",
-                                            "Push-Location -Path $CloudWatchAgentScriptDir;",
-                                            "iex $CloudWatchAgentInstallScript;",
-                                            ".\\amazon-cloudwatch-agent-ctl.ps1 -a fetch-config -m ec2 -c file:$CloudWatchAgentConfig -s;",
-                                            "Pop-Location",
-                                            "}\""
+                                            "$CloudWatchAgentInstallScript =  $CloudWatchAgentScriptDir + '\\install.ps1'; ",
+                                            "$CloudWatchAgentConfig =  $CloudWatchAgentScriptDir + '\\aws-cloudwatch-agent-config.json'; ",
+                                            " Expand-Archive -Path $CloudWatchAgentZipFile -DestinationPath $CloudWatchAgentScriptDir; ",
+                                            "Push-Location -Path $CloudWatchAgentScriptDir; ",
+                                            "iex $CloudWatchAgentInstallScript; ",
+                                            ".\\amazon-cloudwatch-agent-ctl.ps1 -a fetch-config -m ec2 -c file:$CloudWatchAgentConfig -s; ",
+                                            "Pop-Location; ",
+                                            "} -Verbose -ErrorAction Stop",
+                                            "\""
                                         ]
                                     ]
                                 },
@@ -864,7 +867,9 @@
                                                     "command"
                                                 ]
                                             },
-                                            " \"& { ",
+                                            "-Command \"",
+                                            "Invoke-Command -ScriptBlock { ",
+                                            "$ErrorActionPreference = 'Stop'; ",
                                             "$AppScriptUri = [System.Uri]'",
                                             {
                                                 "Ref": "AppScriptUrl"
@@ -883,7 +888,8 @@
                                             },
                                             "; ",
                                             "iex $AppScript; ",
-                                            "}\""
+                                            "} -Verbose -ErrorAction Stop",
+                                            "\""
                                         ]
                                     ]
                                 },
@@ -916,14 +922,17 @@
                                                             "command"
                                                         ]
                                                     },
-                                                    " \"& { ",
-                                                    "$EC2LaunchInitDiskScript = \"${Env:ProgramData}\"+'\\Amazon\\EC2-Windows\\Launch\\Scripts\\InitializeDisks.ps1';",
-                                                    "$EC2LaunchInitDiskConfig = \"${Env:ProgramData}\"+'\\Amazon\\EC2-Windows\\Launch\\Config\\DriveLetterMappingConfig.json';",
+                                                    "-Command \"",
+                                                    "Invoke-Command -ScriptBlock { ",
+                                                    "$ErrorActionPreference = 'Stop'; ",
+                                                    "$EC2LaunchInitDiskScript = ${Env:ProgramData} + '\\Amazon\\EC2-Windows\\Launch\\Scripts\\InitializeDisks.ps1'; ",
+                                                    "$EC2LaunchInitDiskConfig = ${Env:ProgramData} + '\\Amazon\\EC2-Windows\\Launch\\Config\\DriveLetterMappingConfig.json'; ",
                                                     "if (Test-Path $EC2LaunchInitDiskScript) {",
                                                     "if (Test-Path $EC2LaunchInitDiskConfig) {",
-                                                    "iex $EC2LaunchInitDiskScript;",
-                                                    "} }",
-                                                    "}\""
+                                                    "iex $EC2LaunchInitDiskScript; ",
+                                                    "} } ",
+                                                    "} -Verbose -ErrorAction Stop",
+                                                    "\""
                                                 ]
                                             ]
                                         },
@@ -1078,8 +1087,12 @@
                                             "(New-Object System.Net.WebClient).DownloadFile(\"$BootstrapUrl\", \"$BootstrapFile\")\n\n",
                                             "# Install python\n",
                                             "& \"$BootstrapFile\" -PythonUrl \"$PythonUrl\" -Verbose -ErrorAction Stop\n\n",
+                                            "# Install setup dependencies\n",
+                                            "python -m pip install --index-url=\"$PypiUrl\" --trusted-host=\"$PypiHost\" --upgrade pip setuptools\n",
+                                            "if (-not $?) { throw 'pip failed to install setup dependencies!' }\n\n",
                                             "# Install watchmaker\n",
-                                            "python -m pip install --index-url=\"$PypiUrl\" --trusted-host=\"$PypiHost\" --upgrade pip setuptools boto3 watchmaker"
+                                            "pip install --index-url=\"$PypiUrl\" --trusted-host=\"$PypiHost\" --upgrade boto3 watchmaker\n",
+                                            "if (-not $?) { throw 'pip failed to install watchmaker!' }\n"
                                         ]
                                     ]
                                 }
@@ -1112,9 +1125,11 @@
                                                     "command"
                                                 ]
                                             },
-                                            " \"& {",
-                                            " c:\\cfn\\scripts\\watchmaker-install.ps1;",
-                                            " watchmaker --log-level debug",
+                                            "-Command \"",
+                                            "Invoke-Command -ScriptBlock { ",
+                                            "$ErrorActionPreference = 'Stop'; ",
+                                            "c:\\cfn\\scripts\\watchmaker-install.ps1 -ErrorAction Stop -Verbose; ",
+                                            "watchmaker --log-level debug",
                                             " --log-dir C:\\Watchmaker\\Logs",
                                             " --no-reboot",
                                             {
@@ -1189,10 +1204,14 @@
                                                     ""
                                                 ]
                                             },
-                                            " }\""
+                                            "; ",
+                                            "if (-not $?) { throw 'watchmaker execution failed!' } ",
+                                            "} -Verbose -ErrorAction Stop",
+                                            "\""
                                         ]
                                     ]
-                                }
+                                },
+                                "waitAfterCompletion": "0"
                             }
                         }
                     },
@@ -1210,9 +1229,11 @@
                                                     "command"
                                                 ]
                                             },
-                                            " \"& {",
-                                            " c:\\cfn\\scripts\\watchmaker-install.ps1;",
-                                            " watchmaker --log-level debug",
+                                            "-Command \"",
+                                            "Invoke-Command -ScriptBlock { ",
+                                            "$ErrorActionPreference = 'Stop'; ",
+                                            "c:\\cfn\\scripts\\watchmaker-install.ps1 -ErrorAction Stop -Verbose; ",
+                                            "watchmaker --log-level debug",
                                             " --log-dir C:\\Watchmaker\\Logs",
                                             " --salt-states None",
                                             " --no-reboot",
@@ -1288,10 +1309,14 @@
                                                     ""
                                                 ]
                                             },
-                                            " }\""
+                                            "; ",
+                                            "if (-not $?) { throw 'watchmaker execution failed!' } ",
+                                            "} -Verbose -ErrorAction Stop",
+                                            "\""
                                         ]
                                     ]
-                                }
+                                },
+                                "waitAfterCompletion": "0"
                             }
                         }
                     }
@@ -1367,7 +1392,7 @@
                                     "Ref": "ToggleNewInstances"
                                 },
                                 "\n\n",
-                                "# Export AWS ENVs\n",
+                                "REM Export AWS ENVs\n",
                                 "IF EXIST %SystemDrive%\\cfn\\endpoints-override.json ( set AWS_DATA_PATH=%SystemDrive%\\cfn )\n",
                                 "IF EXIST %SystemDrive%\\cfn\\ca-override.pem (\n",
                                 "  set AWS_CA_BUNDLE=%SystemDrive%\\cfn\\ca-override.pem\n",
