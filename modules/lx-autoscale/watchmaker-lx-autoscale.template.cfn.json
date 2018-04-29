@@ -25,18 +25,6 @@
                 }
             ]
         },
-        "AssignStaticPrivateIp": {
-            "Fn::Not": [
-                {
-                    "Fn::Equals": [
-                        {
-                            "Ref": "PrivateIp"
-                        },
-                        ""
-                    ]
-                }
-            ]
-        },
         "CreateAppVolume": {
             "Fn::Equals": [
                 {
@@ -143,18 +131,6 @@
                 }
             ]
         },
-        "UseComputerName": {
-            "Fn::Not": [
-                {
-                    "Fn::Equals": [
-                        {
-                            "Ref": "WatchmakerComputerName"
-                        },
-                        ""
-                    ]
-                }
-            ]
-        },
         "UseEnvironment": {
             "Fn::Not": [
                 {
@@ -179,6 +155,34 @@
                 }
             ]
         },
+        "UseScheduledAction": {
+            "Fn::And": [
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                {
+                                    "Ref": "ScaleUpSchedule"
+                                },
+                                ""
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Fn::Not": [
+                        {
+                            "Fn::Equals": [
+                                {
+                                    "Ref": "ScaleDownSchedule"
+                                },
+                                ""
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
         "UseWamConfig": {
             "Fn::Not": [
                 {
@@ -192,7 +196,7 @@
             ]
         }
     },
-    "Description": "This template deploys a Linux instance using Watchmaker, which applies the DISA STIG.",
+    "Description": "This template creates an Autoscaling Group and Launch Configuration that deploys Linux instances with Watchmaker, which applies the DISA STIG.",
     "Mappings": {
         "Distro2RootDevice": {
             "AmazonLinux": {
@@ -275,7 +279,6 @@
                         "WatchmakerConfig",
                         "WatchmakerEnvironment",
                         "WatchmakerOuPath",
-                        "WatchmakerComputerName",
                         "WatchmakerAdminGroups",
                         "WatchmakerAdminUsers"
                     ]
@@ -303,11 +306,22 @@
                 },
                 {
                     "Label": {
+                        "default": "AutoScale Configuration"
+                    },
+                    "Parameters": [
+                        "DesiredCapacity",
+                        "MinCapacity",
+                        "MaxCapacity",
+                        "ScaleDownSchedule",
+                        "ScaleUpSchedule"
+                    ]
+                },
+                {
+                    "Label": {
                         "default": "Network Configuration"
                     },
                     "Parameters": [
-                        "PrivateIp",
-                        "SubnetId"
+                        "SubnetIds"
                     ]
                 },
                 {
@@ -319,29 +333,54 @@
                         "CfnGetPipUrl",
                         "CfnBootstrapUtilsUrl",
                         "CloudWatchAgentUrl",
-                        "ToggleCfnInitUpdate"
+                        "ToggleCfnInitUpdate",
+                        "ToggleNewInstances"
                     ]
                 }
             ],
             "ParameterLabels": {
                 "ToggleCfnInitUpdate": {
                     "default": "Force Cfn Init Update"
+                },
+                "ToggleNewInstances": {
+                    "default": "Force New Instances"
                 }
             }
-        }
+        },
+        "Version": "1.3.4"
     },
     "Outputs": {
-        "WatchmakerInstanceId": {
-            "Description": "Instance ID",
+        "ScaleDownScheduledAction": {
+            "Condition": "UseScheduledAction",
+            "Description": "Scale Down Scheduled Action ID",
             "Value": {
-                "Ref": "WatchmakerInstance"
+                "Ref": "ScaleDownScheduledAction"
             }
         },
-        "WatchmakerInstanceLogGroupName": {
+        "ScaleUpScheduledAction": {
+            "Condition": "UseScheduledAction",
+            "Description": "Scale Up Scheduled Action ID",
+            "Value": {
+                "Ref": "ScaleUpScheduledAction"
+            }
+        },
+        "WatchmakerAutoScalingGroupId": {
+            "Description": "Autoscaling Group ID",
+            "Value": {
+                "Ref": "WatchmakerAutoScalingGroup"
+            }
+        },
+        "WatchmakerLaunchConfigId": {
+            "Description": "Launch Configuration ID",
+            "Value": {
+                "Ref": "WatchmakerLaunchConfig"
+            }
+        },
+        "WatchmakerLaunchConfigLogGroupName": {
             "Condition": "InstallCloudWatchAgent",
             "Description": "Log Group Name",
             "Value": {
-                "Ref": "WatchmakerInstanceLogGroup"
+                "Ref": "WatchmakerLaunchConfigLogGroup"
             }
         }
     },
@@ -386,19 +425,19 @@
                 "false"
             ],
             "Default": "false",
-            "Description": "Decision on whether to mount an extra EBS volume. Leave as default (\"false\") to launch without an extra application volume",
+            "Description": "Decision whether to mount an extra EBS volume. Leave as default (\"false\") to launch without an extra application volume",
             "Type": "String"
         },
         "AppVolumeMountPath": {
             "AllowedPattern": "/.*",
             "Default": "/opt/data",
-            "Description": "Filesystem path to mount the extra app volume. Ignored if \"AppVolumeDevice\" is false",
+            "Description": "Filesystem path to mount the extra app volume. Ignored if \"AppVolumeDevice\" is blank",
             "Type": "String"
         },
         "AppVolumeSize": {
             "ConstraintDescription": "Must be between 1GB and 16384GB.",
             "Default": "1",
-            "Description": "Size in GB of the EBS volume to create. Ignored if \"AppVolumeDevice\" is false",
+            "Description": "Size in GB of the EBS volume to create. Ignored if \"AppVolumeDevice\" is blank",
             "MaxValue": "16384",
             "MinValue": "1",
             "Type": "Number"
@@ -412,7 +451,7 @@
                 "standard"
             ],
             "Default": "gp2",
-            "Description": "Type of EBS volume to create. Ignored if \"AppVolumeDevice\" is false",
+            "Description": "Type of EBS volume to create. Ignored if \"AppVolumeDevice\" is blank",
             "Type": "String"
         },
         "CfnBootstrapUtilsUrl": {
@@ -439,9 +478,14 @@
             "Description": "(Optional) S3 URL to CloudWatch Agent installer. Example: s3://amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip",
             "Type": "String"
         },
+        "DesiredCapacity": {
+            "Default": "1",
+            "Description": "Desired number of instances in the Autoscaling Group",
+            "Type": "Number"
+        },
         "InstanceRole": {
             "Default": "",
-            "Description": "(Optional) IAM instance role to apply to the instance",
+            "Description": "(Optional) IAM instance role to apply to the instance(s)",
             "Type": "String"
         },
         "InstanceType": {
@@ -467,6 +511,16 @@
         "KeyPairName": {
             "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
             "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "MaxCapacity": {
+            "Default": "2",
+            "Description": "Maximum number of instances in the Autoscaling Group",
+            "Type": "Number"
+        },
+        "MinCapacity": {
+            "Default": "1",
+            "Description": "Minimum number of instances in the Autoscaling Group",
+            "Type": "Number"
         },
         "NoPublicIp": {
             "AllowedValues": [
@@ -495,24 +549,29 @@
             "Description": "Controls whether to run yum update during a stack update (on the initial instance launch, Watchmaker _always_ installs updates)",
             "Type": "String"
         },
-        "PrivateIp": {
-            "Default": "",
-            "Description": "(Optional) Set a static, primary private IP. Leave blank to auto-select a free IP",
-            "Type": "String"
-        },
         "PypiIndexUrl": {
             "AllowedPattern": "^http[s]?://.*$",
             "Default": "https://pypi.org/simple",
             "Description": "URL to the PyPi Index",
             "Type": "String"
         },
+        "ScaleDownSchedule": {
+            "Default": "",
+            "Description": "(Optional) Scheduled Action in cron-format (UTC) to scale down to MinCapacity; ignored if empty or ScaleUpSchedule is unset (E.g. \"0 0 * * *\")",
+            "Type": "String"
+        },
+        "ScaleUpSchedule": {
+            "Default": "",
+            "Description": "(Optional) Scheduled Action in cron-format (UTC) to scale up to MaxCapacity; ignored if empty or ScaleDownSchedule is unset (E.g. \"0 10 * * Mon-Fri\")",
+            "Type": "String"
+        },
         "SecurityGroupIds": {
-            "Description": "List of security groups to apply to the instance",
+            "Description": "List of security groups to apply to the instance(s)",
             "Type": "List<AWS::EC2::SecurityGroup::Id>"
         },
-        "SubnetId": {
-            "Description": "ID of the subnet to assign to the instance",
-            "Type": "AWS::EC2::Subnet::Id"
+        "SubnetIds": {
+            "Description": "List of subnets to associate to the Autoscaling Group",
+            "Type": "List<AWS::EC2::Subnet::Id>"
         },
         "ToggleCfnInitUpdate": {
             "AllowedValues": [
@@ -523,6 +582,15 @@
             "Description": "A/B toggle that forces a change to instance metadata, triggering the cfn-init update sequence",
             "Type": "String"
         },
+        "ToggleNewInstances": {
+            "AllowedValues": [
+                "A",
+                "B"
+            ],
+            "Default": "A",
+            "Description": "A/B toggle that forces a change to instance userdata, triggering new instances via the Autoscale update policy",
+            "Type": "String"
+        },
         "WatchmakerAdminGroups": {
             "Default": "",
             "Description": "(Optional) Colon-separated list of domain groups that should have admin permissions on the EC2 instance",
@@ -531,11 +599,6 @@
         "WatchmakerAdminUsers": {
             "Default": "",
             "Description": "(Optional) Colon-separated list of domain users that should have admin permissions on the EC2 instance",
-            "Type": "String"
-        },
-        "WatchmakerComputerName": {
-            "Default": "",
-            "Description": "(Optional) Sets the hostname/computername within the OS",
             "Type": "String"
         },
         "WatchmakerConfig": {
@@ -563,13 +626,86 @@
         }
     },
     "Resources": {
-        "WatchmakerInstance": {
+        "ScaleDownScheduledAction": {
+            "Condition": "UseScheduledAction",
+            "Properties": {
+                "AutoScalingGroupName": {
+                    "Ref": "WatchmakerAutoScalingGroup"
+                },
+                "DesiredCapacity": {
+                    "Ref": "MinCapacity"
+                },
+                "Recurrence": {
+                    "Ref": "ScaleDownSchedule"
+                }
+            },
+            "Type": "AWS::AutoScaling::ScheduledAction"
+        },
+        "ScaleUpScheduledAction": {
+            "Condition": "UseScheduledAction",
+            "Properties": {
+                "AutoScalingGroupName": {
+                    "Ref": "WatchmakerAutoScalingGroup"
+                },
+                "DesiredCapacity": {
+                    "Ref": "MaxCapacity"
+                },
+                "Recurrence": {
+                    "Ref": "ScaleUpSchedule"
+                }
+            },
+            "Type": "AWS::AutoScaling::ScheduledAction"
+        },
+        "WatchmakerAutoScalingGroup": {
             "CreationPolicy": {
                 "ResourceSignal": {
-                    "Count": "1",
+                    "Count": {
+                        "Ref": "DesiredCapacity"
+                    },
                     "Timeout": "PT30M"
                 }
             },
+            "Properties": {
+                "DesiredCapacity": {
+                    "Ref": "DesiredCapacity"
+                },
+                "LaunchConfigurationName": {
+                    "Ref": "WatchmakerLaunchConfig"
+                },
+                "MaxSize": {
+                    "Ref": "MaxCapacity"
+                },
+                "MinSize": {
+                    "Ref": "MinCapacity"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "PropagateAtLaunch": "true",
+                        "Value": {
+                            "Fn::Join": [
+                                "",
+                                [
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ],
+                "VPCZoneIdentifier": {
+                    "Ref": "SubnetIds"
+                }
+            },
+            "Type": "AWS::AutoScaling::AutoScalingGroup",
+            "UpdatePolicy": {
+                "AutoScalingReplacingUpdate": {
+                    "WillReplace": "true"
+                }
+            }
+        },
+        "WatchmakerLaunchConfig": {
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "configSets": {
@@ -701,7 +837,7 @@
                                                 "Fn::If": [
                                                     "InstallCloudWatchAgent",
                                                     {
-                                                        "Ref": "WatchmakerInstanceLogGroup"
+                                                        "Ref": "WatchmakerLaunchConfigLogGroup"
                                                     },
                                                     {
                                                         "Ref": "AWS::NoValue"
@@ -719,7 +855,7 @@
                                                 "Fn::If": [
                                                     "InstallCloudWatchAgent",
                                                     {
-                                                        "Ref": "WatchmakerInstanceLogGroup"
+                                                        "Ref": "WatchmakerLaunchConfigLogGroup"
                                                     },
                                                     {
                                                         "Ref": "AWS::NoValue"
@@ -737,7 +873,7 @@
                                                 "Fn::If": [
                                                     "InstallCloudWatchAgent",
                                                     {
-                                                        "Ref": "WatchmakerInstanceLogGroup"
+                                                        "Ref": "WatchmakerLaunchConfigLogGroup"
                                                     },
                                                     {
                                                         "Ref": "AWS::NoValue"
@@ -755,7 +891,7 @@
                                                 "Fn::If": [
                                                     "InstallCloudWatchAgent",
                                                     {
-                                                        "Ref": "WatchmakerInstanceLogGroup"
+                                                        "Ref": "WatchmakerLaunchConfigLogGroup"
                                                     },
                                                     {
                                                         "Ref": "AWS::NoValue"
@@ -773,7 +909,7 @@
                                                 "Fn::If": [
                                                     "InstallCloudWatchAgent",
                                                     {
-                                                        "Ref": "WatchmakerInstanceLogGroup"
+                                                        "Ref": "WatchmakerLaunchConfigLogGroup"
                                                     },
                                                     {
                                                         "Ref": "AWS::NoValue"
@@ -808,7 +944,7 @@
                                             {
                                                 "Ref": "AWS::StackName"
                                             },
-                                            " --resource WatchmakerInstance",
+                                            " --resource WatchmakerAutoScalingGroup",
                                             {
                                                 "Fn::If": [
                                                     "AssignInstanceRole",
@@ -979,13 +1115,13 @@
                                         [
                                             "[cfn-auto-reloader-hook]\n",
                                             "triggers=post.update\n",
-                                            "path=Resources.WatchmakerInstance.Metadata\n",
+                                            "path=Resources.WatchmakerLaunchConfig.Metadata\n",
                                             "action=cfn-init -v -c update",
                                             " --stack ",
                                             {
                                                 "Ref": "AWS::StackName"
                                             },
-                                            " --resource WatchmakerInstance",
+                                            " --resource WatchmakerLaunchConfig",
                                             {
                                                 "Fn::If": [
                                                     "AssignInstanceRole",
@@ -1150,24 +1286,6 @@
                                             },
                                             {
                                                 "Fn::If": [
-                                                    "UseComputerName",
-                                                    {
-                                                        "Fn::Join": [
-                                                            "",
-                                                            [
-                                                                " --computer-name \"",
-                                                                {
-                                                                    "Ref": "WatchmakerComputerName"
-                                                                },
-                                                                "\""
-                                                            ]
-                                                        ]
-                                                    },
-                                                    ""
-                                                ]
-                                            },
-                                            {
-                                                "Fn::If": [
                                                     "UseAdminGroups",
                                                     {
                                                         "Fn::Join": [
@@ -1262,27 +1380,9 @@
                                                         "Fn::Join": [
                                                             "",
                                                             [
-                                                                " --oupath \"",
+                                                                " --ou-path \"",
                                                                 {
                                                                     "Ref": "WatchmakerOuPath"
-                                                                },
-                                                                "\""
-                                                            ]
-                                                        ]
-                                                    },
-                                                    ""
-                                                ]
-                                            },
-                                            {
-                                                "Fn::If": [
-                                                    "UseComputerName",
-                                                    {
-                                                        "Fn::Join": [
-                                                            "",
-                                                            [
-                                                                " --computer-name \"",
-                                                                {
-                                                                    "Ref": "WatchmakerComputerName"
                                                                 },
                                                                 "\""
                                                             ]
@@ -1339,6 +1439,13 @@
                 }
             },
             "Properties": {
+                "AssociatePublicIpAddress": {
+                    "Fn::If": [
+                        "AssignPublicIp",
+                        "true",
+                        "false"
+                    ]
+                },
                 "BlockDeviceMappings": [
                     {
                         "DeviceName": {
@@ -1404,50 +1511,9 @@
                 "KeyName": {
                     "Ref": "KeyPairName"
                 },
-                "NetworkInterfaces": [
-                    {
-                        "AssociatePublicIpAddress": {
-                            "Fn::If": [
-                                "AssignPublicIp",
-                                "true",
-                                "false"
-                            ]
-                        },
-                        "DeviceIndex": "0",
-                        "GroupSet": {
-                            "Ref": "SecurityGroupIds"
-                        },
-                        "PrivateIpAddress": {
-                            "Fn::If": [
-                                "AssignStaticPrivateIp",
-                                {
-                                    "Ref": "PrivateIp"
-                                },
-                                {
-                                    "Ref": "AWS::NoValue"
-                                }
-                            ]
-                        },
-                        "SubnetId": {
-                            "Ref": "SubnetId"
-                        }
-                    }
-                ],
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Join": [
-                                "",
-                                [
-                                    {
-                                        "Ref": "AWS::StackName"
-                                    }
-                                ]
-                            ]
-                        }
-                    }
-                ],
+                "SecurityGroups": {
+                    "Ref": "SecurityGroupIds"
+                },
                 "UserData": {
                     "Fn::Base64": {
                         "Fn::Join": [
@@ -1510,6 +1576,11 @@
                                 "Content-Disposition: attachment; filename=\"script.sh\"\n",
                                 "\n",
                                 "#!/bin/bash -xe\n\n",
+                                "# CFN LaunchConfig Update Toggle: ",
+                                {
+                                    "Ref": "ToggleNewInstances"
+                                },
+                                "\n\n",
                                 "# Export AWS ENVs\n",
                                 "test -r /etc/aws/models/endpoints.json && export AWS_DATA_PATH=/etc/aws/models || true\n",
                                 "export AWS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt\n",
@@ -1588,7 +1659,7 @@
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                " --resource WatchmakerInstance",
+                                " --resource WatchmakerLaunchConfig",
                                 {
                                     "Fn::If": [
                                         "AssignInstanceRole",
@@ -1634,7 +1705,7 @@
                                 {
                                     "Ref": "AWS::StackName"
                                 },
-                                "  --resource WatchmakerInstance",
+                                "  --resource WatchmakerAutoScalingGroup",
                                 {
                                     "Fn::If": [
                                         "AssignInstanceRole",
@@ -1682,9 +1753,9 @@
                     }
                 }
             },
-            "Type": "AWS::EC2::Instance"
+            "Type": "AWS::AutoScaling::LaunchConfiguration"
         },
-        "WatchmakerInstanceLogGroup": {
+        "WatchmakerLaunchConfigLogGroup": {
             "Condition": "InstallCloudWatchAgent",
             "Properties": {
                 "LogGroupName": {

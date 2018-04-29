@@ -39,5 +39,5 @@ resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
 
   on_failure = "${var.OnFailureAction}"
 
-  template_body = "${file("${path.module}/watchmaker-lx-instance.cfn.json")}"
+  template_body = "${file("${path.module}/watchmaker-lx-instance.template.cfn.json")}"
 }
