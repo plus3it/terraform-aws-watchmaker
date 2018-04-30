@@ -38,5 +38,5 @@ resource "aws_cloudformation_stack" "watchmaker-win-autoscale" {
 
   on_failure = "${var.OnFailureAction}"
 
-  template_body = "${file("${path.module}/watchmaker-win-autoscale.cfn.json")}"
+  template_body = "${file("${path.module}/watchmaker-win-autoscale.template.cfn.json")}"
 }
