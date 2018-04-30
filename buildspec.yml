@@ -1,0 +1,33 @@
+---
+version: 0.2
+
+env:
+  variables:
+    JQ_INSTALL: https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
+
+phases:
+  install:
+    commands:
+      - cd tests/
+      - curl -L "${JQ_INSTALL}" -o jq && chmod +x jq                        # install jq
+      - terraform_version=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | ./jq -r -M '.current_version')
+      - terraform_url="${TERRAFORM_URL:-https://releases.hashicorp.com/terraform/${terraform_version}/terraform_${terraform_version}_linux_amd64.zip}"
+      - curl -L "${terraform_url}" -o tf.zip && unzip tf.zip                    # install terraform
+      - mv terraform /usr/local/bin/ && terraform -version
+  pre_build:
+    commands:
+      - export TF_VAR_build_id="${CODEBUILD_BUILD_ID}"
+      - terraform init -no-color -input=false                                 # init terraform
+      - terraform plan -no-color -out=tfplan -input=false                     # plan terraform
+  build:
+    commands:
+      - terraform apply -no-color -input=false tfplan                        # apply terraform
+  post_build:
+    commands:
+      - if [ "${DESTROY_AFTER_TEST}" = "true" ]; then terraform destroy -no-color -input=false -force; fi
+artifacts:
+  files:
+    - tests/terraform.tfstate
+    - tests/terraform.log
+    - tests/terraform_output.log
+  discard-paths: yes
