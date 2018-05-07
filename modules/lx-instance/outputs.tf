@@ -1,11 +1,16 @@
 #Outputs from the Linux Instance Terraform module.
 
 output "watchmaker-lx-instance-stack-id" {
-  description = "This output provides the CloudFormation stack id of the Watchmaker Linux instance"
+  description = "CloudFormation stack id"
   value       = "${aws_cloudformation_stack.watchmaker-lx-instance.id}"
 }
 
-output "watchmaker-lx-instance-stack-outputs" {
-  description = "This output provides the outputs of the CloudFormation stack"
-  value       = "${aws_cloudformation_stack.watchmaker-lx-instance.outputs}"
+output "watchmaker-lx-instance-id" {
+  description = "Instance ID"
+  value       = "${aws_cloudformation_stack.watchmaker-lx-instance.outputs["WatchmakerInstanceId"]}"
+}
+
+output "watchmaker-lx-instance-log-group-name" {
+  description = "Log Group Name"
+  value       = "${aws_cloudformation_stack.watchmaker-lx-instance.outputs["WatchmakerInstanceLogGroupName"]}"
 }

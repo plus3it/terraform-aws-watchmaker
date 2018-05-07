@@ -1,11 +1,16 @@
 #Outputs from the Windows Instance Terraform module.
 
 output "watchmaker-win-instance-stack-id" {
-  description = "This output provides the CloudFormation stack id of the Watchmaker Windows instance"
+  description = "CloudFormation stack id"
   value       = "${aws_cloudformation_stack.watchmaker-win-instance.id}"
 }
 
-output "watchmaker-win-instance-stack-outputs" {
-  description = "This output provides the outputs of the CloudFormation stack"
-  value       = "${aws_cloudformation_stack.watchmaker-win-instance.outputs}"
+output "watchmaker-win-instance-id" {
+  description = "Instance ID"
+  value       = "${aws_cloudformation_stack.watchmaker-win-instance.outputs["WatchmakerInstanceId"]}"
+}
+
+output "watchmaker-win-instance-log-group-name" {
+  description = "Log Group Name"
+  value       = "${aws_cloudformation_stack.watchmaker-win-instance.outputs["WatchmakerInstanceLogGroupName"]}"
 }
