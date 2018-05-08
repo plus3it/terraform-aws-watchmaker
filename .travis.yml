@@ -53,7 +53,6 @@ jobs:
       env:
         - JOB="Deploy to GitHub Releases"
         - PRIOR_VERSION=$(git describe --abbrev=0 --tags)
-        - RELEASE_VERSION=$(grep current_version <$TRAVIS_BUILD_DIR/.bumpversion.cfg | sed 's/^.*= //')
         - RELEASE_BODY="* [$REPO v$RELEASE_VERSION changes](https://github.com/$OWNER/$REPO/compare/$PRIOR_VERSION...$RELEASE_VERSION)"
       before_script:
         - echo PRIOR_VERSION=$PRIOR_VERSION
