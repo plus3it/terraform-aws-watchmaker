@@ -7,12 +7,12 @@ output "watchmaker-win-autoscale-stack-id" {
 
 output "watchmaker-win-autoscale-scale-down-scheduled-action" {
   description = "Scale Down Scheduled Action ID"
-  value       = "${aws_cloudformation_stack.watchmaker-win-autoscale.outputs["ScaleDownScheduledAction"]}"
+  value       = "${lookup(aws_cloudformation_stack.watchmaker-win-autoscale.outputs, "ScaleDownScheduledAction", "")}"
 }
 
 output "watchmaker-win-autoscale-scale-up-scheduled-action" {
   description = "Scale Up Scheduled Action ID"
-  value       = "${aws_cloudformation_stack.watchmaker-win-autoscale.outputs["ScaleUpScheduledAction"]}"
+  value       = "${lookup(aws_cloudformation_stack.watchmaker-win-autoscale.outputs, "ScaleUpScheduledAction", "")}"
 }
 
 output "watchmaker-win-autoscale-autoscaling-group-id" {
