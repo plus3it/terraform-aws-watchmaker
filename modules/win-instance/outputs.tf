@@ -7,10 +7,10 @@ output "watchmaker-win-instance-stack-id" {
 
 output "watchmaker-win-instance-id" {
   description = "Instance ID"
-  value       = "${aws_cloudformation_stack.watchmaker-win-instance.outputs["WatchmakerInstanceId"]}"
+  value       = "${lookup(aws_cloudformation_stack.watchmaker-win-instance.outputs, "WatchmakerInstanceId", "")}"
 }
 
 output "watchmaker-win-instance-log-group-name" {
   description = "Log Group Name"
-  value       = "${aws_cloudformation_stack.watchmaker-win-instance.outputs["WatchmakerInstanceLogGroupName"]}"
+  value       = "${lookup(aws_cloudformation_stack.watchmaker-win-instance.outputs, "WatchmakerInstanceLogGroupName", "")}"
 }
