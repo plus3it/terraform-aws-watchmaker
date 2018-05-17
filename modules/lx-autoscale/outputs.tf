@@ -17,15 +17,15 @@ output "watchmaker-lx-autoscale-scale-up-scheduled-action" {
 
 output "watchmaker-lx-autoscale-autoscaling-group-id" {
   description = "Autoscaling Group ID"
-  value       = "${aws_cloudformation_stack.watchmaker-lx-autoscale.outputs["WatchmakerAutoScalingGroupId"]}"
+  value       = "${lookup(aws_cloudformation_stack.watchmaker-lx-autoscale.outputs, "WatchmakerAutoScalingGroupId", "")}"
 }
 
 output "watchmaker-lx-autoscale-launch-config-id" {
   description = "Launch Configuration ID"
-  value       = "${aws_cloudformation_stack.watchmaker-lx-autoscale.outputs["WatchmakerLaunchConfigId"]}"
+  value       = "${lookup(aws_cloudformation_stack.watchmaker-lx-autoscale.outputs, "WatchmakerLaunchConfigId", "")}"
 }
 
 output "watchmaker-lx-autoscale-launch-config-log-group-name" {
   description = "Log Group Name"
-  value       = "${aws_cloudformation_stack.watchmaker-lx-autoscale.outputs["WatchmakerLaunchConfigLogGroupName"]}"
+  value       = "${lookup(aws_cloudformation_stack.watchmaker-lx-autoscale.outputs, "WatchmakerLaunchConfigLogGroupName", "")}"
 }
