@@ -329,7 +329,7 @@
                 }
             }
         },
-        "Version": "1.4.3"
+        "Version": "1.4.4"
     },
     "Outputs": {
         "WatchmakerInstanceId": {
@@ -1548,7 +1548,7 @@
                                 " --upgrade cffi\n",
                                 "pip install",
                                 " --index-url=\"$PYPI_URL\"",
-                                " --upgrade pyopenssl ndg-httpsclient pyasn1 'cryptography<2.2;python_version<\"2.7\"' 'cryptography;python_version>=\"2.7\"'",
+                                " --upgrade 'cryptography<2.2;python_version<\"2.7\"' 'cryptography;python_version>=\"2.7\"'",
                                 "\n\n",
                                 "if [[ $(rpm --quiet -q aws-cfn-bootstrap || pip show --quiet aws-cfn-bootstrap)$? -ne 0 ]]\n",
                                 "then\n",
