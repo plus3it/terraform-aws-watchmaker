@@ -28,6 +28,8 @@ resource "aws_cloudformation_stack" "watchmaker-lx-autoscale" {
     NoUpdates             = "${var.NoUpdates}"
     SecurityGroupIds      = "${var.SecurityGroupIds}"
     SubnetIds             = "${var.SubnetIds}"
+    TargetGroupArns       = "${var.TargetGroupArns}"
+    LoadBalancerNames     = "${var.LoadBalancerNames}"
     PypiIndexUrl          = "${var.PypiIndexUrl}"
     WatchmakerConfig      = "${var.WatchmakerConfig}"
     WatchmakerEnvironment = "${var.WatchmakerEnvironment}"

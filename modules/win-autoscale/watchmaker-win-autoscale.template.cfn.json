@@ -97,12 +97,39 @@
                 }
             ]
         },
+        "UseElbHealthCheck": {
+            "Fn::Or": [
+                {
+                    "Condition": "UseLoadBalancerNames"
+                },
+                {
+                    "Condition": "UseTargetGroupArns"
+                }
+            ]
+        },
         "UseEnvironment": {
             "Fn::Not": [
                 {
                     "Fn::Equals": [
                         {
                             "Ref": "WatchmakerEnvironment"
+                        },
+                        ""
+                    ]
+                }
+            ]
+        },
+        "UseLoadBalancerNames": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Fn::Join": [
+                                "",
+                                {
+                                    "Ref": "LoadBalancerNames"
+                                }
+                            ]
                         },
                         ""
                     ]
@@ -145,6 +172,23 @@
                                 ""
                             ]
                         }
+                    ]
+                }
+            ]
+        },
+        "UseTargetGroupArns": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Fn::Join": [
+                                "",
+                                {
+                                    "Ref": "TargetGroupArns"
+                                }
+                            ]
+                        },
+                        ""
                     ]
                 }
             ]
@@ -234,7 +278,9 @@
                         "MinCapacity",
                         "MaxCapacity",
                         "ScaleDownSchedule",
-                        "ScaleUpSchedule"
+                        "ScaleUpSchedule",
+                        "TargetGroupArns",
+                        "LoadBalancerNames"
                     ]
                 },
                 {
@@ -399,6 +445,11 @@
             "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
+        "LoadBalancerNames": {
+            "Default": "",
+            "Description": "Comma-separated string of Classic ELB Names to associate with the Autoscaling Group; conflicts with TargetGroupArns",
+            "Type": "CommaDelimitedList"
+        },
         "MaxCapacity": {
             "Default": "2",
             "Description": "Maximum number of instances in the Autoscaling Group",
@@ -456,6 +507,11 @@
         "SubnetIds": {
             "Description": "List of subnets to associate to the Autoscaling Group",
             "Type": "List<AWS::EC2::Subnet::Id>"
+        },
+        "TargetGroupArns": {
+            "Default": "",
+            "Description": "Comma-separated string of Target Group ARNs to associate with the Autoscaling Group; conflicts with LoadBalancerNames",
+            "Type": "CommaDelimitedList"
         },
         "ToggleCfnInitUpdate": {
             "AllowedValues": [
@@ -554,8 +610,35 @@
                 "DesiredCapacity": {
                     "Ref": "DesiredCapacity"
                 },
+                "HealthCheckGracePeriod": {
+                    "Fn::If": [
+                        "UseElbHealthCheck",
+                        3600,
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "HealthCheckType": {
+                    "Fn::If": [
+                        "UseElbHealthCheck",
+                        "ELB",
+                        "EC2"
+                    ]
+                },
                 "LaunchConfigurationName": {
                     "Ref": "WatchmakerLaunchConfig"
+                },
+                "LoadBalancerNames": {
+                    "Fn::If": [
+                        "UseLoadBalancerNames",
+                        {
+                            "Ref": "LoadBalancerNames"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
                 },
                 "MaxSize": {
                     "Ref": "MaxCapacity"
@@ -579,6 +662,17 @@
                         }
                     }
                 ],
+                "TargetGroupARNs": {
+                    "Fn::If": [
+                        "UseTargetGroupArns",
+                        {
+                            "Ref": "TargetGroupArns"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
                 "VPCZoneIdentifier": {
                     "Ref": "SubnetIds"
                 }

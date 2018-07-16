@@ -134,6 +134,18 @@ variable "SubnetIds" {
   description = "List of subnets to associate to the Autoscaling Group"
 }
 
+variable "TargetGroupArns" {
+  type        = "string"
+  description = "Comma-separated string of Target Group ARNs to associate with the Autoscaling Group; conflicts with LoadBalancerNames"
+  default     = ""
+}
+
+variable "LoadBalancerNames" {
+  type        = "string"
+  description = "Comma-separated string of Classic ELB Names to associate with the Autoscaling Group; conflicts with TargetGroupArns"
+  default     = ""
+}
+
 variable "PypiIndexUrl" {
   type        = "string"
   description = "URL to the PyPi Index"

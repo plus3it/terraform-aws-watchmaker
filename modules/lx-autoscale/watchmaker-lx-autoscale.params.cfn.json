@@ -80,6 +80,14 @@
         "ParameterValue": "__SUBNETIDS__"
     },
     {
+        "ParameterKey": "TargetGroupArns",
+        "ParameterValue": "__TARGETGROUPARNS__"
+    },
+    {
+        "ParameterKey": "LoadBalancerNames",
+        "ParameterValue": "__LOADBALANCERNAMES__"
+    },
+    {
         "ParameterKey": "PypiIndexUrl",
         "ParameterValue": "__PYPIINDEXURL__"
     },
