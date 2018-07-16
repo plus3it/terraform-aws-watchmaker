@@ -183,6 +183,23 @@
                 }
             ]
         },
+        "UseLoadBalancerNames": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Fn::Join": [
+                                "",
+                                {
+                                    "Ref": "LoadBalancerNames"
+                                }
+                            ]
+                        },
+                        ""
+                    ]
+                }
+            ]
+        },
         "UseTargetGroupArns": {
             "Fn::Not": [
                 {
@@ -197,6 +214,16 @@
                         },
                         ""
                     ]
+                }
+            ]
+        },
+        "UseElbHealthCheck": {
+            "Fn::Or": [
+                {
+                    "Condition": "UseLoadBalancerNames"
+                },
+                {
+                    "Condition": "UseTargetGroupArns"
                 }
             ]
         },
@@ -331,7 +358,8 @@
                         "MaxCapacity",
                         "ScaleDownSchedule",
                         "ScaleUpSchedule",
-                        "TargetGroupArns"
+                        "TargetGroupArns",
+                        "LoadBalancerNames"
                     ]
                 },
                 {
@@ -593,7 +621,12 @@
         },
         "TargetGroupArns": {
             "Default": "",
-            "Description": "List of Target Group ARNs to associate with the Autoscaling Group",
+            "Description": "Comma-separated string of Target Group ARNs to associate with the Autoscaling Group; conflicts with LoadBalancerNames",
+            "Type": "CommaDelimitedList"
+        },
+        "LoadBalancerNames": {
+            "Default": "",
+            "Description": "Comma-separated string of Classic ELB Names to associate with the Autoscaling Group; conflicts with TargetGroupArns",
             "Type": "CommaDelimitedList"
         },
         "ToggleCfnInitUpdate": {
@@ -694,7 +727,7 @@
                 },
                 "HealthCheckGracePeriod": {
                     "Fn::If": [
-                        "UseTargetGroupArns",
+                        "UseElbHealthCheck",
                         3600,
                         {
                             "Ref": "AWS::NoValue"
@@ -703,13 +736,24 @@
                 },
                 "HealthCheckType": {
                     "Fn::If": [
-                        "UseTargetGroupArns",
+                        "UseElbHealthCheck",
                         "ELB",
                         "EC2"
                     ]
                 },
                 "LaunchConfigurationName": {
                     "Ref": "WatchmakerLaunchConfig"
+                },
+                "LoadBalancerNames": {
+                    "Fn::If": [
+                        "UseLoadBalancerNames",
+                        {
+                            "Ref": "LoadBalancerNames"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
                 },
                 "MaxSize": {
                     "Ref": "MaxCapacity"

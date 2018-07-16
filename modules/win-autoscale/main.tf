@@ -25,6 +25,7 @@ resource "aws_cloudformation_stack" "watchmaker-win-autoscale" {
     SecurityGroupIds       = "${var.SecurityGroupIds}"
     SubnetIds              = "${var.SubnetIds}"
     TargetGroupArns        = "${var.TargetGroupArns}"
+    LoadBalancerNames      = "${var.LoadBalancerNames}"
     PypiIndexUrl           = "${var.PypiIndexUrl}"
     PythonInstaller        = "${var.PythonInstaller}"
     WatchmakerBootstrapper = "${var.WatchmakerBootstrapper}"
