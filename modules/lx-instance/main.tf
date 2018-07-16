@@ -2,7 +2,18 @@
 # Assumes that watchmaker-lx-instance.cfn.json is stored in the same directory as main.tf of the module.
 
 resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
-  name = "${var.Name}"
+  template_body = "${file("${path.module}/watchmaker-lx-autoscale.template.cfn.json")}"
+
+  name               = "${var.Name}"
+  capabilities       = "${var.Capabilities}"
+  disable_rollback   = "${var.DisableRollback}"
+  iam_role_arn       = "${var.IamRoleArn}"
+  notification_arns  = "${var.NotificationArns}"
+  on_failure         = "${var.OnFailureAction}"
+  policy_body        = "${var.PolicyBody}"
+  policy_url         = "${var.PolicyUrl}"
+  tags               = "${var.StackTags}"
+  timeout_in_minutes = "${var.TimeoutInMinutes}"
 
   parameters {
     AmiId                  = "${var.AmiId}"
@@ -36,8 +47,4 @@ resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
     CfnBootstrapUtilsUrl   = "${var.CfnBootstrapUtilsUrl}"
     ToggleCfnInitUpdate    = "${var.ToggleCfnInitUpdate}"
   }
-
-  on_failure = "${var.OnFailureAction}"
-
-  template_body = "${file("${path.module}/watchmaker-lx-instance.template.cfn.json")}"
 }

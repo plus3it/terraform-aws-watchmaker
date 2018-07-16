@@ -7,7 +7,61 @@ variable "Name" {
   description = "Name of CloudFormation Stack"
 }
 
-variable "AmiId" {
+variable "Capabilities" {
+  type        = "list"
+  description = "A list of capabilities. Valid values: CAPABILITY_IAM or CAPABILITY_NAMED_IAM"
+  default     = []
+}
+
+variable "DisableRollback" {
+  type        = "string"
+  description = "Set to true to disable rollback of the stack if stack creation failed. Conflicts with OnFailure"
+  default     = false
+}
+
+variable "IamRoleArn" {
+  type        = "string"
+  description = "The ARN of an IAM role that AWS CloudFormation assumes to create the stack. If you don't specify a value, AWS CloudFormation uses the role that was previously associated with the stack. If no role is available, AWS CloudFormation uses a temporary session that is generated from your user credentials"
+  default     = ""
+}
+
+variable "NotificationArns" {
+  type        = "list"
+  description = "A list of SNS topic ARNs to publish stack related events"
+  default     = []
+}
+
+variable "OnFailureAction" {
+  type        = "string"
+  description = "Action to be taken if stack creation fails. This must be one of: DO_NOTHING, ROLLBACK, or DELETE. Conflicts with DisableRollback"
+  default     = "DO_NOTHING"
+}
+
+variable "PolicyBody" {
+  type        = "string"
+  description = "String containing the stack policy body. Conflicts with PolicyUrl"
+  default     = ""
+}
+
+variable "PolicyUrl" {
+  type        = "string"
+  description = "URL to a file containing the stack policy. Conflicts with PolicyBody"
+  default     = ""
+}
+
+variable "StackTags" {
+  type        = "map"
+  description = "A map of tag keys/values to associate with this stack"
+  default     = {}
+}
+
+variable "TimeoutInMinutes" {
+  type        = "string"
+  description = "The amount of time that can pass before the stack status becomes CREATE_FAILED"
+  default     = "120"
+}
+
+s variable "AmiId" {
   type        = "string"
   description = "ID of the AMI to launch"
 }
