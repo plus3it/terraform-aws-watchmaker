@@ -131,12 +131,39 @@
                 }
             ]
         },
+        "UseElbHealthCheck": {
+            "Fn::Or": [
+                {
+                    "Condition": "UseLoadBalancerNames"
+                },
+                {
+                    "Condition": "UseTargetGroupArns"
+                }
+            ]
+        },
         "UseEnvironment": {
             "Fn::Not": [
                 {
                     "Fn::Equals": [
                         {
                             "Ref": "WatchmakerEnvironment"
+                        },
+                        ""
+                    ]
+                }
+            ]
+        },
+        "UseLoadBalancerNames": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Fn::Join": [
+                                "",
+                                {
+                                    "Ref": "LoadBalancerNames"
+                                }
+                            ]
                         },
                         ""
                     ]
@@ -183,23 +210,6 @@
                 }
             ]
         },
-        "UseLoadBalancerNames": {
-            "Fn::Not": [
-                {
-                    "Fn::Equals": [
-                        {
-                            "Fn::Join": [
-                                "",
-                                {
-                                    "Ref": "LoadBalancerNames"
-                                }
-                            ]
-                        },
-                        ""
-                    ]
-                }
-            ]
-        },
         "UseTargetGroupArns": {
             "Fn::Not": [
                 {
@@ -214,16 +224,6 @@
                         },
                         ""
                     ]
-                }
-            ]
-        },
-        "UseElbHealthCheck": {
-            "Fn::Or": [
-                {
-                    "Condition": "UseLoadBalancerNames"
-                },
-                {
-                    "Condition": "UseTargetGroupArns"
                 }
             ]
         },
@@ -558,6 +558,11 @@
             "Description": "Public/private key pairs allow you to securely connect to your instance after it launches",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
+        "LoadBalancerNames": {
+            "Default": "",
+            "Description": "Comma-separated string of Classic ELB Names to associate with the Autoscaling Group; conflicts with TargetGroupArns",
+            "Type": "CommaDelimitedList"
+        },
         "MaxCapacity": {
             "Default": "2",
             "Description": "Maximum number of instances in the Autoscaling Group",
@@ -622,11 +627,6 @@
         "TargetGroupArns": {
             "Default": "",
             "Description": "Comma-separated string of Target Group ARNs to associate with the Autoscaling Group; conflicts with LoadBalancerNames",
-            "Type": "CommaDelimitedList"
-        },
-        "LoadBalancerNames": {
-            "Default": "",
-            "Description": "Comma-separated string of Classic ELB Names to associate with the Autoscaling Group; conflicts with TargetGroupArns",
             "Type": "CommaDelimitedList"
         },
         "ToggleCfnInitUpdate": {
