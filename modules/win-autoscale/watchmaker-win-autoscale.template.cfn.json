@@ -149,6 +149,23 @@
                 }
             ]
         },
+        "UseTargetGroupArns": {
+            "Fn::Not": [
+                {
+                    "Fn::Equals": [
+                        {
+                            "Fn::Join": [
+                                "",
+                                {
+                                    "Ref": "TargetGroupArns"
+                                }
+                            ]
+                        },
+                        ""
+                    ]
+                }
+            ]
+        },
         "UseWamConfig": {
             "Fn::Not": [
                 {
@@ -234,7 +251,8 @@
                         "MinCapacity",
                         "MaxCapacity",
                         "ScaleDownSchedule",
-                        "ScaleUpSchedule"
+                        "ScaleUpSchedule",
+                        "TargetGroupArns"
                     ]
                 },
                 {
@@ -457,6 +475,11 @@
             "Description": "List of subnets to associate to the Autoscaling Group",
             "Type": "List<AWS::EC2::Subnet::Id>"
         },
+        "TargetGroupArns": {
+            "Default": "",
+            "Description": "List of Target Group ARNs to associate with the Autoscaling Group",
+            "Type": "CommaDelimitedList"
+        },
         "ToggleCfnInitUpdate": {
             "AllowedValues": [
                 "A",
@@ -557,6 +580,22 @@
                 "LaunchConfigurationName": {
                     "Ref": "WatchmakerLaunchConfig"
                 },
+                "HealthCheckGracePeriod": {
+                    "Fn::If": [
+                        "UseTargetGroupArns",
+                        3600,
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
+                "HealthCheckType": {
+                    "Fn::If": [
+                        "UseTargetGroupArns",
+                        "ELB",
+                        "EC2"
+                    ]
+                },
                 "MaxSize": {
                     "Ref": "MaxCapacity"
                 },
@@ -579,6 +618,17 @@
                         }
                     }
                 ],
+                "TargetGroupARNs": {
+                    "Fn::If": [
+                        "UseTargetGroupArns",
+                        {
+                            "Ref": "TargetGroupArns"
+                        },
+                        {
+                            "Ref": "AWS::NoValue"
+                        }
+                    ]
+                },
                 "VPCZoneIdentifier": {
                     "Ref": "SubnetIds"
                 }
