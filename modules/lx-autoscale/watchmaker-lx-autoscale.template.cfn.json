@@ -393,7 +393,7 @@
                 }
             }
         },
-        "Version": "1.5.1"
+        "Version": "1.5.2"
     },
     "Outputs": {
         "ScaleDownScheduledAction": {
@@ -441,9 +441,8 @@
             "Type": "String"
         },
         "AmiId": {
-            "AllowedPattern": "^ami-[0-9a-z]{8}$|^ami-[0-9a-z]{17}$",
             "Description": "ID of the AMI to launch",
-            "Type": "String"
+            "Type": "AWS::EC2::Image::Id"
         },
         "AppScriptParams": {
             "Description": "Parameter string to pass to the application script. Ignored if \"AppScriptUrl\" is blank",
@@ -764,7 +763,7 @@
                 "Tags": [
                     {
                         "Key": "Name",
-                        "PropagateAtLaunch": "true",
+                        "PropagateAtLaunch": true,
                         "Value": {
                             "Fn::Join": [
                                 "",
@@ -1536,8 +1535,8 @@
                 "AssociatePublicIpAddress": {
                     "Fn::If": [
                         "AssignPublicIp",
-                        "true",
-                        "false"
+                        true,
+                        false
                     ]
                 },
                 "BlockDeviceMappings": [
@@ -1560,7 +1559,7 @@
                             ]
                         },
                         "Ebs": {
-                            "DeleteOnTermination": "true",
+                            "DeleteOnTermination": true,
                             "VolumeType": "gp2"
                         }
                     },
@@ -1570,7 +1569,7 @@
                             {
                                 "DeviceName": "/dev/xvdf",
                                 "Ebs": {
-                                    "DeleteOnTermination": "true",
+                                    "DeleteOnTermination": true,
                                     "VolumeSize": {
                                         "Ref": "AppVolumeSize"
                                     },
