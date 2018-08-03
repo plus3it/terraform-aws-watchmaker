@@ -195,7 +195,6 @@
                         "KeyPairName",
                         "NoPublicIp",
                         "NoReboot",
-                        "NoUpdates",
                         "SecurityGroupIds"
                     ]
                 },
@@ -221,8 +220,7 @@
                     },
                     "Parameters": [
                         "AppScriptUrl",
-                        "AppScriptParams",
-                        "AppScriptShell"
+                        "AppScriptParams"
                     ]
                 },
                 {
@@ -280,9 +278,8 @@
     },
     "Parameters": {
         "AmiId": {
-            "AllowedPattern": "^ami-[0-9a-z]{8}$|^ami-[0-9a-z]{17}$",
             "Description": "ID of the AMI to launch",
-            "Type": "String"
+            "Type": "AWS::EC2::Image::Id"
         },
         "AppScriptParams": {
             "Description": "Parameter string to pass to the application script. Ignored if \"AppScriptUrl\" is blank",
@@ -779,7 +776,11 @@
                                                 "Ref": "AWS::Region"
                                             },
                                             "; ",
-                                            "iex $AppScript; ",
+                                            "iex $AppScript ",
+                                            {
+                                                "Ref": "AppScriptParams"
+                                            },
+                                            "; ",
                                             "} -Verbose -ErrorAction Stop",
                                             "\""
                                         ]
@@ -1294,7 +1295,7 @@
                     {
                         "DeviceName": "/dev/sda1",
                         "Ebs": {
-                            "DeleteOnTermination": "true",
+                            "DeleteOnTermination": true,
                             "VolumeType": "gp2"
                         }
                     },
@@ -1306,7 +1307,7 @@
                                     "Ref": "AppVolumeDevice"
                                 },
                                 "Ebs": {
-                                    "DeleteOnTermination": "true",
+                                    "DeleteOnTermination": true,
                                     "VolumeSize": {
                                         "Ref": "AppVolumeSize"
                                     },
@@ -1346,8 +1347,8 @@
                         "AssociatePublicIpAddress": {
                             "Fn::If": [
                                 "AssignPublicIp",
-                                "true",
-                                "false"
+                                true,
+                                false
                             ]
                         },
                         "DeviceIndex": "0",
