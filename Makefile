@@ -22,7 +22,7 @@ tf.lint:
 
 .PHONY: cfn.lint
 cfn.lint:
-	$(FIND_CFN) | $(XARGS_CMD) cfn-lint validate --verbose {}
+	$(FIND_CFN) | $(XARGS_CMD) cfn-lint -t {}
 
 .PHONY: cfn.version
 cfn.version:
