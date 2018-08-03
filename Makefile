@@ -22,7 +22,7 @@ tf.lint:
 
 .PHONY: cfn.lint
 cfn.lint:
-	$(FIND_CFN) | $(XARGS_CMD) cfn-lint -t {}
+	$(FIND_CFN) | $(XARGS_CMD) cfn-lint -i E2523 -t {}
 
 .PHONY: cfn.version
 cfn.version:
