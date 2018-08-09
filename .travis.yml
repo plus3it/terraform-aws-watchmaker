@@ -4,7 +4,7 @@ env:
   global:
     - REPO="${TRAVIS_REPO_SLUG#*/}"
     - OWNER=plus3it
-    - DEPLOY_SLUG=$OWNER/$REPO
+    - RELEASE_BRANCH=master
     - RELEASE_VERSION=$(grep -E '^current_version' $TRAVIS_BUILD_DIR/.bumpversion.cfg | sed 's/^.*= //')
 
 jobs:
@@ -47,7 +47,7 @@ jobs:
       script:
         - make cfn.lint
     - stage: deploy
-      if: branch = master AND type = push AND repo = env(DEPLOY_SLUG)
+      if: branch = env(RELEASE_BRANCH) AND tag IS blank
       env:
         - JOB="Deploy to GitHub Releases"
         - PRIOR_VERSION=$(git describe --abbrev=0 --tags)
@@ -57,7 +57,7 @@ jobs:
         - echo RELEASE_VERSION=$RELEASE_VERSION
         - echo RELEASE_BODY=$RELEASE_BODY
       script:
-        - test "$PRIOR_VERSION" = "$RELEASE_VERSION" && travis_terminate || echo "Deploying new version..."
+        - test "$PRIOR_VERSION" = "$RELEASE_VERSION" && (echo "Version has not changed" && travis_terminate) || echo "Will deploy new version $RELEASE_VERSION..."
       deploy:
         provider: releases
         api_key:
@@ -66,3 +66,5 @@ jobs:
         tag_name: $RELEASE_VERSION
         body: $RELEASE_BODY
         draft: false
+        on:
+          branch: $RELEASE_BRANCH
