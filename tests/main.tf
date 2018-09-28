@@ -19,7 +19,7 @@ module "lx-instance-centos7" {
   source = "../modules/lx-instance"
 
   Name                  = "${local.test_prefix}-lx-instance-centos7"
-  AmiId                 = "${data.aws_ami.centos6.image_id}"
+  AmiId                 = "${data.aws_ami.centos7.image_id}"
   AmiDistro             = "CentOS"
   AppVolumeSize         = "10"
   CloudWatchAgentUrl    = "${var.cloudwatch_agent_url_lx}"
