@@ -259,7 +259,7 @@
                 }
             }
         },
-        "Version": "1.5.3"
+        "Version": "1.5.4"
     },
     "Outputs": {
         "WatchmakerInstanceId": {
@@ -776,7 +776,7 @@
                                                 "Ref": "AWS::Region"
                                             },
                                             "; ",
-                                            "iex $AppScript ",
+                                            "& $AppScript ",
                                             {
                                                 "Ref": "AppScriptParams"
                                             },
