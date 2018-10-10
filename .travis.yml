@@ -12,31 +12,18 @@ jobs:
     - stage: test
       env:
         - JOB="Terraform Format Verification"
-      before_script:
-        - TERRAFORM_VERSION=$(curl -sSL https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M '.current_version')
-        - TERRAFORM_URL="https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip"
-        - echo "TERRAFORM_URL=${TERRAFORM_URL}"
-        - curl -sSL -o terraform.zip "$TERRAFORM_URL"
-        - unzip terraform.zip && rm -f terraform.zip
-        - chmod +x terraform
-        - mkdir -p ${HOME}/bin ; export PATH=${PATH}:${HOME}/bin ; mv terraform ${HOME}/bin/
-        - terraform -v
       script:
-        - make tf.lint
+        - make terraform/lint
     - stage: test
       env:
         - JOB="JSON Lint/Format"
-      install:
-        - jq --version
       script:
-        - make json.lint
+        - make json/lint
     - stage: test
       env:
         - JOB="CFN Version Validation"
-      install:
-        - jq --version
       script:
-        - make cfn.version VERSION=$RELEASE_VERSION
+        - make cfn/version VERSION=$RELEASE_VERSION
     - stage: test
       env:
         - JOB="CFN Lint"
@@ -45,7 +32,7 @@ jobs:
         - cfn-lint --version
       language: python
       script:
-        - make cfn.lint
+        - make cfn/lint
     - stage: deploy
       if: branch = env(RELEASE_BRANCH) AND tag IS blank
       env:
