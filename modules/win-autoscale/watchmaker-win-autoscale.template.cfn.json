@@ -685,6 +685,10 @@
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "configSets": {
+                        "appscript": [
+                            "reboot",
+                            "make-app"
+                        ],
                         "launch": [
                             "setup",
                             {
@@ -700,7 +704,9 @@
                             {
                                 "Fn::If": [
                                     "ExecuteAppScript",
-                                    "make-app",
+                                    {
+                                        "ConfigSet": "appscript"
+                                    },
                                     {
                                         "Ref": "AWS::NoValue"
                                     }
@@ -723,7 +729,9 @@
                             {
                                 "Fn::If": [
                                     "ExecuteAppScript",
-                                    "make-app",
+                                    {
+                                        "ConfigSet": "appscript"
+                                    },
                                     {
                                         "Ref": "AWS::NoValue"
                                     }
