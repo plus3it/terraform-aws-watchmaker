@@ -259,7 +259,7 @@
                 }
             }
         },
-        "Version": "1.5.5"
+        "Version": "1.5.6"
     },
     "Outputs": {
         "WatchmakerInstanceId": {
@@ -474,6 +474,10 @@
             "Metadata": {
                 "AWS::CloudFormation::Init": {
                     "configSets": {
+                        "appscript": [
+                            "reboot",
+                            "make-app"
+                        ],
                         "launch": [
                             "setup",
                             {
@@ -489,7 +493,9 @@
                             {
                                 "Fn::If": [
                                     "ExecuteAppScript",
-                                    "make-app",
+                                    {
+                                        "ConfigSet": "appscript"
+                                    },
                                     {
                                         "Ref": "AWS::NoValue"
                                     }
@@ -512,7 +518,9 @@
                             {
                                 "Fn::If": [
                                     "ExecuteAppScript",
-                                    "make-app",
+                                    {
+                                        "ConfigSet": "appscript"
+                                    },
                                     {
                                         "Ref": "AWS::NoValue"
                                     }
