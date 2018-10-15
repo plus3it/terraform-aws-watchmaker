@@ -2,7 +2,7 @@
 # Assumes that watchmaker-win-autoscale.cfn.json is stored in the same directory as main.tf of the module.
 
 resource "aws_cloudformation_stack" "watchmaker-win-autoscale" {
-  template_body = "${file("${path.module}/watchmaker-win-autoscale.template.cfn.json")}"
+  template_body = "${file("${path.module}/watchmaker-win-autoscale.template.cfn.yaml")}"
 
   name               = "${var.Name}"
   capabilities       = "${var.Capabilities}"

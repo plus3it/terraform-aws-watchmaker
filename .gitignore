@@ -93,6 +93,7 @@ coverage.xml
 htmlcov
 
 # Terraform compiled files and folders
+*.tfvars
 *.tfstate
 *.tfstate.backup
 .terraform/
