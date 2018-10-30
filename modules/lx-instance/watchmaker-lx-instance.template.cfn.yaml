@@ -250,7 +250,7 @@ Parameters:
     Type: String
   CfnGetPipUrl:
     AllowedPattern: '^http[s]?://.*\.py$'
-    Default: 'https://bootstrap.pypa.io/2.6/get-pip.py'
+    Default: 'https://bootstrap.pypa.io/get-pip.py'
     Description: URL to get-pip.py
     Type: String
   CloudWatchAgentUrl:
@@ -556,11 +556,16 @@ Resources:
               mode: '000400'
               owner: root
             /etc/cfn/scripts/watchmaker-install.sh:
-              content: !Sub |-
+              content: !Sub |
                   #!/bin/bash
                   PYPI_URL=${PypiIndexUrl}
-                  curl --silent --show-error --retry 5 -L ${CfnGetPipUrl} | python - --index-url="$PYPI_URL" 'wheel<0.30.0;python_version<"2.7"' 'wheel;python_version>="2.7"'
-                  pip install --index-url="$PYPI_URL" --upgrade 'pip<10' 'setuptools<37;python_version<"2.7"' 'setuptools;python_version>="2.7"' boto3
+
+                  # Setup terminal support for UTF-8
+                  export LC_ALL=en_US.UTF-8
+                  export LANG=en_US.UTF-8
+
+                  curl --silent --show-error --retry 5 -L ${CfnGetPipUrl} | python3 - --index-url="$PYPI_URL"
+                  pip install --index-url="$PYPI_URL" --upgrade pip setuptools boto3
                   pip install --index-url="$PYPI_URL" --upgrade watchmaker
               group: root
               mode: '000700'
@@ -677,6 +682,10 @@ Resources:
 
               #!/bin/bash -xe
 
+              # Setup terminal support for UTF-8
+              export LC_ALL=en_US.UTF-8
+              export LANG=en_US.UTF-8
+
               # Export AWS ENVs
               test -r /etc/aws/models/endpoints.json && export AWS_DATA_PATH=/etc/aws/models || true
               export AWS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
@@ -685,18 +694,18 @@ Resources:
 
               # Get pip
               PYPI_URL=${PypiIndexUrl}
-              curl --silent --show-error --retry 5 -L ${CfnGetPipUrl} | python - --index-url="$PYPI_URL" 'wheel<0.30.0;python_version<"2.7"' 'wheel;python_version>="2.7"'
+              curl --silent --show-error --retry 5 -L ${CfnGetPipUrl} | python3 - --index-url="$PYPI_URL"
               
               # Add pip to path
               hash pip 2> /dev/null || PATH="${!PATH}:/usr/local/bin"
 
               # Upgrade pip and setuptools
-              pip install --index-url="$PYPI_URL" --upgrade 'pip<10' 'setuptools<37;python_version<"2.7"' 'setuptools;python_version>="2.7"'
+              pip install --index-url="$PYPI_URL" --upgrade pip setuptools
 
               # Fix python urllib3 warnings
               yum -y install gcc python-devel libffi-devel openssl-devel
-              pip install --index-url="$PYPI_URL" --upgrade 'pycparser<2.19;python_version<"2.7"' cffi
-              pip install --index-url="$PYPI_URL" --upgrade 'pycparser<2.19;python_version<"2.7"' 'cryptography<2.2;python_version<"2.7"' 'cryptography;python_version>="2.7"'
+              pip install --index-url="$PYPI_URL" --upgrade cffi
+              pip install --index-url="$PYPI_URL" --upgrade cryptography
               if [[ $(rpm --quiet -q aws-cfn-bootstrap || pip show --quiet aws-cfn-bootstrap)$? -ne 0 ]]
               then
                 # Get cfn utils
