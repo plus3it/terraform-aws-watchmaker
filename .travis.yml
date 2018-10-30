@@ -21,11 +21,6 @@ jobs:
         - make json/lint
     - stage: test
       env:
-        - JOB="CFN Version Validation"
-      script:
-        - make cfn/version VERSION=$RELEASE_VERSION
-    - stage: test
-      env:
         - JOB="CFN Lint"
       install:
         - pip install -r _requirements/cfn-lint.txt
@@ -33,6 +28,15 @@ jobs:
       language: python
       script:
         - make cfn/lint
+    - stage: test
+      env:
+        - JOB="CFN Version Validation"
+      install:
+        - pip install -r _requirements/cfn-version-check.txt
+        - yq --version
+      language: python
+      script:
+        - make cfn/version VERSION=$RELEASE_VERSION
     - stage: deploy
       if: branch = env(RELEASE_BRANCH) AND tag IS blank
       env:

@@ -2,7 +2,7 @@
 # Assumes that watchmaker-win-instance.cfn.json is stored in the same directory as main.tf of the module.
 
 resource "aws_cloudformation_stack" "watchmaker-win-instance" {
-  template_body = "${file("${path.module}/watchmaker-win-instance.template.cfn.json")}"
+  template_body = "${file("${path.module}/watchmaker-win-instance.template.cfn.yaml")}"
 
   name               = "${var.Name}"
   capabilities       = "${var.Capabilities}"

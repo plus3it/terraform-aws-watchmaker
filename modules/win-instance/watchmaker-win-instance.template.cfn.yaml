@@ -1,0 +1,655 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Conditions:
+  AssignInstanceRole: !Not 
+    - !Equals 
+      - !Ref InstanceRole
+      - ''
+  AssignPublicIp: !Not 
+    - !Equals 
+      - !Ref NoPublicIp
+      - 'true'
+  AssignStaticPrivateIp: !Not 
+    - !Equals 
+      - !Ref PrivateIp
+      - ''
+  CreateAppVolume: !Not 
+    - !Equals 
+      - !Ref AppVolumeDevice
+      - ''
+  ExecuteAppScript: !Not 
+    - !Equals 
+      - !Ref AppScriptUrl
+      - ''
+  InstallCloudWatchAgent: !Not 
+    - !Equals 
+      - !Ref CloudWatchAgentUrl
+      - ''
+  Reboot: !Not 
+    - !Equals 
+      - !Ref NoReboot
+      - 'true'
+  UseAdminGroups: !Not 
+    - !Equals 
+      - !Ref WatchmakerAdminGroups
+      - ''
+  UseAdminUsers: !Not 
+    - !Equals 
+      - !Ref WatchmakerAdminUsers
+      - ''
+  UseCfnUrl: !Not 
+    - !Equals 
+      - !Ref CfnEndpointUrl
+      - ''
+  UseComputerName: !Not 
+    - !Equals 
+      - !Ref WatchmakerComputerName
+      - ''
+  UseEnvironment: !Not 
+    - !Equals 
+      - !Ref WatchmakerEnvironment
+      - ''
+  UseOuPath: !Not 
+    - !Equals 
+      - !Ref WatchmakerOuPath
+      - ''
+  UseWamConfig: !Not 
+    - !Equals 
+      - !Ref WatchmakerConfig
+      - ''
+Description: >-
+  This template deploys a Windows instance using Watchmaker, which applies the
+  DISA STIG.
+Mappings:
+  ShellCommandMap:
+    cmd:
+      command: cmd.exe
+    powershell:
+      command: powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass 
+Metadata:
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: EC2 Instance Configuration
+        Parameters:
+          - AmiId
+          - InstanceType
+          - InstanceRole
+          - KeyPairName
+          - NoPublicIp
+          - NoReboot
+          - SecurityGroupIds
+      - Label:
+          default: EC2 Watchmaker Configuration
+        Parameters:
+          - PythonInstaller
+          - PypiIndexUrl
+          - WatchmakerBootstrapper
+          - WatchmakerConfig
+          - WatchmakerEnvironment
+          - WatchmakerOuPath
+          - WatchmakerComputerName
+          - WatchmakerAdminGroups
+          - WatchmakerAdminUsers
+      - Label:
+          default: EC2 Application Configuration
+        Parameters:
+          - AppScriptUrl
+          - AppScriptParams
+      - Label:
+          default: EC2 Application EBS Volume
+        Parameters:
+          - AppVolumeDevice
+          - AppVolumeSize
+          - AppVolumeType
+      - Label:
+          default: Network Configuration
+        Parameters:
+          - PrivateIp
+          - SubnetId
+      - Label:
+          default: CloudFormation Configuration
+        Parameters:
+          - CfnEndpointUrl
+          - CloudWatchAgentUrl
+          - ToggleCfnInitUpdate
+    ParameterLabels:
+      ToggleCfnInitUpdate:
+        default: Force Cfn Init Update
+  Version: 1.6.0
+Outputs:
+  WatchmakerInstanceId:
+    Description: Instance ID
+    Value: !Ref WatchmakerInstance
+  WatchmakerInstanceLogGroupName:
+    Condition: InstallCloudWatchAgent
+    Description: Log Group Name
+    Value: !Ref WatchmakerInstanceLogGroup
+Parameters:
+  AmiId:
+    Description: ID of the AMI to launch
+    Type: 'AWS::EC2::Image::Id'
+  AppScriptParams:
+    Description: >-
+      Parameter string to pass to the application script. Ignored if
+      "AppScriptUrl" is blank
+    Type: String
+  AppScriptUrl:
+    AllowedPattern: '^$|^s3://(.*)/(.*)\.(bat|ps1)$'
+    ConstraintDescription: 'Must use an S3 URL (starts with "s3://") to a .bat or .ps1 file'
+    Default: ''
+    Description: >-
+      (Optional) S3 URL to the .ps1 or .bat application script in an S3 bucket
+      (s3://). Leave blank to launch without an application script. If
+      specified, an appropriate "InstanceRole" is required
+    Type: String
+  AppVolumeDevice:
+    AllowedValues:
+      - ''
+      - xvdf
+      - xvde
+      - xvdg
+      - xvdh
+      - xvdi
+    Default: ''
+    Description: >-
+      (Optional) Device to mount an extra EBS volume. Leave blank to launch
+      without an extra application volume
+    Type: String
+  AppVolumeSize:
+    ConstraintDescription: Must be between 1GB and 16384GB.
+    Default: 1
+    Description: >-
+      Size in GB of the EBS volume to create. Ignored if "AppVolumeDevice" is
+      blank
+    MaxValue: 16384
+    MinValue: 1
+    Type: Number
+  AppVolumeType:
+    AllowedValues:
+      - gp2
+      - io1
+      - sc1
+      - st1
+      - standard
+    Default: gp2
+    Description: Type of EBS volume to create. Ignored if "AppVolumeDevice" is blank
+    Type: String
+  CfnEndpointUrl:
+    AllowedPattern: '^$|^http[s]?://.*$'
+    Default: 'https://cloudformation.us-east-1.amazonaws.com'
+    Description: >-
+      (Optional) URL to the CloudFormation Endpoint. e.g.
+      https://cloudformation.us-east-1.amazonaws.com
+    Type: String
+  CloudWatchAgentUrl:
+    AllowedPattern: '^$|^s3://.*$'
+    Default: ''
+    Description: >-
+      (Optional) S3 URL to CloudWatch Agent installer. Example:
+      s3://amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.zip
+    Type: String
+  InstanceRole:
+    Default: ''
+    Description: (Optional) IAM instance role to apply to the instance(s)
+    Type: String
+  InstanceType:
+    AllowedValues:
+      - t2.micro
+      - t2.small
+      - t2.medium
+      - t2.large
+      - t2.xlarge
+      - c4.large
+      - c4.xlarge
+      - m4.large
+      - m4.xlarge
+      - c5.large
+      - c5.xlarge
+      - m5.large
+      - m5.xlarge
+    Default: t2.micro
+    Description: Amazon EC2 instance type
+    Type: String
+  KeyPairName:
+    Description: >-
+      Public/private key pairs allow you to securely connect to your instance
+      after it launches
+    Type: 'AWS::EC2::KeyPair::KeyName'
+  NoPublicIp:
+    AllowedValues:
+      - 'false'
+      - 'true'
+    Default: 'true'
+    Description: >-
+      Controls whether to assign the instance a public IP. Recommended to leave
+      at "true" _unless_ launching in a public subnet
+    Type: String
+  NoReboot:
+    AllowedValues:
+      - 'false'
+      - 'true'
+    Default: 'false'
+    Description: >-
+      Controls whether to reboot the instance as the last step of cfn-init
+      execution
+    Type: String
+  PrivateIp:
+    Default: ''
+    Description: >-
+      (Optional) Set a static, primary private IP. Leave blank to auto-select a
+      free IP
+    Type: String
+  PypiIndexUrl:
+    AllowedPattern: '^http[s]?://.*$'
+    Default: 'https://pypi.org/simple'
+    Description: URL to the PyPi Index
+    Type: String
+  PythonInstaller:
+    AllowedPattern: '^http[s]?://.*\.exe$'
+    Default: 'https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe'
+    Description: URL to the Python Installer Executable
+    Type: String
+  SecurityGroupIds:
+    Description: List of security groups to apply to the instance
+    Type: 'List<AWS::EC2::SecurityGroup::Id>'
+  SubnetId:
+    Description: ID of the subnet to assign to the instance
+    Type: 'AWS::EC2::Subnet::Id'
+  ToggleCfnInitUpdate:
+    AllowedValues:
+      - A
+      - B
+    Default: A
+    Description: >-
+      A/B toggle that forces a change to instance metadata, triggering the
+      cfn-init update sequence
+    Type: String
+  WatchmakerAdminGroups:
+    Default: ''
+    Description: >-
+      (Optional) Colon-separated list of domain groups that should have admin
+      permissions on the EC2 instance
+    Type: String
+  WatchmakerAdminUsers:
+    Default: ''
+    Description: >-
+      (Optional) Colon-separated list of domain users that should have admin
+      permissions on the EC2 instance
+    Type: String
+  WatchmakerBootstrapper:
+    AllowedPattern: '^$|^http[s]?://.*\.ps1$'
+    Default: >-
+      https://raw.githubusercontent.com/plus3it/watchmaker/master/docs/files/bootstrap/watchmaker-bootstrap.ps1
+    Description: URL to the Watchmaker PowerShell bootstrapper for Windows
+    Type: String
+  WatchmakerComputerName:
+    Default: ''
+    Description: (Optional) Sets the hostname/computername within the OS
+    Type: String
+  WatchmakerConfig:
+    AllowedPattern: '^$|^(http[s]?|s3|file)://.*$'
+    Default: ''
+    Description: >-
+      (Optional) Path to a Watchmaker config file.  The config file path can be
+      a remote source (i.e. http[s]://, s3://) or local directory (i.e. file://)
+    Type: String
+  WatchmakerEnvironment:
+    AllowedValues:
+      - ''
+      - dev
+      - test
+      - prod
+    Default: ''
+    Description: Environment in which the instance is being deployed
+    Type: String
+  WatchmakerOuPath:
+    AllowedPattern: '^$|^(OU=.+,)+(DC=.+)+$'
+    Default: ''
+    Description: >-
+      (Optional) DN of the OU to place the instance when joining a domain. If
+      blank and "WatchmakerEnvironment" enforces a domain join, the instance
+      will be placed in a default container. Leave blank if not joining a
+      domain, or if "WatchmakerEnvironment" is "$false"
+    Type: String
+Resources:
+  WatchmakerInstance:
+    CreationPolicy:
+      ResourceSignal:
+        Count: 1
+        Timeout: PT60M
+    Metadata:
+      'AWS::CloudFormation::Init':
+        configSets:
+          appscript:
+            - reboot
+            - make-app
+          launch:
+            - setup
+            - !If 
+              - InstallCloudWatchAgent
+              - install-cloudwatch-agent
+              - !Ref 'AWS::NoValue'
+            - watchmaker-launch
+            - !If 
+              - ExecuteAppScript
+              - ConfigSet: appscript
+              - !Ref 'AWS::NoValue'
+            - !If 
+              - Reboot
+              - reboot
+              - !Ref 'AWS::NoValue'
+            - finalize
+          update:
+            - setup
+            - watchmaker-update
+            - !If 
+              - ExecuteAppScript
+              - ConfigSet: appscript
+              - !Ref 'AWS::NoValue'
+            - !If 
+              - Reboot
+              - reboot
+              - !Ref 'AWS::NoValue'
+            - finalize
+        finalize:
+          commands:
+            10-signal-success:
+              command: !Sub
+                - >-
+                  cfn-signal.exe -e 0 --stack ${AWS::StackName} --resource WatchmakerInstance --region ${AWS::Region}
+                  ${local_AssignInstanceRole}
+                  ${local_UseCfnUrl}
+                -
+                  local_AssignInstanceRole: !If [AssignInstanceRole, !Sub '--role ${InstanceRole}', '']
+                  local_UseCfnUrl: !If [UseCfnUrl, !Sub '--url ${CfnEndpointUrl}', '']
+              ignoreErrors: 'true'
+              waitAfterCompletion: '0'
+        install-cloudwatch-agent:
+          commands:
+            10-install-cloudwatch-agent:
+              command: !Sub
+                - >-
+                  ${local_ShellCommandMap} -Command "
+                  Invoke-Command -ScriptBlock {
+                  $ErrorActionPreference = 'Stop';
+                  $CloudWatchAgentUri = [System.Uri]'${CloudWatchAgentUrl}';
+                  $CloudWatchAgentScriptDir = 'c:\cfn\scripts\AmazonCloudWatchAgent';
+                  $CloudWatchAgentZipFile = Join-Path $CloudWatchAgentScriptDir $CloudWatchAgentUri.Segments[($CloudWatchAgentUri.Segments.Length-1)];
+                  $Null = New-Item $CloudWatchAgentScriptDir -Type Directory -Force;
+                  Read-S3Object -BucketName $CloudWatchAgentUri.Host `
+                  -Key ($CloudWatchAgentUri.Segments[1..($CloudWatchAgentUri.Segments.Length-1)] -Join '') `
+                  -File $CloudWatchAgentZipFile `
+                  -Region ${AWS::Region}; 
+                  $CloudWatchAgentInstallScript = $CloudWatchAgentScriptDir + '\install.ps1';
+                  $CloudWatchAgentConfig = $CloudWatchAgentScriptDir + '\aws-cloudwatch-agent-config.json';
+                  if ($PSVersionTable.PSVersion.Major -ge 5) { Expand-Archive -Path $CloudWatchAgentZipFile -DestinationPath $CloudWatchAgentScriptDir;
+                  }
+                  else { $ShellApp = New-Object -Com Shell.Application;
+                  $ShellZip = $ShellApp.NameSpace([String]$CloudWatchAgentZipFile);
+                  $ShellDest = $ShellApp.NameSpace($CloudWatchAgentScriptDir);
+                  $ShellDest.CopyHere($ShellZip.items());
+                  }
+                  Push-Location -Path $CloudWatchAgentScriptDir;
+                  iex $CloudWatchAgentInstallScript;
+                  .\amazon-cloudwatch-agent-ctl.ps1 -a fetch-config -m ec2 -c file:$CloudWatchAgentConfig -s;
+                  Pop-Location;} -Verbose -ErrorAction Stop "
+                -
+                  local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command] 
+              waitAfterCompletion: '0'
+          files:
+            'c:\cfn\scripts\AmazonCloudWatchAgent\aws-cloudwatch-agent-config.json':
+              content: !Sub |-
+                  {
+                    "logs": {
+                      "logs_collected": {
+                        "files": {
+                          "collect_list": [
+                            {
+                               "file_path": "c:\\ProgramData\\Amazon\\AmazonCloudWatchAgent\\Logs\\amazon-cloudwatch-agent.log",
+                               "log_group_name": "/aws/ec2/win/${AWS::StackName}",
+                               "log_stream_name": "cloudwatch_agent_logs_{instance_id}",
+                               "timestamp_format": "%H:%M:%S %y %b %-d"
+                            },
+                            {
+                              "file_path": "c:\\cfn\\log\\cfn-init.log",
+                              "log_group_name": "/aws/ec2/win/${AWS::StackName}",
+                              "log_stream_name": "cloudformation_init_logs_{instance_id}",
+                              "timestamp_format": "%H:%M:%S %y %b %-d"
+                            },
+                            {
+                              "file_path": "c:\\Watchmaker\\Logs\\salt_call.debug.log",
+                              "log_group_name": "/aws/ec2/win/${AWS::StackName}",
+                              "log_stream_name": "salt_call_debug_logs_{instance_id}",
+                              "timestamp_format": "%H:%M:%S %y %b %-d"
+                            },
+                            {
+                              "file_path": "c:\\Watchmaker\\Logs\\watchmaker.log",
+                              "log_group_name": "/aws/ec2/win/${AWS::StackName}",
+                              "log_stream_name": "watchmaker_logs_{instance_id}",
+                              "timestamp_format": "%H:%M:%S %y %b %-d"
+                            }
+                          ]
+                        }
+                      },
+                      "log_stream_name": "default_logs_{instance_id}"
+                    }
+                  }
+        make-app:
+          commands:
+            10-make-app:
+              command: !Sub
+                - >-
+                  ${local_ShellCommandMap} -Command "Invoke-Command -ScriptBlock {
+                  $ErrorActionPreference = 'Stop';
+                  $AppScriptUri = [System.Uri]'${AppScriptUrl}';
+                  $AppScriptDir = 'c:\cfn\scripts';
+                  $AppScript = Join-Path $AppScriptDir $AppScriptUri.Segments[($AppScriptUri.Segments.Length-1)];
+                  $Null = New-Item $AppScriptDir -Type Directory -Force;
+                  Read-S3Object
+                  -BucketName $AppScriptUri.Host
+                  -Key ($AppScriptUri.Segments[1..($AppScriptUri.Segments.Length-1)] -Join '')
+                  -File $AppScript
+                  -Region ${AWS::Region};
+                  & $AppScript ${AppScriptParams};
+                  } -Verbose -ErrorAction Stop"
+                -
+                  local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command] 
+              waitAfterCompletion: '0'
+        reboot:
+          commands:
+            10-reboot:
+              command: powershell.exe "Restart-Computer -Force -Verbose"
+              waitAfterCompletion: forever
+        setup:
+          commands:
+            10-initialize-disks:
+              command: !If 
+                - CreateAppVolume
+                - !Sub
+                  - >-
+                    ${local_ShellCommandMap} -Command "Invoke-Command -ScriptBlock {
+                    $ErrorActionPreference = 'Stop';
+                    $EC2LaunchInitDiskScript = ${!Env:ProgramData} + '\Amazon\EC2-Windows\Launch\Scripts\InitializeDisks.ps1';
+                    $EC2LaunchInitDiskConfig = ${!Env:ProgramData} + '\Amazon\EC2-Windows\Launch\Config\DriveLetterMappingConfig.json';
+                    if (Test-Path $EC2LaunchInitDiskScript) {if (Test-Path $EC2LaunchInitDiskConfig) {iex $EC2LaunchInitDiskScript;} } } 
+                    -Verbose -ErrorAction Stop"
+                  -
+                    local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
+                - ''
+              waitAfterCompletion: '0'
+          files:
+            'c:\cfn\cfn-hup.conf':
+              content: !Sub
+                - |
+                  [main]
+                  stack=${AWS::StackId}
+                  region=${AWS::Region}
+                  ${local_AssignInstanceRole}
+                  ${local_UseCfnUrl}
+                  interval=1
+                  verbose=true
+                -
+                  local_AssignInstanceRole: !If [AssignInstanceRole, !Sub 'role=${InstanceRole}','']
+                  local_UseCfnUrl: !If [UseCfnUrl, !Sub 'url=${CfnEndpointUrl}', '']
+            'c:\cfn\hooks.d\cfn-auto-reloader.conf':
+              content: !Sub
+                - |
+                  [cfn-auto-reloader-hook]
+                  triggers=post.update
+                  path=Resources.WatchmakerInstance.Metadata
+                  action=cfn-init.exe -v -c update --stack ${AWS::StackName} --resource WatchmakerInstance --region ${AWS::Region} ${local_AssignInstanceRole} ${local_UseCfnUrl}
+                - 
+                  local_AssignInstanceRole: !If [AssignInstanceRole, !Sub '--role ${InstanceRole}','']
+                  local_UseCfnUrl: !If [UseCfnUrl, !Sub '--url ${CfnEndpointUrl}', '']
+            'c:\cfn\scripts\watchmaker-install.ps1':
+              content: !Sub |
+                  $BootstrapUrl = "${WatchmakerBootstrapper}"
+                  $PythonUrl = "${PythonInstaller}"
+                  $PypiUrl = "${PypiIndexUrl}"
+
+                  # Get the host
+                  $PypiHost="$(([System.Uri]$PypiUrl).Host)"
+                  
+                  # Download bootstrap file
+                  $BootstrapFile = "${!Env:Temp}\$(${!BootstrapUrl}.split('/')[-1])"
+                  (New-Object System.Net.WebClient).DownloadFile("$BootstrapUrl", "$BootstrapFile")
+
+                  # Install python
+                  & "$BootstrapFile" -PythonUrl "$PythonUrl" -Verbose -ErrorAction Stop
+
+                  # Install setup dependencies
+                  python -m pip install --index-url="$PypiUrl" --trusted-host="$PypiHost" --upgrade pip setuptools
+                  if (-not $?) { throw 'pip failed to install setup dependencies!' }
+
+                  # Install watchmaker
+                  pip install --index-url="$PypiUrl" --trusted-host="$PypiHost" --upgrade boto3 watchmaker
+                  if (-not $?) { throw 'pip failed to install watchmaker!' }
+          services:
+            windows:
+              cfn-hup:
+                enabled: 'true'
+                ensureRunning: 'true'
+                files:
+                  - 'c:\cfn\cfn-hup.conf'
+                  - 'c:\cfn\hooks.d\cfn-auto-reloader.conf'
+        watchmaker-launch:
+          commands:
+            10-watchmaker-launch:
+              command: !Sub 
+                - >-
+                  ${local_ShellCommandMap} -Command "Invoke-Command -ScriptBlock {
+                  $ErrorActionPreference = 'Stop';
+                  c:\cfn\scripts\watchmaker-install.ps1 -ErrorAction Stop  -Verbose; 
+                  watchmaker --log-level debug --log-dir C:\Watchmaker\Logs --no-reboot
+                  ${local_UseWamConfig}
+                  ${local_UseEnvironment}
+                  ${local_UseOuPath}
+                  ${local_UseComputerName}
+                  ${local_UseAdminGroups}
+                  ${local_UseAdminUsers};
+                  if (-not $?) { throw 'watchmaker execution failed!' } 
+                  } -Verbose -ErrorAction Stop"
+                -
+                 local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
+                 local_UseWamConfig: !If [UseWamConfig, !Sub '--config "${WatchmakerConfig}"' , '']
+                 local_UseEnvironment: !If [UseEnvironment, !Sub '--env "${WatchmakerEnvironment}"', '']
+                 local_UseOuPath: !If [UseOuPath, !Sub '--ou-path "${WatchmakerOuPath}"', '']
+                 local_UseComputerName: !If [UseComputerName, !Sub '--computer-name "${WatchmakerComputerName}"', '']
+                 local_UseAdminGroups: !If [UseAdminGroups, !Sub '--admin-groups "${WatchmakerAdminGroups}"', '']
+                 local_UseAdminUsers: !If [UseAdminUsers, !Sub '--admin-users "${WatchmakerAdminUsers}"', '']
+              waitAfterCompletion: '0'
+        watchmaker-update:
+          commands:
+            10-watchmaker-update:
+              command:  !Sub 
+                - >-
+                  ${local_ShellCommandMap} -Command "Invoke-Command -ScriptBlock {
+                  $ErrorActionPreference = 'Stop';
+                  c:\cfn\scripts\watchmaker-install.ps1 -ErrorAction Stop  -Verbose; 
+                  watchmaker --log-level debug --log-dir C:\Watchmaker\Logs --no-reboot --salt-states None
+                  ${local_UseWamConfig}
+                  ${local_UseEnvironment}
+                  ${local_UseOuPath}
+                  ${local_UseComputerName}
+                  ${local_UseAdminGroups}
+                  ${local_UseAdminUsers};
+                  if (-not $?) { throw 'watchmaker execution failed!' }
+                  } -Verbose -ErrorAction Stop"
+                -
+                 local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
+                 local_UseWamConfig: !If [UseWamConfig, !Sub '--config "${WatchmakerConfig}"', '']
+                 local_UseEnvironment: !If [UseEnvironment, !Sub '--env "${WatchmakerEnvironment}"', '']
+                 local_UseOuPath: !If [UseOuPath, !Sub '--ou-path "${WatchmakerOuPath}"', '']
+                 local_UseComputerName: !If [UseComputerName, !Sub '--computer-name "${WatchmakerComputerName}"', '']
+                 local_UseAdminGroups: !If [UseAdminGroups, !Sub '--admin-groups "${WatchmakerAdminGroups}"', '']
+                 local_UseAdminUsers: !If [UseAdminUsers, !Sub '--admin-users "${WatchmakerAdminUsers}"', '']
+              waitAfterCompletion: '0'
+      ToggleCfnInitUpdate: !Ref ToggleCfnInitUpdate
+    Properties:
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            DeleteOnTermination: true
+            VolumeType: gp2
+        - !If 
+          - CreateAppVolume
+          - DeviceName: !Ref AppVolumeDevice
+            Ebs:
+              DeleteOnTermination: true
+              VolumeSize: !Ref AppVolumeSize
+              VolumeType: !Ref AppVolumeType
+          - !Ref 'AWS::NoValue'
+      IamInstanceProfile: !If 
+        - AssignInstanceRole
+        - !Ref InstanceRole
+        - !Ref 'AWS::NoValue'
+      ImageId: !Ref AmiId
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPairName
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: !If 
+            - AssignPublicIp
+            - true
+            - false
+          DeviceIndex: '0'
+          GroupSet: !Ref SecurityGroupIds
+          PrivateIpAddress: !If 
+            - AssignStaticPrivateIp
+            - !Ref PrivateIp
+            - !Ref 'AWS::NoValue'
+          SubnetId: !Ref SubnetId
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName}'
+      UserData:
+        !Base64 
+          Fn::Sub:
+            - |
+              <script>
+              REM Export AWS ENVs
+              IF EXIST %SystemDrive%\cfn\endpoints-override.json ( set AWS_DATA_PATH=%SystemDrive%\cfn )
+              IF EXIST %SystemDrive%\cfn\ca-override.pem (
+                set AWS_CA_BUNDLE=%SystemDrive%\cfn\ca-override.pem
+                set REQUESTS_CA_BUNDLE=%SystemDrive%\cfn\ca-override.pem
+              )
+              set AWS_DEFAULT_REGION=${AWS::Region}
+              
+              cfn-init.exe -v -c launch --stack ${AWS::StackName} --resource WatchmakerInstance --region ${AWS::Region} ${local_AssignInstanceRole} ${local_UseCfnUrl}
+              if %ERRORLEVEL% equ 0 goto success
+              
+              :error
+              cfn-signal.exe -e 1 --stack ${AWS::StackName} --resource WatchmakerInstance --region ${AWS::Region} ${local_AssignInstanceRole} ${local_UseCfnUrl}
+              echo "ERROR: cfn-init failed! Aborting!"
+              exit /b 1
+
+              :success
+              </script>
+            -
+              local_AssignInstanceRole: !If [AssignInstanceRole, !Sub '--role ${InstanceRole}', '']
+              local_UseCfnUrl: !If [UseCfnUrl, !Sub '--url ${CfnEndpointUrl}', '']
+    Type: 'AWS::EC2::Instance'
+  WatchmakerInstanceLogGroup:
+    Condition: InstallCloudWatchAgent
+    Properties:
+      LogGroupName: !Sub '/aws/ec2/win/${AWS::StackName}'
+    Type: 'AWS::Logs::LogGroup'
