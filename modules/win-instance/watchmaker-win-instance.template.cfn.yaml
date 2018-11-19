@@ -111,6 +111,7 @@ Metadata:
         Parameters:
           - CfnEndpointUrl
           - CloudWatchAgentUrl
+          - CloudWatchAppLogs
           - ToggleCfnInitUpdate
     ParameterLabels:
       ToggleCfnInitUpdate:
@@ -188,6 +189,11 @@ Parameters:
       (Optional) S3 URL to CloudWatch Agent installer. Example:
       s3://amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.zip
     Type: String
+  CloudWatchAppLogs:
+    Default: ''
+    Description: >-
+      (Optional) List of application log file paths to send to CloudWatch. Example: C:\\dir1\\file1,C:\\dir2\file2,C:\\dir3\\file3
+    Type: CommaDelimitedList
   InstanceRole:
     Default: ''
     Description: (Optional) IAM instance role to apply to the instance(s)
@@ -366,6 +372,15 @@ Resources:
               waitAfterCompletion: '0'
         install-cloudwatch-agent:
           commands:
+            01-manipulate-cloudwatch-config:
+              command: !Sub
+                - >-
+                  ${local_ShellCommandMap} -Command "
+                  c:\cfn\scripts\update-path.ps1 -Verbose -ErrorAction Stop;
+                  & python c:\cfn\scripts\AmazonCloudWatchAgent\cloudwatch-applog-config.py;
+                  if (-not $?) { throw 'CloudWatch Logs modification failed!'; }"
+                -
+                  local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
             10-install-cloudwatch-agent:
               command: !Sub
                 - >-
@@ -434,6 +449,49 @@ Resources:
                       "log_stream_name": "default_logs_{instance_id}"
                     }
                   }
+            'c:\cfn\scripts\AmazonCloudWatchAgent\cloudwatch-applog-config.py':
+              content: !Sub 
+                - |-
+                  import json
+                  import os
+
+                  cloudwatch_baseline = 'c:/cfn/scripts/AmazonCloudWatchAgent/aws-cloudwatch-agent-config.json'
+                  log_group_name = "/aws/ec2/win/${AWS::StackName}"
+                  log_paths_input = (r'''${local_addCWLtarget}''').split(",")
+
+
+                  def get_stream_name(log_path):
+                      log_no_ext = os.path.splitext(os.path.basename(log_path))[0]
+                      return "{}_logs_{{instance_id}}".format(log_no_ext)
+
+
+                  def load_baseline():
+                      print('Loading existing cwl baseline')
+                      with open(cloudwatch_baseline, 'r') as f:
+                          return json.load(f)
+
+
+                  def write_baseline(baseline):
+                      print('Writing new cwl baseline')
+                      with open(cloudwatch_baseline, 'w') as f:
+                          f.write(json.dumps(baseline, sort_keys=True, indent=4))
+                    
+
+                  if log_paths_input:
+                      print('Additional cwl paths were defined.')
+                      baseline = load_baseline()
+                      for log_path in log_paths_input:
+                          baseline['logs']['logs_collected']['files']['collect_list'].append({
+                              'file_path': log_path,
+                              'log_group_name': log_group_name,
+                              'log_stream_name': get_stream_name(log_path),
+                              'timestamp_format': "%H:%M:%S %y %b %-d"
+                          })
+                      write_baseline(baseline)
+                      print('CWL baseline modification complete')
+                # convert CommanDelimitedList to a string for Fn::Sub compatibility
+                - 
+                  local_addCWLtarget: !Join ["," ,!Ref CloudWatchAppLogs]
         make-app:
           commands:
             10-make-app:
@@ -462,6 +520,13 @@ Resources:
               waitAfterCompletion: forever
         setup:
           commands:
+            01-install-python-and-wam:
+              command: !Sub
+                - >- 
+                  ${local_ShellCommandMap} -Command "Invoke-Command -ScriptBlock {
+                  $ErrorActionPreference = 'Stop'; c:\cfn\scripts\watchmaker-install.ps1; } -Verbose -ErrorAction Stop"
+                -
+                  local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
             10-initialize-disks:
               command: !If 
                 - CreateAppVolume
@@ -524,6 +589,17 @@ Resources:
                   # Install watchmaker
                   pip install --index-url="$PypiUrl" --trusted-host="$PypiHost" --upgrade boto3 watchmaker
                   if (-not $?) { throw 'pip failed to install watchmaker!' }
+            'c:\cfn\scripts\update-path.ps1':
+                content: |
+                    foreach( $Level in "Machine", "User" ) {
+                      [Environment]::GetEnvironmentVariables(${Level}).GetEnumerator() | % {
+                        # For Path variables, append the new values, if they're not already in there.
+                        if($_.Name -match 'Path$') {
+                          $_.Value = ($((Get-Content "Env:$($_.Name)") + ";$($_.Value)") -split ';' | Select -unique) -join ';'
+                        }
+                        $_
+                      } | Set-Content -Path { "Env:$($_.Name)" }
+                    }
           services:
             windows:
               cfn-hup:
@@ -539,7 +615,7 @@ Resources:
                 - >-
                   ${local_ShellCommandMap} -Command "Invoke-Command -ScriptBlock {
                   $ErrorActionPreference = 'Stop';
-                  c:\cfn\scripts\watchmaker-install.ps1 -ErrorAction Stop  -Verbose; 
+                  c:\cfn\scripts\update-path.ps1 -ErrorAction Stop  -Verbose; 
                   watchmaker --log-level debug --log-dir C:\Watchmaker\Logs --no-reboot
                   ${local_UseWamConfig}
                   ${local_UseEnvironment}
@@ -565,7 +641,7 @@ Resources:
                 - >-
                   ${local_ShellCommandMap} -Command "Invoke-Command -ScriptBlock {
                   $ErrorActionPreference = 'Stop';
-                  c:\cfn\scripts\watchmaker-install.ps1 -ErrorAction Stop  -Verbose; 
+                  c:\cfn\scripts\update-path.ps1 -ErrorAction Stop  -Verbose; 
                   watchmaker --log-level debug --log-dir C:\Watchmaker\Logs --no-reboot --salt-states None
                   ${local_UseWamConfig}
                   ${local_UseEnvironment}

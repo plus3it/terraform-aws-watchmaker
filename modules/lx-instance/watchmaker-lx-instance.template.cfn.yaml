@@ -153,6 +153,7 @@ Metadata:
           - CfnGetPipUrl
           - CfnBootstrapUtilsUrl
           - CloudWatchAgentUrl
+          - CloudWatchAppLogs
           - ToggleCfnInitUpdate
     ParameterLabels:
       ToggleCfnInitUpdate:
@@ -260,6 +261,11 @@ Parameters:
       (Optional) S3 URL to CloudWatch Agent installer. Example:
       s3://amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip
     Type: String
+  CloudWatchAppLogs:
+    Default: ''
+    Description: >-
+      (Optional) List of application log file paths to send to CloudWatch. Example: path01/file01.log, path02/file02.log
+    Type: CommaDelimitedList
   InstanceRole:
     Default: ''
     Description: (Optional) IAM instance role to apply to the instance
@@ -435,8 +441,10 @@ Resources:
             02-extract-cloudwatch-agent:
               command: >-
                 yum -y install unzip &&
-                unzip /etc/cfn/scripts/AmazonCloudWatchAgent.zip -d
-                /etc/cfn/scripts/aws-cw-agent
+                unzip /etc/cfn/scripts/AmazonCloudWatchAgent.zip -d /etc/cfn/scripts/aws-cw-agent
+            03-manipulate-cloudwatch-config:
+              command: >-
+                python3 /etc/cfn/scripts/aws-cw-agent/cloudwatch-applog-config.py
             10-install-cloudwatch-agent:
               command: >-
                 bash -xe install.sh &&
@@ -491,6 +499,48 @@ Resources:
                         "log_stream_name": "default_logs_{instance_id}"
                       }
                     }
+            /etc/cfn/scripts/aws-cw-agent/cloudwatch-applog-config.py:
+              content: !Sub
+                - |-
+                  import json
+                  import os
+                  
+                  cloudwatch_baseline = "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
+                  log_group_name = "/aws/ec2/lx/${AWS::StackName}"
+                  log_paths_input = (r'''${local_addCWLtarget}''').split(",")
+
+
+                  def get_stream_name(log_path):
+                      log_no_ext = os.path.splitext(os.path.basename(log_path))[0]
+                      return "{}_logs_{{instance_id}}".format(log_no_ext)
+
+
+                  def load_baseline():
+                      print('Loading existing cwl baseline')
+                      with open(cloudwatch_baseline, 'r') as f:
+                          return json.load(f)
+
+
+                  def write_baseline(baseline):
+                      print('Writing new cwl baseline')
+                      with open(cloudwatch_baseline, 'w') as f:
+                          f.write(json.dumps(baseline, sort_keys=True, indent=4))
+
+
+                  if log_paths_input:
+                      print('Additional cwl paths were defined.')
+                      baseline = load_baseline()
+                      for log_path in log_paths_input:
+                          baseline['logs']['logs_collected']['files']['collect_list'].append({
+                              'file_path': log_path,
+                              'log_group_name': log_group_name,
+                              'log_stream_name': get_stream_name(log_path),
+                              'timestamp_format': "%H:%M:%S %y %b %-d"
+                          })
+                      write_baseline(baseline)
+                      print('CWL baseline modification complete')
+                # convert CommaDelimitedList to a string for Fn::Sub compatibility
+                - local_addCWLtarget: !Join ["," ,!Ref CloudWatchAppLogs]
         finalize:
           commands:
             10-signal-success:

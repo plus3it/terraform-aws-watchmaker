@@ -50,6 +50,8 @@
   ParameterValue: __WATCHMAKEROUPATH__
 - ParameterKey: CloudWatchAgentUrl
   ParameterValue: __CWAGENTURL__
+- ParameterKey: CloudWatchAppLogs
+  ParameterValue: __CWAGENTAPPLOGS__
 - ParameterKey: CfnBootstrapUtilsUrl
   ParameterValue: __CFNBOOTSTRAPUTILSURL__
 - ParameterKey: CfnEndpointUrl
