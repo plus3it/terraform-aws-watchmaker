@@ -23,6 +23,7 @@ resource "aws_cloudformation_stack" "watchmaker-win-instance" {
     AppVolumeType          = "${var.AppVolumeType}"
     AppVolumeSize          = "${var.AppVolumeSize}"
     CloudWatchAgentUrl     = "${var.CloudWatchAgentUrl}"
+    CloudWatchAppLogs      = "${join(",", var.CloudWatchAppLogs)}"
     KeyPairName            = "${var.KeyPairName}"
     InstanceType           = "${var.InstanceType}"
     InstanceRole           = "${var.InstanceRole}"

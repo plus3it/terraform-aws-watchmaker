@@ -212,6 +212,12 @@ variable "CloudWatchAgentUrl" {
   default     = ""
 }
 
+variable "CloudWatchAppLogs" {
+  type        = "list"
+  description = "(Optional) List of application log file paths to send to CloudWatch"
+  default     = []
+}
+
 variable "CfnEndpointUrl" {
   type        = "string"
   description = "(Optional) URL to the CloudFormation Endpoint. e.g. https://cloudformation.us-east-1.amazonaws.com"
