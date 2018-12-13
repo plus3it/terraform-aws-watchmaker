@@ -16,6 +16,10 @@ Conditions:
     - !Equals 
       - !Ref AppVolumeDevice
       - ''
+  CreatePatchGroupTag: !Not
+    - !Equals
+      - !Ref PatchGroup
+      - ''
   ExecuteAppScript: !Not 
     - !Equals 
       - !Ref AppScriptUrl
@@ -77,6 +81,7 @@ Metadata:
           - KeyPairName
           - NoPublicIp
           - NoReboot
+          - PatchGroup
           - SecurityGroupIds
       - Label:
           default: EC2 Watchmaker Configuration
@@ -238,6 +243,12 @@ Parameters:
     Description: >-
       Controls whether to reboot the instance as the last step of cfn-init
       execution
+    Type: String
+  PatchGroup:
+    Default: ''
+    Description: >-
+      (Optional) Key value of the Patch Group tag. Controls whether to create a PatchGroup
+      tag that can be leveraged via SSM to auto-update instances.
     Type: String
   PrivateIp:
     Default: ''
@@ -697,6 +708,12 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub '${AWS::StackName}'
+        - !If
+          - CreatePatchGroupTag
+          -
+            Key: Patch Group
+            Value: !Ref PatchGroup
+          - !Ref 'AWS::NoValue'
       UserData:
         !Base64 
           Fn::Sub:

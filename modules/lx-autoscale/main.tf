@@ -38,6 +38,7 @@ resource "aws_cloudformation_stack" "watchmaker-lx-autoscale" {
     NoPublicIp            = "${var.NoPublicIp}"
     NoReboot              = "${var.NoReboot}"
     NoUpdates             = "${var.NoUpdates}"
+    PatchGroup            = "${var.PatchGroup}"
     SecurityGroupIds      = "${var.SecurityGroupIds}"
     SubnetIds             = "${var.SubnetIds}"
     TargetGroupArns       = "${var.TargetGroupArns}"

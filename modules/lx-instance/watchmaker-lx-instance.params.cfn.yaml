@@ -28,6 +28,8 @@
   ParameterValue: __NOREBOOT__
 - ParameterKey: NoUpdates
   ParameterValue: __NOUPDATES__
+- ParameterKey: PatchGroup
+  ParameterValue: __PATCHGROUP__
 - ParameterKey: PrivateIp
   ParameterValue: __PRIVATEIP__
 - ParameterKey: SecurityGroupIds

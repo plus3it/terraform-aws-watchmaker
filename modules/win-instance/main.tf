@@ -30,6 +30,7 @@ resource "aws_cloudformation_stack" "watchmaker-win-instance" {
     PrivateIp              = "${var.PrivateIp}"
     NoPublicIp             = "${var.NoPublicIp}"
     NoReboot               = "${var.NoReboot}"
+    PatchGroup             = "${var.PatchGroup}"
     SecurityGroupIds       = "${var.SecurityGroupIds}"
     SubnetId               = "${var.SubnetId}"
     PypiIndexUrl           = "${var.PypiIndexUrl}"

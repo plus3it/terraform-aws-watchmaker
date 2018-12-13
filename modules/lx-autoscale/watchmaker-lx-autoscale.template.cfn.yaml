@@ -11,6 +11,10 @@ Conditions:
   CreateAppVolume: !Equals 
     - !Ref AppVolumeDevice
     - 'true'
+  CreatePatchGroupTag: !Not
+    - !Equals
+      - !Ref PatchGroup
+      - ''
   ExecuteAppScript: !Not 
     - !Equals 
       - !Ref AppScriptUrl
@@ -133,6 +137,7 @@ Metadata:
           - NoPublicIp
           - NoReboot
           - NoUpdates
+          - PatchGroup
           - SecurityGroupIds
       - Label:
           default: EC2 Watchmaker Configuration
@@ -376,6 +381,12 @@ Parameters:
       Controls whether to run yum update during a stack update (on the initial
       instance launch, Watchmaker _always_ installs updates)
     Type: String
+  PatchGroup:
+    Default: ''
+    Description: >-
+      (Optional) Key value of the Patch Group tag. Controls whether to create a PatchGroup
+      tag that can be leveraged via SSM to auto-update instances.
+    Type: String
   PypiIndexUrl:
     AllowedPattern: '^http[s]?://.*$'
     Default: 'https://pypi.org/simple'
@@ -499,9 +510,15 @@ Resources:
       MinSize: !Ref MinCapacity
       Tags:
         - Key: Name
+          Value: !Sub '${AWS::StackName}'
           PropagateAtLaunch: true
-          Value: 
-            !Sub '${AWS::StackName}'
+        - !If
+          - CreatePatchGroupTag
+          -
+            Key: Patch Group
+            Value: !Ref PatchGroup
+            PropagateAtLaunch: true
+          - !Ref 'AWS::NoValue'
       TargetGroupARNs: !If 
         - UseTargetGroupArns
         - !Ref TargetGroupArns

@@ -28,6 +28,8 @@
   ParameterValue: __SECURITYGROUPIDS__
 - ParameterKey: SubnetId
   ParameterValue: __SUBNETID__
+- ParameterKey: PatchGroup
+  ParameterValue: __PATCHGROUP__
 - ParameterKey: PypiIndexUrl
   ParameterValue: __PYPIINDEXURL__
 - ParameterKey: PythonInstaller
