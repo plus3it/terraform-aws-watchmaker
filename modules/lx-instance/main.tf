@@ -36,6 +36,7 @@ resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
     NoUpdates              = "${var.NoUpdates}"
     SecurityGroupIds       = "${var.SecurityGroupIds}"
     SubnetId               = "${var.SubnetId}"
+    PatchGroup             = "${var.PatchGroup}"
     PypiIndexUrl           = "${var.PypiIndexUrl}"
     WatchmakerConfig       = "${var.WatchmakerConfig}"
     WatchmakerEnvironment  = "${var.WatchmakerEnvironment}"

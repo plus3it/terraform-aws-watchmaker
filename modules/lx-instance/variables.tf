@@ -37,6 +37,12 @@ variable "OnFailureAction" {
   default     = "DO_NOTHING"
 }
 
+variable "PatchGroup" {
+  type        = "string"
+  description = "Key value of the Patch Group tag. Controls whether to create a PatchGroup tag that can be leveraged via SSM to auto-update instances."
+  default     = ""
+}
+
 variable "PolicyBody" {
   type        = "string"
   description = "String containing the stack policy body. Conflicts with PolicyUrl"

@@ -12,6 +12,10 @@ Conditions:
     - !Equals 
       - !Ref AppVolumeDevice
       - ''
+  CreatePatchGroupTag: !Not
+    - !Equals
+      - !Ref PatchGroup
+      - ''
   ExecuteAppScript: !Not 
     - !Equals 
       - !Ref AppScriptUrl
@@ -91,6 +95,7 @@ Metadata:
           - KeyPairName
           - NoPublicIp
           - NoReboot
+          - PatchGroup
           - SecurityGroupIds
       - Label:
           default: EC2 Watchmaker Configuration
@@ -140,7 +145,7 @@ Metadata:
         default: Force Cfn Init Update
       ToggleNewInstances:
         default: Force New Instances
-  Version: 1.7.0
+  Version: 1.8.0
 Outputs:
   ScaleDownScheduledAction:
     Condition: UseScheduledAction
@@ -292,6 +297,12 @@ Parameters:
       Controls whether to reboot the instance as the last step of cfn-init
       execution
     Type: String
+  PatchGroup:
+    Default: ''
+    Description: >-
+      (Optional) Key value of the Patch Group tag. Controls whether to create a PatchGroup
+      tag that can be leveraged via SSM to auto-update instances.
+    Type: String
   PypiIndexUrl:
     AllowedPattern: '^http[s]?://.*$'
     Default: 'https://pypi.org/simple'
@@ -422,8 +433,15 @@ Resources:
       MinSize: !Ref MinCapacity
       Tags:
         - Key: Name
-          PropagateAtLaunch: true
           Value: !Ref 'AWS::StackName'
+          PropagateAtLaunch: true
+        - !If
+          - CreatePatchGroupTag
+          -
+            Key: Patch Group
+            Value: !Ref PatchGroup
+            PropagateAtLaunch: true
+          - !Ref 'AWS::NoValue'
       TargetGroupARNs: !If 
         - UseTargetGroupArns
         - !Ref TargetGroupArns

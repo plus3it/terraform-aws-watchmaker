@@ -36,6 +36,8 @@
   ParameterValue: __TARGETGROUPARNS__
 - ParameterKey: LoadBalancerNames
   ParameterValue: __LOADBALANCERNAMES__
+- ParameterKey: PatchGroup
+  ParameterValue: __PATCHGROUP__
 - ParameterKey: PypiIndexUrl
   ParameterValue: __PYPIINDEXURL__
 - ParameterKey: PythonInstaller

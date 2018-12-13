@@ -34,6 +34,8 @@
   ParameterValue: __NOREBOOT__
 - ParameterKey: NoUpdates
   ParameterValue: __NOUPDATES__
+- ParameterKey: PatchGroup
+  ParameterValue: __PATCHGROUP__
 - ParameterKey: SecurityGroupIds
   ParameterValue: __SECURITYGROUPIDS__
 - ParameterKey: SubnetIds

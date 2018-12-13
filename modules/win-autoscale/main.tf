@@ -34,6 +34,7 @@ resource "aws_cloudformation_stack" "watchmaker-win-autoscale" {
     ScaleUpSchedule        = "${var.ScaleUpSchedule}"
     NoPublicIp             = "${var.NoPublicIp}"
     NoReboot               = "${var.NoReboot}"
+    PatchGroup             = "${var.PatchGroup}"
     SecurityGroupIds       = "${var.SecurityGroupIds}"
     SubnetIds              = "${var.SubnetIds}"
     TargetGroupArns        = "${var.TargetGroupArns}"
