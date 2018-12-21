@@ -121,7 +121,7 @@ Metadata:
     ParameterLabels:
       ToggleCfnInitUpdate:
         default: Force Cfn Init Update
-  Version: 1.8.0
+  Version: 1.9.0
 Outputs:
   WatchmakerInstanceId:
     Description: Instance ID
@@ -205,11 +205,20 @@ Parameters:
     Type: String
   InstanceType:
     AllowedValues:
+      - t2.nano
       - t2.micro
       - t2.small
       - t2.medium
       - t2.large
       - t2.xlarge
+      - t2.2xlarge
+      - t3.large
+      - t3.medium
+      - t3.micro
+      - t3.small
+      - t3.xlarge
+      - t3.2xlarge
+      - t3.nano
       - c4.large
       - c4.xlarge
       - m4.large
