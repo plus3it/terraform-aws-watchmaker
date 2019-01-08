@@ -8,36 +8,42 @@
   ParameterValue: __APPSCRIPTURL__
 - ParameterKey: AppVolumeDevice
   ParameterValue: __APPVOLUMEDEVICE__
-- ParameterKey: AppVolumeType
-  ParameterValue: __APPVOLUMETYPE__
 - ParameterKey: AppVolumeSize
   ParameterValue: __APPVOLUMESIZE__
-- ParameterKey: KeyPairName
-  ParameterValue: __KEYPAIRNAME__
+- ParameterKey: AppVolumeType
+  ParameterValue: __APPVOLUMETYPE__
+- ParameterKey: CfnEndpointUrl
+  ParameterValue: __CFNENDPOINTURL__
+- ParameterKey: CloudWatchAgentUrl
+  ParameterValue: __CWAGENTURL__
+- ParameterKey: CloudWatchAppLogs
+  ParameterValue: __CWAGENTAPPLOGS__
 - ParameterKey: InstanceRole
   ParameterValue: __INSTANCEROLE__
 - ParameterKey: InstanceType
   ParameterValue: __INSTANCETYPE__
+- ParameterKey: KeyPairName
+  ParameterValue: __KEYPAIRNAME__
 - ParameterKey: NoPublicIp
   ParameterValue: __NOPUBLICIP__
 - ParameterKey: NoReboot
   ParameterValue: __NOREBOOT__
-- ParameterKey: PrivateIp
-  ParameterValue: __PRIVATEIP__
-- ParameterKey: SecurityGroupIds
-  ParameterValue: __SECURITYGROUPIDS__
-- ParameterKey: SubnetId
-  ParameterValue: __SUBNETID__
 - ParameterKey: PatchGroup
   ParameterValue: __PATCHGROUP__
+- ParameterKey: PrivateIp
+  ParameterValue: __PRIVATEIP__
 - ParameterKey: PypiIndexUrl
   ParameterValue: __PYPIINDEXURL__
 - ParameterKey: PythonInstaller
   ParameterValue: __PYTHONINSTALLER__
+- ParameterKey: SecurityGroupIds
+  ParameterValue: __SECURITYGROUPIDS__
+- ParameterKey: SubnetId
+  ParameterValue: __SUBNETID__
+- ParameterKey: ToggleCfnInitUpdate
+  ParameterValue: __TOGGLECFNINITUPDATE__
 - ParameterKey: WatchmakerAdminGroups
   ParameterValue: __WATCHMAKERADMINGROUPS__
-- ParameterKey: WatchmakerExtraArgs
-  ParameterValue: __WATCHMAKEREXTRAARGS__
 - ParameterKey: WatchmakerBootstrapper
   ParameterValue: __WATCHMAKERBOOTSTRAPPER__
 - ParameterKey: WatchmakerComputerName
@@ -46,13 +52,7 @@
   ParameterValue: __WATCHMAKERCONFIG__
 - ParameterKey: WatchmakerEnvironment
   ParameterValue: __WATCHMAKERENVIRONMENT__
+- ParameterKey: WatchmakerExtraArgs
+  ParameterValue: __WATCHMAKEREXTRAARGS__
 - ParameterKey: WatchmakerOuPath
   ParameterValue: __WATCHMAKEROUPATH__
-- ParameterKey: CloudWatchAgentUrl
-  ParameterValue: __CWAGENTURL__
-- ParameterKey: CloudWatchAppLogs
-  ParameterValue: __CWAGENTAPPLOGS__
-- ParameterKey: CfnEndpointUrl
-  ParameterValue: __CFNENDPOINTURL__
-- ParameterKey: ToggleCfnInitUpdate
-  ParameterValue: __TOGGLECFNINITUPDATE__
