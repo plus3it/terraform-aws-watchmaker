@@ -34,6 +34,7 @@ resource "aws_cloudformation_stack" "watchmaker-win-instance" {
     PrivateIp              = "${var.PrivateIp}"
     PypiIndexUrl           = "${var.PypiIndexUrl}"
     PythonInstaller        = "${var.PythonInstaller}"
+    RootVolumeSize         = "${var.RootVolumeSize}"
     SecurityGroupIds       = "${var.SecurityGroupIds}"
     SubnetId               = "${var.SubnetId}"
     ToggleCfnInitUpdate    = "${var.ToggleCfnInitUpdate}"

@@ -37,6 +37,7 @@ resource "aws_cloudformation_stack" "watchmaker-win-autoscale" {
     PatchGroup             = "${var.PatchGroup}"
     PypiIndexUrl           = "${var.PypiIndexUrl}"
     PythonInstaller        = "${var.PythonInstaller}"
+    RootVolumeSize         = "${var.RootVolumeSize}"
     ScaleDownSchedule      = "${var.ScaleDownSchedule}"
     ScaleUpSchedule        = "${var.ScaleUpSchedule}"
     SecurityGroupIds       = "${var.SecurityGroupIds}"

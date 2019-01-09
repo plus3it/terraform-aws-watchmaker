@@ -39,6 +39,7 @@ resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
     PatchGroup             = "${var.PatchGroup}"
     PrivateIp              = "${var.PrivateIp}"
     PypiIndexUrl           = "${var.PypiIndexUrl}"
+    RootVolumeSize         = "${var.RootVolumeSize}"
     SecurityGroupIds       = "${var.SecurityGroupIds}"
     SubnetId               = "${var.SubnetId}"
     ToggleCfnInitUpdate    = "${var.ToggleCfnInitUpdate}"

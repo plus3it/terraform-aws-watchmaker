@@ -42,6 +42,7 @@ resource "aws_cloudformation_stack" "watchmaker-lx-autoscale" {
     NoUpdates             = "${var.NoUpdates}"
     PatchGroup            = "${var.PatchGroup}"
     PypiIndexUrl          = "${var.PypiIndexUrl}"
+    RootVolumeSize        = "${var.RootVolumeSize}"
     ScaleDownSchedule     = "${var.ScaleDownSchedule}"
     ScaleUpSchedule       = "${var.ScaleUpSchedule}"
     SecurityGroupIds      = "${var.SecurityGroupIds}"

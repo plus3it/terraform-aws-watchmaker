@@ -36,6 +36,8 @@
   ParameterValue: __PYPIINDEXURL__
 - ParameterKey: PythonInstaller
   ParameterValue: __PYTHONINSTALLER__
+- ParameterKey: RootVolumeSize
+  ParameterValue: __ROOTVOLUMESIZE__
 - ParameterKey: SecurityGroupIds
   ParameterValue: __SECURITYGROUPIDS__
 - ParameterKey: SubnetId

@@ -140,6 +140,7 @@ Metadata:
           - NoReboot
           - NoUpdates
           - PatchGroup
+          - RootVolumeSize
           - SecurityGroupIds
       - Label:
           default: EC2 Watchmaker Configuration
@@ -369,6 +370,12 @@ Parameters:
     AllowedPattern: '^http[s]?://.*$'
     Default: 'https://pypi.org/simple'
     Description: URL to the PyPi Index
+    Type: String
+  RootVolumeSize:
+    Default: 20
+    Description: >- 
+      Root Volume Size in GB **NOTE** This value can be set larger than the default (20GB) but NOT smaller
+      If set larger than default value root partition will need to be expanded manually.
     Type: String
   SecurityGroupIds:
     Description: List of security groups to apply to the instance
@@ -725,6 +732,7 @@ Resources:
             - local_Distro2RootDevice: !FindInMap [Distro2RootDevice, !Ref AmiDistro, DeviceName]
           Ebs:
             DeleteOnTermination: true
+            VolumeSize: !Ref RootVolumeSize
             VolumeType: gp2
         - !If
           - CreateAppVolume

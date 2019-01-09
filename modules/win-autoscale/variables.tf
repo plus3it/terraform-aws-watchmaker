@@ -135,6 +135,12 @@ variable "DesiredCapacity" {
   default     = "1"
 }
 
+variable "RootVolumeSize" {
+  type        = "string"
+  description = "Root Volume Size in GB **NOTE** This value can be set larger than the default (30GB) but NOT smaller. If set larger than default value partition will need to be expanded manually."
+  default     = "30"
+}
+
 variable "ScaleDownSchedule" {
   type        = "string"
   description = "(Optional) Scheduled Action in cron-format (UTC) to scale down to MinCapacity; ignored if empty or ScaleUpSchedule is unset (E.g. \"0 0 * * *\")"

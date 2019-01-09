@@ -50,6 +50,8 @@
   ParameterValue: __PATCHGROUP__
 - ParameterKey: PypiIndexUrl
   ParameterValue: __PYPIINDEXURL__
+- ParameterKey: RootVolumeSize
+  ParameterValue: __ROOTVOLUMESIZE__
 - ParameterKey: SecurityGroupIds
   ParameterValue: __SECURITYGROUPIDS__
 - ParameterKey: SubnetIds
