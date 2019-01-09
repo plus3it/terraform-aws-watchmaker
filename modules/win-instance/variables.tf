@@ -57,7 +57,7 @@ variable "PolicyUrl" {
 
 variable "RootVolumeSize" {
   type        = "string"
-  description = "Root Volume Size in GB **NOTE** This value can be set larger than the default (30GB) but NOT smaller. If set larger than default value partition will need to be expanded manually."
+  description = "Root Volume Size in GB **NOTE** This value can be set larger than the default (30GB) but NOT smaller."
   default     = "30"
 }
 

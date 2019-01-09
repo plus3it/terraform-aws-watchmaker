@@ -19,6 +19,10 @@ Conditions:
     - !Equals
       - !Ref AppScriptUrl
       - ''
+  ExpandRootVolume: !Not
+    - !Equals
+      - !Ref RootVolumeSize
+      - "20"
   InstallCloudWatchAgent: !Not
     - !Equals
       - !Ref CloudWatchAgentUrl
@@ -422,8 +426,8 @@ Parameters:
     Description: URL to the PyPi Index
     Type: String
   RootVolumeSize:
-    Default: 20
-    Description: >- 
+    Default: "20"
+    Description: >-
       Root Volume Size in GB **NOTE** This value can be set larger than the default (20GB) but NOT smaller
       If set larger than default value root partition will need to be expanded manually.
     Type: String
@@ -889,6 +893,7 @@ Resources:
 
               #cloud-config
               ${local_CreateAppVolume}
+              ${local_ExpandRootVolume}
 
               --===============3585321300151562773==
               Content-Type: text/x-shellscript; charset="us-ascii"
@@ -897,6 +902,20 @@ Resources:
               Content-Disposition: attachment; filename="script.sh"
 
               #!/bin/bash -xe
+
+              # Suppress erroneous LVM file descriptor warnings
+              # https://access.redhat.com/solutions/49144
+              export LVM_SUPPRESS_FD_WARNINGS=1
+
+              # Extend any available LVM PVs
+              if [[ -x $( which pvs ) ]]
+              then
+                LVMPVS=($(pvs --noheadings -o pv_name))
+                for PV in "${!LVMPVS[@]}"
+                do
+                    pvresize ${!PV}
+                done
+              fi
 
               # CFN LaunchConfig Update Toggle: ${ToggleNewInstances}
 
@@ -956,6 +975,7 @@ Resources:
                 ${local_AssignInstanceRole} ${local_UseCfnUrl}; exit 1)
               --===============3585321300151562773==--
             -
+              local_AssignInstanceRole: !If [AssignInstanceRole, !Sub '--role ${InstanceRole}', '']
               local_CreateAppVolume: !If
                 - CreateAppVolume
                 - !Sub
@@ -966,7 +986,14 @@ Resources:
                         - [${local_SupportsNvme}, ${AppVolumeMountPath}]
                   - local_SupportsNvme: !If [SupportsNvme, /dev/nvme1n1, /dev/xvdf]
                 - ''
-              local_AssignInstanceRole: !If [AssignInstanceRole, !Sub '--role ${InstanceRole}', '']
+              local_ExpandRootVolume: !If
+                - ExpandRootVolume
+                - |+
+                  growpart:
+                    mode: auto
+                    devices: [ '/dev/xvda', '/dev/xvda2', '/dev/nvme0n1', '/dev/nvme0n1p2' ]
+                    ignore_growroot_disabled: false
+                - ''
               local_UseCfnUrl: !If [UseCfnUrl, !Sub '--url ${CfnEndpointUrl}', '']
     Type: AWS::AutoScaling::LaunchConfiguration
   WatchmakerLaunchConfigLogGroup:

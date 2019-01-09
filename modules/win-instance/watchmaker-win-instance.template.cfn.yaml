@@ -281,7 +281,6 @@ Parameters:
     Default: 30
     Description: >- 
       Root Volume Size in GB **NOTE** This value can be set larger than the default (30GB) but NOT smaller
-      If set larger than default value partition will need to be expanded manually.
     Type: String
   SecurityGroupIds:
     Description: List of security groups to apply to the instance
