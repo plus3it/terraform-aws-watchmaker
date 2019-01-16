@@ -208,7 +208,7 @@ Metadata:
         default: Force Cfn Init Update
       ToggleNewInstances:
         default: Force New Instances
-  Version: 1.9.0
+  Version: 1.9.1
 Outputs:
   ScaleDownScheduledAction:
     Condition: UseScheduledAction
@@ -944,7 +944,7 @@ Resources:
                 - !Sub
                   - |+
                       bootcmd:
-                        - cloud-init-per instance mkfs-appvolume mkfs -t ext4 ${local_SupportsNvme}
+                        - cloud-init-per instance mkfsappvolume mkfs -t ext4 ${local_SupportsNvme}
                       mounts: 
                         - [${local_SupportsNvme}, ${AppVolumeMountPath}]
                   - local_SupportsNvme: !If [SupportsNvme, /dev/nvme1n1, /dev/xvdf]
