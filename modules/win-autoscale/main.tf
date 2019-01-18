@@ -46,6 +46,7 @@ resource "aws_cloudformation_stack" "watchmaker-win-autoscale" {
     WatchmakerEnvironment  = "${var.WatchmakerEnvironment}"
     WatchmakerOuPath       = "${var.WatchmakerOuPath}"
     WatchmakerAdminGroups  = "${var.WatchmakerAdminGroups}"
+    WatchmakerExtraArgs   = "${var.WatchmakerExtraArgs}"
     CfnEndpointUrl         = "${var.CfnEndpointUrl}"
     ToggleCfnInitUpdate    = "${var.ToggleCfnInitUpdate}"
     ToggleNewInstances     = "${var.ToggleNewInstances}"

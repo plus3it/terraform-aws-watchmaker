@@ -49,6 +49,7 @@ resource "aws_cloudformation_stack" "watchmaker-lx-autoscale" {
     WatchmakerOuPath      = "${var.WatchmakerOuPath}"
     WatchmakerAdminGroups = "${var.WatchmakerAdminGroups}"
     WatchmakerAdminUsers  = "${var.WatchmakerAdminUsers}"
+    WatchmakerExtraArgs   = "${var.WatchmakerExtraArgs}"
     CfnEndpointUrl        = "${var.CfnEndpointUrl}"
     CfnGetPipUrl          = "${var.CfnGetPipUrl}"
     CfnBootstrapUtilsUrl  = "${var.CfnBootstrapUtilsUrl}"
