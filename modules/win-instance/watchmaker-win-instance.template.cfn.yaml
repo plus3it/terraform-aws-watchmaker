@@ -649,7 +649,8 @@ Resources:
                   ${local_UseOuPath}
                   ${local_UseComputerName}
                   ${local_UseAdminGroups}
-                  ${local_UseAdminUsers};
+                  ${local_UseAdminUsers}
+                  !Ref ${WatchmakerExtraArgs};
                   if (-not $?) { throw 'watchmaker execution failed!' }
                   } -Verbose -ErrorAction Stop"
                 -
@@ -660,7 +661,6 @@ Resources:
                  local_UseComputerName: !If [UseComputerName, !Sub '--computer-name "${WatchmakerComputerName}"', '']
                  local_UseAdminGroups: !If [UseAdminGroups, !Sub '--admin-groups "${WatchmakerAdminGroups}"', '']
                  local_UseAdminUsers: !If [UseAdminUsers, !Sub '--admin-users "${WatchmakerAdminUsers}"', '']
-                 !Ref ${WatchmakerExtraArgs}
               waitAfterCompletion: '0'
         watchmaker-update:
           commands:
@@ -676,7 +676,8 @@ Resources:
                   ${local_UseOuPath}
                   ${local_UseComputerName}
                   ${local_UseAdminGroups}
-                  ${local_UseAdminUsers};
+                  ${local_UseAdminUsers}
+                  !Ref ${WatchmakerExtraArgs};
                   if (-not $?) { throw 'watchmaker execution failed!' }
                   } -Verbose -ErrorAction Stop"
                 -
@@ -687,7 +688,6 @@ Resources:
                  local_UseComputerName: !If [UseComputerName, !Sub '--computer-name "${WatchmakerComputerName}"', '']
                  local_UseAdminGroups: !If [UseAdminGroups, !Sub '--admin-groups "${WatchmakerAdminGroups}"', '']
                  local_UseAdminUsers: !If [UseAdminUsers, !Sub '--admin-users "${WatchmakerAdminUsers}"', '']
-                 !Ref ${WatchmakerExtraArgs}
               waitAfterCompletion: '0'
       ToggleCfnInitUpdate: !Ref ToggleCfnInitUpdate
     Properties:
