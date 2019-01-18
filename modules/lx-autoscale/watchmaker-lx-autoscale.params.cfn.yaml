@@ -54,6 +54,8 @@
   ParameterValue: __WATCHMAKEROUPATH__
 - ParameterKey: WatchmakerAdminGroups
   ParameterValue: __WATCHMAKERADMINGROUPS__
+- ParameterKey: WatchmakerExtraArgs
+  ParameterValue: __WATCHMAKEREXTRAARGS__
 - ParameterKey: CloudWatchAgentUrl
   ParameterValue: __CWAGENTURL__
 - ParameterKey: CloudWatchAppLogs

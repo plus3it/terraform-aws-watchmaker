@@ -223,6 +223,12 @@ variable "WatchmakerAdminGroups" {
   default     = ""
 }
 
+variable "WatchmakerExtraArgs" {
+  type        = "string"
+  description = "(Optional) Additional parameters to be passed to the Watchmaker CLI"
+  default     = ""
+}
+
 variable "CloudWatchAgentUrl" {
   type        = "string"
   description = "(Optional) S3 URL to CloudWatch Agent installer. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.zip"
