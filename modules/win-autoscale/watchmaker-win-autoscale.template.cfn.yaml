@@ -146,7 +146,7 @@ Metadata:
         default: Force Cfn Init Update
       ToggleNewInstances:
         default: Force New Instances
-  Version: 1.9.1
+  Version: 1.10.0
 Outputs:
   ScaleDownScheduledAction:
     Condition: UseScheduledAction
