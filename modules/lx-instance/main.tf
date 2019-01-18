@@ -44,7 +44,7 @@ resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
     WatchmakerComputerName = "${var.WatchmakerComputerName}"
     WatchmakerAdminGroups  = "${var.WatchmakerAdminGroups}"
     WatchmakerAdminUsers   = "${var.WatchmakerAdminUsers}"
-    WatchmakerExtraArgs   = "${var.WatchmakerExtraArgs}"
+    WatchmakerExtraArgs    = "${var.WatchmakerExtraArgs}"
     CfnEndpointUrl         = "${var.CfnEndpointUrl}"
     CfnGetPipUrl           = "${var.CfnGetPipUrl}"
     CfnBootstrapUtilsUrl   = "${var.CfnBootstrapUtilsUrl}"
