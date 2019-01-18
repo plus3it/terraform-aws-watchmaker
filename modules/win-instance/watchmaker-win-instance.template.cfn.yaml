@@ -650,7 +650,7 @@ Resources:
                   ${local_UseComputerName}
                   ${local_UseAdminGroups}
                   ${local_UseAdminUsers}
-                  !Ref ${WatchmakerExtraArgs};
+                  ${WatchmakerExtraArgs};
                   if (-not $?) { throw 'watchmaker execution failed!' }
                   } -Verbose -ErrorAction Stop"
                 -
@@ -677,7 +677,7 @@ Resources:
                   ${local_UseComputerName}
                   ${local_UseAdminGroups}
                   ${local_UseAdminUsers}
-                  !Ref ${WatchmakerExtraArgs};
+                  ${WatchmakerExtraArgs};
                   if (-not $?) { throw 'watchmaker execution failed!' }
                   } -Verbose -ErrorAction Stop"
                 -

@@ -766,7 +766,7 @@ Resources:
                   ${local_UseEnvironment}
                   ${local_UseOuPath}
                   ${local_UseAdminGroups}
-                  !Ref ${WatchmakerExtraArgs};
+                  ${WatchmakerExtraArgs};
                   if (-not $?) { throw 'watchmaker execution failed!' }
                   } -Verbose -ErrorAction Stop"
                 -
@@ -789,7 +789,7 @@ Resources:
                   ${local_UseEnvironment}
                   ${local_UseOuPath}
                   ${local_UseAdminGroups}
-                  !Ref ${WatchmakerExtraArgs};
+                  ${WatchmakerExtraArgs};
                   if (-not $?) { throw 'watchmaker execution failed!' }
                   } -Verbose -ErrorAction Stop"
                 -

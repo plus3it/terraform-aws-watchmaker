@@ -813,7 +813,7 @@ Resources:
                   ${local_UseOUPath}
                   ${local_UseAdminGroups}
                   ${local_UseAdminUsers}
-                  !Ref ${WatchmakerExtraArgs}
+                  ${WatchmakerExtraArgs}
                 -
                   local_UseWamConfig: !If [UseWamConfig, !Sub '--config ${WatchmakerConfig}', '']
                   local_UseEnvironment: !If [UseEnvironment, !Sub '--env ${WatchmakerEnvironment}', '']
@@ -831,7 +831,7 @@ Resources:
                   ${local_UseOUPath}
                   ${local_UseAdminGroups}
                   ${local_UseAdminUsers}
-                  !Ref ${WatchmakerExtraArgs}
+                  ${WatchmakerExtraArgs}
                 -
                   local_UseWamConfig: !If [UseWamConfig, !Sub '--config ${WatchmakerConfig}', '']
                   local_UseEnvironment: !If [UseEnvironment, !Sub '--env ${WatchmakerEnvironment}', '']
