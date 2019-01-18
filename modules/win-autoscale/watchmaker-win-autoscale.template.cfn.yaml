@@ -1,75 +1,75 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Conditions:
-  AssignInstanceRole: !Not 
-    - !Equals 
+  AssignInstanceRole: !Not
+    - !Equals
       - !Ref InstanceRole
       - ''
-  AssignPublicIp: !Not 
-    - !Equals 
+  AssignPublicIp: !Not
+    - !Equals
       - !Ref NoPublicIp
       - 'true'
-  CreateAppVolume: !Not 
-    - !Equals 
+  CreateAppVolume: !Not
+    - !Equals
       - !Ref AppVolumeDevice
       - ''
   CreatePatchGroupTag: !Not
     - !Equals
       - !Ref PatchGroup
       - ''
-  ExecuteAppScript: !Not 
-    - !Equals 
+  ExecuteAppScript: !Not
+    - !Equals
       - !Ref AppScriptUrl
       - ''
-  InstallCloudWatchAgent: !Not 
-    - !Equals 
+  InstallCloudWatchAgent: !Not
+    - !Equals
       - !Ref CloudWatchAgentUrl
       - ''
-  Reboot: !Not 
-    - !Equals 
+  Reboot: !Not
+    - !Equals
       - !Ref NoReboot
       - 'true'
-  UseAdminGroups: !Not 
-    - !Equals 
+  UseAdminGroups: !Not
+    - !Equals
       - !Ref WatchmakerAdminGroups
       - ''
-  UseCfnUrl: !Not 
-    - !Equals 
+  UseCfnUrl: !Not
+    - !Equals
       - !Ref CfnEndpointUrl
       - ''
-  UseElbHealthCheck: !Or 
+  UseElbHealthCheck: !Or
     - !Condition UseLoadBalancerNames
     - !Condition UseTargetGroupArns
-  UseEnvironment: !Not 
-    - !Equals 
+  UseEnvironment: !Not
+    - !Equals
       - !Ref WatchmakerEnvironment
       - ''
-  UseLoadBalancerNames: !Not 
+  UseLoadBalancerNames: !Not
     - !Equals
-      - !Join 
+      - !Join
         - ''
         - !Ref LoadBalancerNames
       - ''
-  UseOuPath: !Not 
-    - !Equals 
+  UseOuPath: !Not
+    - !Equals
       - !Ref WatchmakerOuPath
       - ''
-  UseScheduledAction: !And 
-    - !Not 
-      - !Equals 
+  UseScheduledAction: !And
+    - !Not
+      - !Equals
         - !Ref ScaleUpSchedule
         - ''
-    - !Not 
-      - !Equals 
+    - !Not
+      - !Equals
         - !Ref ScaleDownSchedule
         - ''
-  UseTargetGroupArns: !Not 
-    - !Equals 
-      - !Join 
+  UseTargetGroupArns: !Not
+    - !Equals
+      - !Join
         - ''
         - !Ref TargetGroupArns
       - ''
-  UseWamConfig: !Not 
-    - !Equals 
+  UseWamConfig: !Not
+    - !Equals
       - !Ref WatchmakerConfig
       - ''
 Description: >-
@@ -82,7 +82,7 @@ Mappings:
     powershell:
       command: >-
         powershell.exe -NoLogo -NoProfile -NonInteractive -ExecutionPolicy
-        Bypass 
+        Bypass
 Metadata:
   'AWS::CloudFormation::Interface':
     ParameterGroups:
@@ -107,6 +107,7 @@ Metadata:
           - WatchmakerEnvironment
           - WatchmakerOuPath
           - WatchmakerAdminGroups
+          - WatchmakerExtraArgs
       - Label:
           default: EC2 Application Configuration
         Parameters:
@@ -372,6 +373,12 @@ Parameters:
       (Optional) Colon-separated list of domain groups that should have admin
       permissions on the EC2 instance
     Type: String
+  WatchmakerExtraArgs:
+    Default: ''
+    Description: >-
+      (Optional) Additional Watchmaker parameters.  E.g. --exclude-states scap*scan
+      or --salt-states 'None'
+    Type: String
   WatchmakerBootstrapper:
     AllowedPattern: '^$|^http[s]?://.*\.ps1$'
     Default: >-
@@ -425,16 +432,16 @@ Resources:
         Timeout: PT60M
     Properties:
       DesiredCapacity: !Ref DesiredCapacity
-      HealthCheckGracePeriod: !If 
+      HealthCheckGracePeriod: !If
         - UseElbHealthCheck
         - 3600
         - !Ref 'AWS::NoValue'
-      HealthCheckType: !If 
+      HealthCheckType: !If
         - UseElbHealthCheck
         - ELB
         - EC2
       LaunchConfigurationName: !Ref WatchmakerLaunchConfig
-      LoadBalancerNames: !If 
+      LoadBalancerNames: !If
         - UseLoadBalancerNames
         - !Ref LoadBalancerNames
         - !Ref 'AWS::NoValue'
@@ -451,7 +458,7 @@ Resources:
             Value: !Ref PatchGroup
             PropagateAtLaunch: true
           - !Ref 'AWS::NoValue'
-      TargetGroupARNs: !If 
+      TargetGroupARNs: !If
         - UseTargetGroupArns
         - !Ref TargetGroupArns
         - !Ref 'AWS::NoValue'
@@ -469,16 +476,16 @@ Resources:
             - make-app
           launch:
             - setup
-            - !If 
+            - !If
               - InstallCloudWatchAgent
               - install-cloudwatch-agent
               - !Ref 'AWS::NoValue'
             - watchmaker-launch
-            - !If 
+            - !If
               - ExecuteAppScript
               - ConfigSet: appscript
               - !Ref 'AWS::NoValue'
-            - !If 
+            - !If
               - Reboot
               - reboot
               - !Ref 'AWS::NoValue'
@@ -486,11 +493,11 @@ Resources:
           update:
             - setup
             - watchmaker-update
-            - !If 
+            - !If
               - ExecuteAppScript
               - ConfigSet: appscript
               - !Ref 'AWS::NoValue'
-            - !If 
+            - !If
               - Reboot
               - reboot
               - !Ref 'AWS::NoValue'
@@ -532,7 +539,7 @@ Resources:
                   Read-S3Object -BucketName $CloudWatchAgentUri.Host `
                   -Key ($CloudWatchAgentUri.Segments[1..($CloudWatchAgentUri.Segments.Length-1)] -Join '') `
                   -File $CloudWatchAgentZipFile `
-                  -Region ${AWS::Region}; 
+                  -Region ${AWS::Region};
                   $CloudWatchAgentInstallScript = $CloudWatchAgentScriptDir + '\install.ps1';
                   $CloudWatchAgentConfig = $CloudWatchAgentScriptDir + '\aws-cloudwatch-agent-config.json';
                   if ($PSVersionTable.PSVersion.Major -ge 5) { Expand-Archive -Path $CloudWatchAgentZipFile -DestinationPath $CloudWatchAgentScriptDir;
@@ -547,7 +554,7 @@ Resources:
                   .\amazon-cloudwatch-agent-ctl.ps1 -a fetch-config -m ec2 -c file:$CloudWatchAgentConfig -s;
                   Pop-Location;} -Verbose -ErrorAction Stop "
                 -
-                  local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command] 
+                  local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
               waitAfterCompletion: '0'
           files:
             'c:\cfn\scripts\AmazonCloudWatchAgent\aws-cloudwatch-agent-config.json':
@@ -588,7 +595,7 @@ Resources:
                     }
                   }
             'c:\cfn\scripts\AmazonCloudWatchAgent\cloudwatch-applog-config.py':
-              content: !Sub 
+              content: !Sub
                 - |-
                   import json
                   import os
@@ -613,7 +620,7 @@ Resources:
                       print('Writing new cwl baseline')
                       with open(cloudwatch_baseline, 'w') as f:
                           f.write(json.dumps(baseline, sort_keys=True, indent=4))
-                    
+
 
                   if log_paths_input:
                       print('Additional cwl paths were defined.')
@@ -628,7 +635,7 @@ Resources:
                       write_baseline(baseline)
                       print('CWL baseline modification complete')
                 # convert CommanDelimitedList to a string for Fn::Sub compatibility
-                - 
+                -
                   local_addCWLtarget: !Join ["," ,!Ref CloudWatchAppLogs]
         make-app:
           commands:
@@ -649,7 +656,7 @@ Resources:
                   & $AppScript ${AppScriptParams};
                   } -Verbose -ErrorAction Stop"
                 -
-                  local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command] 
+                  local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
               waitAfterCompletion: '0'
         reboot:
           commands:
@@ -660,13 +667,13 @@ Resources:
           commands:
             01-install-python-and-wam:
               command: !Sub
-                - >- 
+                - >-
                   ${local_ShellCommandMap} -Command "Invoke-Command -ScriptBlock {
                   $ErrorActionPreference = 'Stop'; c:\cfn\scripts\watchmaker-install.ps1; } -Verbose -ErrorAction Stop"
                 -
                   local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
             10-initialize-disks:
-              command: !If 
+              command: !If
                 - CreateAppVolume
                 - !Sub
                   - >-
@@ -674,7 +681,7 @@ Resources:
                     $ErrorActionPreference = 'Stop';
                     $EC2LaunchInitDiskScript = ${!Env:ProgramData} + '\Amazon\EC2-Windows\Launch\Scripts\InitializeDisks.ps1';
                     $EC2LaunchInitDiskConfig = ${!Env:ProgramData} + '\Amazon\EC2-Windows\Launch\Config\DriveLetterMappingConfig.json';
-                    if (Test-Path $EC2LaunchInitDiskScript) {if (Test-Path $EC2LaunchInitDiskConfig) {iex $EC2LaunchInitDiskScript;} } } 
+                    if (Test-Path $EC2LaunchInitDiskScript) {if (Test-Path $EC2LaunchInitDiskConfig) {iex $EC2LaunchInitDiskScript;} } }
                     -Verbose -ErrorAction Stop"
                   -
                     local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
@@ -701,7 +708,7 @@ Resources:
                   triggers=post.update
                   path=Resources.WatchmakerLaunchConfig.Metadata
                   action=cfn-init.exe -v -c update --stack ${AWS::StackName} --resource WatchmakerLaunchConfig --region ${AWS::Region} ${local_AssignInstanceRole} ${local_UseCfnUrl}
-                - 
+                -
                   local_AssignInstanceRole: !If [AssignInstanceRole, !Sub '--role ${InstanceRole}','']
                   local_UseCfnUrl: !If [UseCfnUrl, !Sub '--url ${CfnEndpointUrl}', '']
             'c:\cfn\scripts\watchmaker-install.ps1':
@@ -712,7 +719,7 @@ Resources:
 
                   # Get the host
                   $PypiHost="$(([System.Uri]$PypiUrl).Host)"
-                  
+
                   # Download bootstrap file
                   $BootstrapFile = "${!Env:Temp}\$(${!BootstrapUrl}.split('/')[-1])"
                   (New-Object System.Net.WebClient).DownloadFile("$BootstrapUrl", "$BootstrapFile")
@@ -749,17 +756,17 @@ Resources:
         watchmaker-launch:
           commands:
             10-watchmaker-launch:
-              command: !Sub 
+              command: !Sub
                 - >-
                   ${local_ShellCommandMap} -Command "Invoke-Command -ScriptBlock {
                   $ErrorActionPreference = 'Stop';
-                  c:\cfn\scripts\update-path.ps1 -ErrorAction Stop  -Verbose; 
+                  c:\cfn\scripts\update-path.ps1 -ErrorAction Stop  -Verbose;
                   watchmaker --log-level debug --log-dir C:\Watchmaker\Logs --no-reboot
                   ${local_UseWamConfig}
                   ${local_UseEnvironment}
                   ${local_UseOuPath}
                   ${local_UseAdminGroups}
-                  if (-not $?) { throw 'watchmaker execution failed!' } 
+                  if (-not $?) { throw 'watchmaker execution failed!' }
                   } -Verbose -ErrorAction Stop"
                 -
                  local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
@@ -767,15 +774,16 @@ Resources:
                  local_UseEnvironment: !If [UseEnvironment, !Sub '--env "${WatchmakerEnvironment}"', '']
                  local_UseOuPath: !If [UseOuPath, !Sub '--ou-path "${WatchmakerOuPath}"', '']
                  local_UseAdminGroups: !If [UseAdminGroups, !Sub '--admin-groups "${WatchmakerAdminGroups}"', '']
+                 !Ref ${WatchmakerExtraArgs}
               waitAfterCompletion: '0'
         watchmaker-update:
           commands:
             10-watchmaker-update:
-              command:  !Sub 
+              command:  !Sub
                 - >-
                   ${local_ShellCommandMap} -Command "Invoke-Command -ScriptBlock {
                   $ErrorActionPreference = 'Stop';
-                  c:\cfn\scripts\update-path.ps1 -ErrorAction Stop  -Verbose; 
+                  c:\cfn\scripts\update-path.ps1 -ErrorAction Stop  -Verbose;
                   watchmaker --log-level debug --log-dir C:\Watchmaker\Logs --no-reboot --salt-states None
                   ${local_UseWamConfig}
                   ${local_UseEnvironment}
@@ -789,10 +797,11 @@ Resources:
                  local_UseEnvironment: !If [UseEnvironment, !Sub '--env "${WatchmakerEnvironment}"', '']
                  local_UseOuPath: !If [UseOuPath, !Sub '--ou-path "${WatchmakerOuPath}"', '']
                  local_UseAdminGroups: !If [UseAdminGroups, !Sub '--admin-groups "${WatchmakerAdminGroups}"', '']
+                 !Ref ${WatchmakerExtraArgs}
               waitAfterCompletion: '0'
       ToggleCfnInitUpdate: !Ref ToggleCfnInitUpdate
     Properties:
-      AssociatePublicIpAddress: !If 
+      AssociatePublicIpAddress: !If
         - AssignPublicIp
         - true
         - false
@@ -801,7 +810,7 @@ Resources:
           Ebs:
             DeleteOnTermination: true
             VolumeType: gp2
-        - !If 
+        - !If
           - CreateAppVolume
           - DeviceName: !Ref AppVolumeDevice
             Ebs:
@@ -809,7 +818,7 @@ Resources:
               VolumeSize: !Ref AppVolumeSize
               VolumeType: !Ref AppVolumeType
           - !Ref 'AWS::NoValue'
-      IamInstanceProfile: !If 
+      IamInstanceProfile: !If
         - AssignInstanceRole
         - !Ref InstanceRole
         - !Ref 'AWS::NoValue'
@@ -818,7 +827,7 @@ Resources:
       KeyName: !Ref KeyPairName
       SecurityGroups: !Ref SecurityGroupIds
       UserData:
-        !Base64 
+        !Base64
           Fn::Sub:
             - |
               <script>
@@ -830,10 +839,10 @@ Resources:
                 set REQUESTS_CA_BUNDLE=%SystemDrive%\cfn\ca-override.pem
               )
               set AWS_DEFAULT_REGION=${AWS::Region}
-              
+
               cfn-init.exe -v -c launch --stack ${AWS::StackName} --resource WatchmakerLaunchConfig --region ${AWS::Region} ${local_AssignInstanceRole} ${local_UseCfnUrl}
               if %ERRORLEVEL% equ 0 goto success
-              
+
               :error
               cfn-signal.exe -e 1 --stack ${AWS::StackName} --resource WatchmakerAutoScalingGroup --region ${AWS::Region} ${local_AssignInstanceRole} ${local_UseCfnUrl}
               echo "ERROR: cfn-init failed! Aborting!"

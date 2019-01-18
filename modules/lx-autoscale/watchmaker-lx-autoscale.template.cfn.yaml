@@ -1,88 +1,88 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Conditions:
-  AssignInstanceRole: !Not 
-    - !Equals 
+  AssignInstanceRole: !Not
+    - !Equals
       - !Ref InstanceRole
       - ''
-  AssignPublicIp: !Not 
-    - !Equals 
+  AssignPublicIp: !Not
+    - !Equals
       - !Ref NoPublicIp
       - 'true'
-  CreateAppVolume: !Equals 
+  CreateAppVolume: !Equals
     - !Ref AppVolumeDevice
     - 'true'
   CreatePatchGroupTag: !Not
     - !Equals
       - !Ref PatchGroup
       - ''
-  ExecuteAppScript: !Not 
-    - !Equals 
+  ExecuteAppScript: !Not
+    - !Equals
       - !Ref AppScriptUrl
       - ''
-  InstallCloudWatchAgent: !Not 
-    - !Equals 
+  InstallCloudWatchAgent: !Not
+    - !Equals
       - !Ref CloudWatchAgentUrl
       - ''
-  InstallUpdates: !Not 
-    - !Equals 
+  InstallUpdates: !Not
+    - !Equals
       - !Ref NoUpdates
       - 'true'
-  Reboot: !Not 
-    - !Equals 
+  Reboot: !Not
+    - !Equals
       - !Ref NoReboot
       - 'true'
-  SupportsNvme: !Equals 
-    - !FindInMap 
+  SupportsNvme: !Equals
+    - !FindInMap
       - InstanceTypeMap
       - !Ref InstanceType
       - SupportsNvme
     - 'true'
-  UseAdminGroups: !Not 
-    - !Equals 
+  UseAdminGroups: !Not
+    - !Equals
       - !Ref WatchmakerAdminGroups
       - ''
-  UseAdminUsers: !Not 
-    - !Equals 
+  UseAdminUsers: !Not
+    - !Equals
       - !Ref WatchmakerAdminUsers
       - ''
-  UseCfnUrl: !Not 
-    - !Equals 
+  UseCfnUrl: !Not
+    - !Equals
       - !Ref CfnEndpointUrl
       - ''
-  UseElbHealthCheck: !Or 
+  UseElbHealthCheck: !Or
     - !Condition UseLoadBalancerNames
     - !Condition UseTargetGroupArns
-  UseEnvironment: !Not 
-    - !Equals 
+  UseEnvironment: !Not
+    - !Equals
       - !Ref WatchmakerEnvironment
       - ''
-  UseLoadBalancerNames: !Not 
+  UseLoadBalancerNames: !Not
     - !Equals
       - !Join
         - ''
         - !Ref LoadBalancerNames
       - ''
-  UseOuPath: !Not 
-    - !Equals 
+  UseOuPath: !Not
+    - !Equals
       - !Ref WatchmakerOuPath
       - ''
-  UseScheduledAction: !And 
-    - !Not 
-      - !Equals 
+  UseScheduledAction: !And
+    - !Not
+      - !Equals
         - !Ref ScaleUpSchedule
         - ''
-    - !Not 
-      - !Equals 
+    - !Not
+      - !Equals
         - !Ref ScaleDownSchedule
         - ''
-  UseTargetGroupArns: !Not 
+  UseTargetGroupArns: !Not
     - !Equals
       - !Join
         - ''
         - !Ref TargetGroupArns
       - ''
-  UseWamConfig: !Not 
-    - !Equals 
+  UseWamConfig: !Not
+    - !Equals
       - !Ref WatchmakerConfig
       - ''
 Description: >-
@@ -166,6 +166,7 @@ Metadata:
           - WatchmakerOuPath
           - WatchmakerAdminGroups
           - WatchmakerAdminUsers
+          - WatchmakerExtraArgs
       - Label:
           default: EC2 Application Configuration
         Parameters:
@@ -473,6 +474,12 @@ Parameters:
       (Optional) Colon-separated list of domain users that should have admin
       permissions on the EC2 instance
     Type: String
+  WatchmakerExtraArgs:
+    Default: ''
+    Description: >-
+      (Optional) Additional Watchmaker parameters.  E.g. --exclude-states scap*scan
+      or --salt-states 'None'
+    Type: String
   WatchmakerConfig:
     AllowedPattern: '^$|^(http[s]?|s3|file)://.*$'
     Default: ''
@@ -520,16 +527,16 @@ Resources:
         Timeout: PT30M
     Properties:
       DesiredCapacity: !Ref DesiredCapacity
-      HealthCheckGracePeriod: !If 
+      HealthCheckGracePeriod: !If
         - UseElbHealthCheck
         - 3600
         - !Ref 'AWS::NoValue'
-      HealthCheckType: !If 
+      HealthCheckType: !If
         - UseElbHealthCheck
         - ELB
         - EC2
       LaunchConfigurationName: !Ref WatchmakerLaunchConfig
-      LoadBalancerNames: !If 
+      LoadBalancerNames: !If
         - UseLoadBalancerNames
         - !Ref LoadBalancerNames
         - !Ref 'AWS::NoValue'
@@ -546,7 +553,7 @@ Resources:
             Value: !Ref PatchGroup
             PropagateAtLaunch: true
           - !Ref 'AWS::NoValue'
-      TargetGroupARNs: !If 
+      TargetGroupARNs: !If
         - UseTargetGroupArns
         - !Ref TargetGroupArns
         - !Ref 'AWS::NoValue'
@@ -561,35 +568,35 @@ Resources:
         configSets:
           launch:
             - setup
-            - !If 
+            - !If
               - InstallCloudWatchAgent
               - cw-agent-install
               - !Ref 'AWS::NoValue'
             - watchmaker-install
             - watchmaker-launch
-            - !If 
+            - !If
               - ExecuteAppScript
               - make-app
               - !Ref 'AWS::NoValue'
             - finalize
-            - !If 
+            - !If
               - Reboot
               - reboot
               - !Ref 'AWS::NoValue'
           update:
             - setup
-            - !If 
+            - !If
               - InstallUpdates
               - install-updates
               - !Ref 'AWS::NoValue'
             - watchmaker-install
             - watchmaker-update
-            - !If 
+            - !If
               - ExecuteAppScript
               - make-app
               - !Ref 'AWS::NoValue'
             - finalize
-            - !If 
+            - !If
               - Reboot
               - reboot
               - !Ref 'AWS::NoValue'
@@ -618,25 +625,25 @@ Resources:
           files:
             /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json:
               content: !Sub |-
-                    { 
-                      "logs": 
+                    {
+                      "logs":
                       {
                         "logs_collected":
                         {
-                          "files": 
+                          "files":
                           {
-                            "collect_list": [ 
+                            "collect_list": [
                               {
                                 "file_path": "/opt/aws/amazon-cloudwatch-agent/logs/amazon-cloudwatch-agent.log",
                                 "log_group_name": "/aws/ec2/lx/${AWS::StackName}",
                                 "log_stream_name": "cloudwatch_agent_logs_{instance_id}",
-                                "timestamp_format": "%H:%M:%S %y %b %-d" 
+                                "timestamp_format": "%H:%M:%S %y %b %-d"
                               },
                               {
                                 "file_path": "/var/log/cfn-init.log",
                                 "log_group_name": "/aws/ec2/lx/${AWS::StackName}",
                                 "log_stream_name": "cfn_init_logs_{instance_id}",
-                                "timestamp_format": "%H:%M:%S %y %b %-d" 
+                                "timestamp_format": "%H:%M:%S %y %b %-d"
                               },
                               {
                                 "file_path": "/var/log/messages",
@@ -667,7 +674,7 @@ Resources:
                 - |-
                   import json
                   import os
-                  
+
                   cloudwatch_baseline = "/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json"
                   log_group_name = "/aws/ec2/lx/${AWS::StackName}"
                   log_paths_input = (r'''${local_addCWLtarget}''').split(",")
@@ -710,9 +717,9 @@ Resources:
               command: !Sub
                 - >-
                   cfn-signal -e 0 --stack ${AWS::StackName} --resource WatchmakerAutoScalingGroup --region ${AWS::Region}
-                  ${local_AssignInstanceRole} 
+                  ${local_AssignInstanceRole}
                   ${local_UseCfnUrl}
-                - 
+                -
                   local_AssignInstanceRole: !If [AssignInstanceRole, !Sub '--role ${InstanceRole}', '']
                   local_UseCfnUrl: !If [UseCfnUrl, !Sub '--url ${CfnEndpointUrl}', '']
               ignoreErrors: 'true'
@@ -723,7 +730,7 @@ Resources:
         make-app:
           commands:
             05-get-appscript:
-              command: 
+              command:
                 !Sub >-
                     mkdir -p /etc/cfn/scripts &&
                     aws s3 cp ${AppScriptUrl}
@@ -748,21 +755,21 @@ Resources:
                   ${local_UseCfnUrl}
                   interval=1
                   verbose=true
-                - 
+                -
                   local_AssignInstanceRole: !If [AssignInstanceRole, !Sub 'role=${InstanceRole}', '']
                   local_UseCfnUrl: !If [UseCfnUrl, !Sub 'url=${CfnEndpointUrl}', '']
               group: root
               mode: '000400'
               owner: root
             /etc/cfn/hooks.d/cfn-auto-reloader.conf:
-              content: !Sub 
+              content: !Sub
                 - |-
                     [cfn-auto-reloader-hook]
                     triggers=post.update
                     path=Resources.WatchmakerInstance.Metadata
                     action=cfn-init -v -c update --stack ${AWS::StackName} --resource WatchmakerLaunchConfig --region ${AWS::Region} ${local_AssignInstanceRole} ${local_UseCfnUrl}
                     runas=root
-                - 
+                -
                   local_AssignInstanceRole: !If [AssignInstanceRole, !Sub '--role ${InstanceRole}', '']
                   local_UseCfnUrl: !If [UseCfnUrl, !Sub '--url ${CfnEndpointUrl}', '']
               group: root
@@ -806,6 +813,7 @@ Resources:
                   ${local_UseOUPath}
                   ${local_UseAdminGroups}
                   ${local_UseAdminUsers}
+                  !Ref ${WatchmakerExtraArgs}
                 -
                   local_UseWamConfig: !If [UseWamConfig, !Sub '--config ${WatchmakerConfig}', '']
                   local_UseEnvironment: !If [UseEnvironment, !Sub '--env ${WatchmakerEnvironment}', '']
@@ -823,6 +831,7 @@ Resources:
                   ${local_UseOUPath}
                   ${local_UseAdminGroups}
                   ${local_UseAdminUsers}
+                  !Ref ${WatchmakerExtraArgs}
                 -
                   local_UseWamConfig: !If [UseWamConfig, !Sub '--config ${WatchmakerConfig}', '']
                   local_UseEnvironment: !If [UseEnvironment, !Sub '--env ${WatchmakerEnvironment}', '']
@@ -831,18 +840,18 @@ Resources:
                   local_UseAdminUsers: !If [UseAdminUsers, !Sub '--admin-users ${WatchmakerAdminUsers}', '']
       ToggleCfnInitUpdate: !Ref ToggleCfnInitUpdate
     Properties:
-      AssociatePublicIpAddress: !If 
+      AssociatePublicIpAddress: !If
         - AssignPublicIp
         - true
         - false
       BlockDeviceMappings:
-        - DeviceName: !Sub 
+        - DeviceName: !Sub
             - '/dev/${local_Distro2RootDevice}'
             - local_Distro2RootDevice: !FindInMap [Distro2RootDevice, !Ref AmiDistro, DeviceName]
           Ebs:
             DeleteOnTermination: true
             VolumeType: gp2
-        - !If 
+        - !If
           - CreateAppVolume
           - DeviceName: /dev/xvdf
             Ebs:
@@ -850,7 +859,7 @@ Resources:
               VolumeSize: !Ref AppVolumeSize
               VolumeType: !Ref AppVolumeType
           - !Ref 'AWS::NoValue'
-      IamInstanceProfile: !If 
+      IamInstanceProfile: !If
         - AssignInstanceRole
         - !Ref InstanceRole
         - !Ref 'AWS::NoValue'
@@ -858,7 +867,7 @@ Resources:
       InstanceType: !Ref InstanceType
       KeyName: !Ref KeyPairName
       SecurityGroups: !Ref SecurityGroupIds
-      UserData: 
+      UserData:
         !Base64
           Fn::Sub:
             - |
@@ -938,14 +947,14 @@ Resources:
                 ( echo 'ERROR: cfn-init failed! Aborting!'; cfn-signal -e 1 --stack ${AWS::StackName} --resource WatchmakerAutoScalingGroup --region ${AWS::Region} \
                 ${local_AssignInstanceRole} ${local_UseCfnUrl}; exit 1)
               --===============3585321300151562773==--
-            - 
-              local_CreateAppVolume: !If 
+            -
+              local_CreateAppVolume: !If
                 - CreateAppVolume
                 - !Sub
                   - |+
                       bootcmd:
                         - cloud-init-per instance mkfsappvolume mkfs -t ext4 ${local_SupportsNvme}
-                      mounts: 
+                      mounts:
                         - [${local_SupportsNvme}, ${AppVolumeMountPath}]
                   - local_SupportsNvme: !If [SupportsNvme, /dev/nvme1n1, /dev/xvdf]
                 - ''

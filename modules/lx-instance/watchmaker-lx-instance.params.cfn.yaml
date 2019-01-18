@@ -42,6 +42,8 @@
   ParameterValue: __WATCHMAKERADMINGROUPS__
 - ParameterKey: WatchmakerAdminUsers
   ParameterValue: __WATCHMAKERADMINUSERS__
+- ParameterKey: WatchmakerExtraArgs
+  ParameterValue: __WATCHMAKEREXTRAARGS__
 - ParameterKey: WatchmakerComputerName
   ParameterValue: __COMPUTERNAME__
 - ParameterKey: WatchmakerConfig
