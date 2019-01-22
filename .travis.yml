@@ -30,6 +30,16 @@ jobs:
         - make cfn/lint
     - stage: test
       env:
+        - JOB="EditorConfig Lint"
+      install:
+        - npm install -g eclint
+        - eclint --version
+      language: node_js
+      node_js: 8
+      script:
+        - make eclint/lint
+    - stage: test
+      env:
         - JOB="CFN Version Validation"
       install:
         - pip install -r _requirements/cfn-version-check.txt

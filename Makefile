@@ -70,3 +70,8 @@ cfn/lint: | guard/program/cfn-lint
 
 cfn/version:
 	$(FIND_CFN) | $(XARGS) bash -c "yq -e '.Metadata.Version | test(\"^$(VERSION)$$\")' {} > /dev/null || (echo '[{}]: BAD/MISSING Cfn Version Metadata'; exit 1)"
+
+eclint/lint: | guard/program/eclint
+	@ echo "[$@]: Linting all files with eclint..."
+	eclint check
+	@ echo "[$@]: All files PASSED lint test!"
