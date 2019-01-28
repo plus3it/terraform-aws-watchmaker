@@ -461,10 +461,6 @@ Resources:
             - watchmaker-install
             - watchmaker-launch
             - !If
-              - ExpandRootVolume
-              - expand-root-volume
-              - !Ref 'AWS::NoValue'
-            - !If
               - ExecuteAppScript
               - make-app
               - !Ref 'AWS::NoValue'
@@ -481,10 +477,6 @@ Resources:
               - !Ref 'AWS::NoValue'
             - watchmaker-install
             - watchmaker-update
-            - !If
-              - ExpandRootVolume
-              - expand-root-volume
-              - !Ref 'AWS::NoValue'
             - !If
               - ExecuteAppScript
               - make-app
@@ -621,27 +613,6 @@ Resources:
           commands:
             10-install-updates:
               command: yum -y update
-        expand-root-volume:
-          commands:
-            10-expand-root-volume:
-              command: bash -xe /etc/cfn/scripts/expand-root-volume.sh
-          files:
-            /etc/cfn/scripts/expand-root-volume.sh:
-              content: |
-                #!/bin/bash
-                # Suppress erroneous LVM file descriptor warnings
-                # https://access.redhat.com/solutions/49144
-                export LVM_SUPPRESS_FD_WARNINGS=1
-
-                # Extend any available LVM PVs
-                if [[ -x $( which pvs ) ]]
-                then
-                  LVMPVS=($(pvs --noheadings -o pv_name))
-                  for PV in "${LVMPVS[@]}"
-                  do
-                      pvresize ${PV}
-                  done
-                fi
         make-app:
           commands:
             05-get-appscript:
@@ -826,6 +797,20 @@ Resources:
               Content-Disposition: attachment; filename="script.sh"
 
               #!/bin/bash -xe
+
+              # Suppress erroneous LVM file descriptor warnings
+              # https://access.redhat.com/solutions/49144
+              export LVM_SUPPRESS_FD_WARNINGS=1
+
+              # Extend any available LVM PVs
+              if [[ -x $( which pvs ) ]]
+              then
+                LVMPVS=($(pvs --noheadings -o pv_name))
+                for PV in "${!LVMPVS[@]}"
+                do
+                    pvresize ${!PV}
+                done
+              fi
 
               # Setup terminal support for UTF-8
               export LC_ALL=en_US.UTF-8
