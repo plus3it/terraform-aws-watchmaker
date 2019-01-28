@@ -8,59 +8,61 @@
   ParameterValue: __APPSCRIPTURL__
 - ParameterKey: AppVolumeDevice
   ParameterValue: __APPVOLUMEDEVICE__
-- ParameterKey: AppVolumeType
-  ParameterValue: __APPVOLUMETYPE__
 - ParameterKey: AppVolumeSize
   ParameterValue: __APPVOLUMESIZE__
-- ParameterKey: KeyPairName
-  ParameterValue: __KEYPAIRNAME__
+- ParameterKey: AppVolumeType
+  ParameterValue: __APPVOLUMETYPE__
+- ParameterKey: CfnEndpointUrl
+  ParameterValue: __CFNENDPOINTURL__
+- ParameterKey: CloudWatchAgentUrl
+  ParameterValue: __CWAGENTURL__
+- ParameterKey: CloudWatchAppLogs
+  ParameterValue: __CWAGENTAPPLOGS__
+- ParameterKey: DesiredCapacity
+  ParameterValue: __DESIREDCAPACITY__
 - ParameterKey: InstanceRole
   ParameterValue: __INSTANCEROLE__
 - ParameterKey: InstanceType
   ParameterValue: __INSTANCETYPE__
-- ParameterKey: MinCapacity
-  ParameterValue: __MINCAPACITY__
+- ParameterKey: KeyPairName
+  ParameterValue: __KEYPAIRNAME__
+- ParameterKey: LoadBalancerNames
+  ParameterValue: __LOADBALANCERNAMES__
 - ParameterKey: MaxCapacity
   ParameterValue: __MAXCAPACITY__
-- ParameterKey: DesiredCapacity
-  ParameterValue: __DESIREDCAPACITY__
+- ParameterKey: MinCapacity
+  ParameterValue: __MINCAPACITY__
 - ParameterKey: NoPublicIp
   ParameterValue: __NOPUBLICIP__
 - ParameterKey: NoReboot
   ParameterValue: __NOREBOOT__
-- ParameterKey: SecurityGroupIds
-  ParameterValue: __SECURITYGROUPIDS__
-- ParameterKey: SubnetIds
-  ParameterValue: __SUBNETIDS__
-- ParameterKey: TargetGroupArns
-  ParameterValue: __TARGETGROUPARNS__
-- ParameterKey: LoadBalancerNames
-  ParameterValue: __LOADBALANCERNAMES__
 - ParameterKey: PatchGroup
   ParameterValue: __PATCHGROUP__
 - ParameterKey: PypiIndexUrl
   ParameterValue: __PYPIINDEXURL__
 - ParameterKey: PythonInstaller
   ParameterValue: __PYTHONINSTALLER__
+- ParameterKey: RootVolumeSize
+  ParameterValue: __ROOTVOLUMESIZE__
+- ParameterKey: SecurityGroupIds
+  ParameterValue: __SECURITYGROUPIDS__
+- ParameterKey: SubnetIds
+  ParameterValue: __SUBNETIDS__
+- ParameterKey: TargetGroupArns
+  ParameterValue: __TARGETGROUPARNS__
+- ParameterKey: ToggleCfnInitUpdate
+  ParameterValue: __TOGGLECFNINITUPDATE__
+- ParameterKey: ToggleNewInstances
+  ParameterValue: __TOGGLENEWINSTANCES__
 - ParameterKey: WatchmakerAdminGroups
   ParameterValue: __WATCHMAKERADMINGROUPS__
-- ParameterKey: WatchmakerExtraArgs
-  ParameterValue: __WATCHMAKEREXTRAARGS__
 - ParameterKey: WatchmakerBootstrapper
   ParameterValue: __WATCHMAKERBOOTSTRAPPER__
 - ParameterKey: WatchmakerConfig
   ParameterValue: __WATCHMAKERCONFIG__
 - ParameterKey: WatchmakerEnvironment
   ParameterValue: __WATCHMAKERENVIRONMENT__
+- ParameterKey: WatchmakerExtraArgs
+  ParameterValue: __WATCHMAKEREXTRAARGS__
 - ParameterKey: WatchmakerOuPath
   ParameterValue: __WATCHMAKEROUPATH__
-- ParameterKey: CloudWatchAgentUrl
-  ParameterValue: __CWAGENTURL__
-- ParameterKey: CloudWatchAppLogs
-  ParameterValue: __CWAGENTAPPLOGS__
-- ParameterKey: CfnEndpointUrl
-  ParameterValue: __CFNENDPOINTURL__
-- ParameterKey: ToggleCfnInitUpdate
-  ParameterValue: __TOGGLECFNINITUPDATE__
-- ParameterKey: ToggleNewInstances
-  ParameterValue: __TOGGLENEWINSTANCES__

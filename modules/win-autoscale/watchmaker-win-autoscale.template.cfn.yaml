@@ -96,6 +96,7 @@ Metadata:
           - NoPublicIp
           - NoReboot
           - PatchGroup
+          - RootVolumeSize
           - SecurityGroupIds
       - Label:
           default: EC2 Watchmaker Configuration
@@ -146,7 +147,7 @@ Metadata:
         default: Force Cfn Init Update
       ToggleNewInstances:
         default: Force New Instances
-  Version: 1.10.0
+  Version: 1.11.0
 Outputs:
   ScaleDownScheduledAction:
     Condition: UseScheduledAction
@@ -322,6 +323,11 @@ Parameters:
     AllowedPattern: '^http[s]?://.*\.exe$'
     Default: 'https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe'
     Description: URL to the Python Installer Executable
+    Type: String
+  RootVolumeSize:
+    Default: 30
+    Description: >-
+      Root Volume Size in GB **NOTE** This value can be set larger than the default (30GB) but NOT smaller
     Type: String
   ScaleDownSchedule:
     Default: ''
@@ -809,6 +815,7 @@ Resources:
         - DeviceName: /dev/sda1
           Ebs:
             DeleteOnTermination: true
+            VolumeSize: !Ref RootVolumeSize
             VolumeType: gp2
         - !If
           - CreateAppVolume

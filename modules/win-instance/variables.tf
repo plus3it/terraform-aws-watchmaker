@@ -55,6 +55,12 @@ variable "PolicyUrl" {
   default     = ""
 }
 
+variable "RootVolumeSize" {
+  type        = "string"
+  description = "Root Volume Size in GB **NOTE** This value can be set larger than the default (30GB) but NOT smaller."
+  default     = "30"
+}
+
 variable "StackTags" {
   type        = "map"
   description = "A map of tag keys/values to associate with this stack"
