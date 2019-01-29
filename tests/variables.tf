@@ -1,3 +1,13 @@
+variable "AsgMetrics" {
+  default = ["GroupMinSize", "GroupMaxSize", "GroupDesiredCapacity", "GroupInServiceInstances", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
+  type    = "list"
+}
+
+variable "AsgNotificationTypes" {
+  default = ["autoscaling:EC2_INSTANCE_LAUNCH", "autoscaling:EC2_INSTANCE_LAUNCH_ERROR", "autoscaling:EC2_INSTANCE_TERMINATE", "autoscaling:EC2_INSTANCE_TERMINATE_ERROR", "autoscaling:TEST_NOTIFICATION"]
+  type    = "list"
+}
+
 variable "build_id" {
   default = ""
   type    = "string"

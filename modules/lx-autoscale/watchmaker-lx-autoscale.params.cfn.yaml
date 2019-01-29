@@ -16,6 +16,12 @@
   ParameterValue: __APPVOLUMESIZE__
 - ParameterKey: AppVolumeType
   ParameterValue: __APPVOLUMETYPE__
+- ParameterKey: AsgMetrics
+  ParameterValue: __Metrics__
+- ParmeterKey: AsgNotificationTypes
+  ParameterValue: __ASGNOTIFICATION__
+- ParameterKey: AsgSnsArn
+  ParameterValue: __ASGSNSARN__
 - ParameterKey: CfnBootstrapUtilsUrl
   ParameterValue: __CFNBOOTSTRAPUTILSURL__
 - ParameterKey: CfnEndpointUrl
@@ -28,8 +34,12 @@
   ParameterValue: __CWAGENTAPPLOGS__
 - ParameterKey: DesiredCapacity
   ParameterValue: __DESIREDCAPACITY__
+- ParameterKey: EbsOptimized
+  ParameterValue: __EBSOPTIMIZED__
 - ParameterKey: InstanceRole
   ParameterValue: __INSTANCEROLE__
+- ParameterKey: InstanceTerminationPolicies
+  ParameterValue: __INSTTERMPOLICY__
 - ParameterKey: InstanceType
   ParameterValue: __INSTANCETYPE__
 - ParameterKey: KeyPairName
