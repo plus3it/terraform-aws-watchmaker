@@ -227,7 +227,7 @@ variable "CloudWatchAppLogs" {
 
 variable "CfnEndpointUrl" {
   type        = "string"
-  description = "(Optional) URL to the CloudFormation Endpoint. e.g. https://cloudformation.us-east-1.amazonaws.com"
+  description = "URL to the CloudFormation Endpoint. e.g. https://cloudformation.us-east-1.amazonaws.com"
   default     = "https://cloudformation.us-east-1.amazonaws.com"
 }
 
@@ -235,4 +235,16 @@ variable "ToggleCfnInitUpdate" {
   type        = "string"
   description = "A/B toggle that forces a change to instance metadata, triggering the cfn-init update sequence"
   default     = "A"
+}
+
+variable "DisableApiTermination" {
+  type        = "string"
+  description = "Specifies whether the instance can be terminated through the API."
+  default     = "false"
+}
+
+variable "EbsOptimized" {
+  type        = "string"
+  description = "Specifies whether the instance is optimized for Amazon Elastic Block Store I/O. Warning: Stack creation will fail if set to true and the instance type does not support EBS Optimization. See complete list of supported instances here: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html#ebs-optimization-support"
+  default     = "false"
 }

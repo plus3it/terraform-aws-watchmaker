@@ -12,6 +12,12 @@
   ParameterValue: __APPVOLUMESIZE__
 - ParameterKey: AppVolumeType
   ParameterValue: __APPVOLUMETYPE__
+- ParameterKey: AsgMetrics
+  ParameterValue: __Metrics__
+- ParmeterKey: AsgNotificationTypes
+  ParameterValue: __ASGNOTIFICATION__
+- ParameterKey: AsgSnsArn
+  ParameterValue: __ASGSNSARN__
 - ParameterKey: CfnEndpointUrl
   ParameterValue: __CFNENDPOINTURL__
 - ParameterKey: CloudWatchAgentUrl
@@ -20,8 +26,12 @@
   ParameterValue: __CWAGENTAPPLOGS__
 - ParameterKey: DesiredCapacity
   ParameterValue: __DESIREDCAPACITY__
+- ParameterKey: EbsOptimized
+  ParameterValue: __EBSOPTIMIZED__
 - ParameterKey: InstanceRole
   ParameterValue: __INSTANCEROLE__
+- ParameterKey: InstanceTerminationPolicies
+  ParameterValue: __INSTTERMPOLICY__
 - ParameterKey: InstanceType
   ParameterValue: __INSTANCETYPE__
 - ParameterKey: KeyPairName

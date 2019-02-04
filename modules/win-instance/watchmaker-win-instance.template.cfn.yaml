@@ -76,6 +76,8 @@ Metadata:
           default: EC2 Instance Configuration
         Parameters:
           - AmiId
+          - DisableApiTermination
+          - EbsOptimized
           - InstanceType
           - InstanceRole
           - KeyPairName
@@ -123,7 +125,7 @@ Metadata:
     ParameterLabels:
       ToggleCfnInitUpdate:
         default: Force Cfn Init Update
-  Version: 1.11.0
+  Version: 1.12.0
 Outputs:
   WatchmakerInstanceId:
     Description: Instance ID
@@ -201,6 +203,22 @@ Parameters:
     Description: >-
       (Optional) List of application log file paths to send to CloudWatch. Example: C:\\dir1\\file1,C:\\dir2\file2,C:\\dir3\\file3
     Type: CommaDelimitedList
+  DisableApiTermination:
+    AllowedValues:
+      - 'false'
+      - 'true'
+    Default: 'false'
+    Description: >-
+      Specifies whether the instance can be terminated through the API.
+    Type: String
+  EbsOptimized:
+    Default: 'false'
+    Description: >-
+      Specifies whether the instance is optimized for Amazon Elastic Block Store I/O.
+      Warning: Stack creation will fail if set to true and the instance type does not support EBS Optimization.
+      See complete list of supported instances here:
+      https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html#ebs-optimization-support
+    Type: String
   InstanceRole:
     Default: ''
     Description: (Optional) IAM instance role to apply to the instance(s)
@@ -711,6 +729,8 @@ Resources:
               VolumeSize: !Ref AppVolumeSize
               VolumeType: !Ref AppVolumeType
           - !Ref 'AWS::NoValue'
+      DisableApiTermination: !Ref DisableApiTermination
+      EbsOptimized: !Ref EbsOptimized
       IamInstanceProfile: !If
         - AssignInstanceRole
         - !Ref InstanceRole
@@ -718,6 +738,7 @@ Resources:
       ImageId: !Ref AmiId
       InstanceType: !Ref InstanceType
       KeyName: !Ref KeyPairName
+      Monitoring: true
       NetworkInterfaces:
         - AssociatePublicIpAddress: !If
             - AssignPublicIp

@@ -26,6 +26,10 @@
   ParameterValue: __CWAGENTURL__
 - ParameterKey: CloudWatchAppLogs
   ParameterValue: __CWAGENTAPPLOGS__
+- ParameterKey: DisableApiTermination
+  ParameterValue: __DISABLEAPITERMINATION__
+- ParameterKey: EbsOptimized
+  ParameterValue: __EBSOPTIMIZED__
 - ParameterKey: InstanceRole
   ParameterValue: __INSTANCEROLE__
 - ParameterKey: InstanceType

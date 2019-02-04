@@ -1,5 +1,13 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Conditions:
+  AsgNotificationsDefined: !Not
+    - !Equals
+      - !Join [ ",", !Ref AsgNotificationTypes]
+      - ''
+  AsgSnsArnDefined: !Not
+    - !Equals
+      - !Ref AsgSnsArn
+      - ''
   AssignInstanceRole: !Not
     - !Equals
       - !Ref InstanceRole
@@ -49,6 +57,13 @@ Conditions:
     - !Equals
       - !Ref WatchmakerAdminUsers
       - ''
+  UseAsgMetricsCollection: !Not
+    - !Equals
+      - !Join [ "," , !Ref AsgMetrics]
+      - ''
+  UseAsgNotifications: !And
+    - !Condition AsgNotificationsDefined
+    - !Condition AsgSnsArnDefined
   UseCfnUrl: !Not
     - !Equals
       - !Ref CfnEndpointUrl
@@ -84,6 +99,10 @@ Conditions:
       - !Join
         - ''
         - !Ref TargetGroupArns
+      - ''
+  UseTerminationPolicies: !Not
+    - !Equals
+      - !Join [ "," , !Ref InstanceTerminationPolicies]
       - ''
   UseWamConfig: !Not
     - !Equals
@@ -188,7 +207,12 @@ Metadata:
       - Label:
           default: AutoScale Configuration
         Parameters:
+          - AsgMetrics
+          - AsgNotificationTypes
+          - AsgSnsArn
           - DesiredCapacity
+          - EbsOptimized
+          - InstanceTerminationPolicies
           - MinCapacity
           - MaxCapacity
           - ScaleDownSchedule
@@ -214,7 +238,7 @@ Metadata:
         default: Force Cfn Init Update
       ToggleNewInstances:
         default: Force New Instances
-  Version: 1.11.0
+  Version: 1.12.0
 Outputs:
   ScaleDownScheduledAction:
     Condition: UseScheduledAction
@@ -303,6 +327,26 @@ Parameters:
     Default: gp2
     Description: Type of EBS volume to create. Ignored if "AppVolumeDevice" is blank
     Type: String
+  AsgMetrics:
+    Default: ''
+    Description: >-
+      (Optional) The list of Asg metrics to collect. Must define MetricsCollectionGranularity to enable.
+      Define MetricsCollectionGranularity and leave this option blank to collect all metrics
+    Type: CommaDelimitedList
+  AsgNotificationTypes:
+    Default: ''
+    Description: >-
+      (Optional) A list of event types that trigger a notification. Event types can include any of the following
+      types: autoscaling:EC2_INSTANCE_LAUNCH, autoscaling:EC2_INSTANCE_LAUNCH_ERROR, autoscaling:EC2_INSTANCE_TERMINATE,
+      autoscaling:EC2_INSTANCE_TERMINATE_ERROR, and autoscaling:TEST_NOTIFICATION.
+      NOTE: Must be defined in conjunction with AsgSnsArn.
+    Type: CommaDelimitedList
+  AsgSnsArn:
+    Default: ''
+    Description: >-
+      (Optional) The Amazon Resource Name (ARN) of the Amazon Simple Notification Service (SNS) topic to send Asg events to.
+      NOTE: Must be defined in conjunction with AsgNotificationTypes.
+    Type: String
   CfnBootstrapUtilsUrl:
     AllowedPattern: '^http[s]?://.*\.tar\.gz$'
     Default: >-
@@ -337,10 +381,28 @@ Parameters:
     Default: 1
     Description: Desired number of instances in the Autoscaling Group
     Type: Number
+  EbsOptimized:
+    AllowedValues:
+      - 'true'
+      - 'false'
+    Default: 'false'
+    Description: >-
+      Specifies whether the launch configuration is optimized for EBS I/O. This optimization provides
+      dedicated throughput to Amazon EBS and an optimized configuration stack to provide optimal EBS I/O performance.
+      Warning: Stack creation will fail if set to true and the instance type does not support EBS Optimization.
+      See complete list of supported instances here:
+      https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html#ebs-optimization-support
+    Type: String
   InstanceRole:
     Default: ''
     Description: (Optional) IAM instance role to apply to the instance(s)
     Type: String
+  InstanceTerminationPolicies:
+    Default: ''
+    Description: >-
+      (Optional) A list of policies that are used to select the instances to terminate.
+      The policies are executed in the order that you list them.
+    Type: CommaDelimitedList
   InstanceType:
     AllowedValues:
       - t2.nano
@@ -552,7 +614,21 @@ Resources:
         - !Ref LoadBalancerNames
         - !Ref 'AWS::NoValue'
       MaxSize: !Ref MaxCapacity
+      MetricsCollection: !If
+        - UseAsgMetricsCollection
+        -
+          -
+            Granularity: "1Minute"
+            Metrics: !Ref AsgMetrics
+        - !Ref 'AWS::NoValue'
       MinSize: !Ref MinCapacity
+      NotificationConfigurations: !If
+        - UseAsgNotifications
+        -
+          -
+            NotificationTypes: !Ref AsgNotificationTypes
+            TopicARN: !Ref AsgSnsArn
+        - !Ref 'AWS::NoValue'
       Tags:
         - Key: Name
           Value: !Sub '${AWS::StackName}'
@@ -567,6 +643,10 @@ Resources:
       TargetGroupARNs: !If
         - UseTargetGroupArns
         - !Ref TargetGroupArns
+        - !Ref 'AWS::NoValue'
+      TerminationPolicies: !If
+        - UseTerminationPolicies
+        - !Ref InstanceTerminationPolicies
         - !Ref 'AWS::NoValue'
       VPCZoneIdentifier: !Ref SubnetIds
     Type: AWS::AutoScaling::AutoScalingGroup
@@ -871,6 +951,7 @@ Resources:
               VolumeSize: !Ref AppVolumeSize
               VolumeType: !Ref AppVolumeType
           - !Ref 'AWS::NoValue'
+      EbsOptimized: !Ref EbsOptimized
       IamInstanceProfile: !If
         - AssignInstanceRole
         - !Ref InstanceRole

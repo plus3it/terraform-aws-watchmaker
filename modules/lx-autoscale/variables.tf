@@ -295,3 +295,33 @@ variable "ToggleNewInstances" {
   description = "A/B toggle that forces a change to instance userdata, triggering new instances via the Autoscale update policy"
   default     = "A"
 }
+
+variable "AsgMetrics" {
+  type        = "list"
+  description = "(Optional) The list of ASG metrics to collect. Must define EnableASGMetricsCollection to enable. Define MetricsCollectionGranularity and leave this option blank to collect all metrics"
+  default     = []
+}
+
+variable "AsgSnsArn" {
+  type        = "string"
+  description = "(Optional) The Amazon Resource Name (ARN) of the Amazon Simple Notification Service (SNS) topic to send ASG events to. NOTE: Must be defined in conjunction with ASGNotificationTypes."
+  default     = ""
+}
+
+variable "AsgNotificationTypes" {
+  type        = "list"
+  description = "(Optional) A list of event types that trigger a notification. Event types can include any of the following types: autoscaling:EC2_INSTANCE_LAUNCH, autoscaling:EC2_INSTANCE_LAUNCH_ERROR, autoscaling:EC2_INSTANCE_TERMINATE, autoscaling:EC2_INSTANCE_TERMINATE_ERROR, and autoscaling:TEST_NOTIFICATION. NOTE: Must be defined in conjunction with ASGSNSARN."
+  default     = []
+}
+
+variable "InstanceTerminationPolicies" {
+  type        = "list"
+  description = "(Optional) A list of policies that are used to select the instances to terminate. The policies are executed in the order that you list them."
+  default     = []
+}
+
+variable "EbsOptimized" {
+  type        = "string"
+  description = "Specifies whether the launch configuration is optimized for EBS I/O. This optimization provides dedicated throughput to Amazon EBS and an optimized configuration stack to provide optimal EBS I/O performance. Warning: Stack creation will fail if set to true and the instance type does not support EBS Optimization. See complete list of supported instances here: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html#ebs-optimization-support"
+  default     = "false"
+}
