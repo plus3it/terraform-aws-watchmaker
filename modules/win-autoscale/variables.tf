@@ -100,6 +100,12 @@ variable "AppVolumeSize" {
   default     = "1"
 }
 
+variable "AppVolumeSnapshotId" {
+  type        = "string"
+  description = "(Optional) EBS Snapshot ID from which to create the AppVolume. \"AppVolumeSize\" must be equal or greater than the size of the snapshot. Ignored if \"AppVolumeDevice\" is blank"
+  default     = ""
+}
+
 variable "KeyPairName" {
   type        = "string"
   description = "Public/private key pairs allow you to securely connect to your instance after it launches"

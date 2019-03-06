@@ -57,6 +57,10 @@ Conditions:
     - !Equals
       - !Ref WatchmakerAdminUsers
       - ''
+  UseAppVolumeSnapshot: !Not
+    - !Equals
+      - !Ref AppVolumeSnapshotId
+      - ''
   UseAsgMetricsCollection: !Not
     - !Equals
       - !Join [ "," , !Ref AsgMetrics]
@@ -203,6 +207,7 @@ Metadata:
           - AppVolumeDevice
           - AppVolumeMountPath
           - AppVolumeSize
+          - AppVolumeSnapshotId
           - AppVolumeType
       - Label:
           default: AutoScale Configuration
@@ -306,17 +311,25 @@ Parameters:
     Default: /opt/data
     Description: >-
       Filesystem path to mount the extra app volume. Ignored if
-      "AppVolumeDevice" is blank
+      "AppVolumeDevice" is false
     Type: String
   AppVolumeSize:
     ConstraintDescription: Must be between 1GB and 16384GB.
     Default: 1
     Description: >-
       Size in GB of the EBS volume to create. Ignored if "AppVolumeDevice" is
-      blank
+      false
     MaxValue: 16384
     MinValue: 1
     Type: Number
+  AppVolumeSnapshotId:
+    AllowedPattern: '^$|snap-[a-z0-9]+'
+    Default: ''
+    Description: >-
+      (Optional) EBS Snapshot ID from which to create the AppVolume. "AppVolumeSize"
+      must be equal or greater than the size of the snapshot. Ignored if "AppVolumeDevice"
+      is false
+    Type: String
   AppVolumeType:
     AllowedValues:
       - gp2
@@ -325,7 +338,7 @@ Parameters:
       - st1
       - standard
     Default: gp2
-    Description: Type of EBS volume to create. Ignored if "AppVolumeDevice" is blank
+    Description: Type of EBS volume to create. Ignored if "AppVolumeDevice" is false
     Type: String
   AsgMetrics:
     Default: ''
@@ -948,6 +961,10 @@ Resources:
           - DeviceName: /dev/xvdf
             Ebs:
               DeleteOnTermination: true
+              SnapshotId: !If
+                - UseAppVolumeSnapshot
+                - !Ref AppVolumeSnapshotId
+                - !Ref 'AWS::NoValue'
               VolumeSize: !Ref AppVolumeSize
               VolumeType: !Ref AppVolumeType
           - !Ref 'AWS::NoValue'

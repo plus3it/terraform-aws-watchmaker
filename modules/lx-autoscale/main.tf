@@ -24,6 +24,7 @@ resource "aws_cloudformation_stack" "watchmaker-lx-autoscale" {
     AppVolumeDevice             = "${var.AppVolumeDevice}"
     AppVolumeMountPath          = "${var.AppVolumeMountPath}"
     AppVolumeSize               = "${var.AppVolumeSize}"
+    AppVolumeSnapshotId         = "${var.AppVolumeSnapshotId}"
     AppVolumeType               = "${var.AppVolumeType}"
     AsgMetrics                  = "${join(",", var.AsgMetrics)}"
     AsgNotificationTypes        = "${join(",", var.AsgNotificationTypes)}"
