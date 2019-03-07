@@ -24,6 +24,7 @@ resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
     AppVolumeDevice        = "${var.AppVolumeDevice}"
     AppVolumeMountPath     = "${var.AppVolumeMountPath}"
     AppVolumeSize          = "${var.AppVolumeSize}"
+    AppVolumeSnapshotId    = "${var.AppVolumeSnapshotId}"
     AppVolumeType          = "${var.AppVolumeType}"
     CfnBootstrapUtilsUrl   = "${var.CfnBootstrapUtilsUrl}"
     CfnEndpointUrl         = "${var.CfnEndpointUrl}"

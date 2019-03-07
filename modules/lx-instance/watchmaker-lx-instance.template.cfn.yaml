@@ -53,6 +53,10 @@ Conditions:
     - !Equals
       - !Ref WatchmakerAdminUsers
       - ''
+  UseAppVolumeSnapshot: !Not
+    - !Equals
+      - !Ref AppVolumeSnapshotId
+      - ''
   UseCfnUrl: !Not
     - !Equals
       - !Ref CfnEndpointUrl
@@ -171,6 +175,7 @@ Metadata:
           - AppVolumeDevice
           - AppVolumeMountPath
           - AppVolumeSize
+          - AppVolumeSnapshotId
           - AppVolumeType
       - Label:
           default: Network Configuration
@@ -189,7 +194,7 @@ Metadata:
     ParameterLabels:
       ToggleCfnInitUpdate:
         default: Force Cfn Init Update
-  Version: 1.12.0
+  Version: 1.13.0
 Outputs:
   WatchmakerInstanceId:
     Description: Instance ID
@@ -257,6 +262,14 @@ Parameters:
     MaxValue: 16384
     MinValue: 1
     Type: Number
+  AppVolumeSnapshotId:
+    AllowedPattern: '^$|snap-[a-z0-9]+'
+    Default: ''
+    Description: >-
+      (Optional) EBS Snapshot ID from which to create the AppVolume. "AppVolumeSize"
+      must be equal or greater than the size of the snapshot. Ignored if "AppVolumeDevice"
+      is false
+    Type: String
   AppVolumeType:
     AllowedValues:
       - gp2
@@ -761,6 +774,10 @@ Resources:
           - DeviceName: /dev/xvdf
             Ebs:
               DeleteOnTermination: true
+              SnapshotId: !If
+                - UseAppVolumeSnapshot
+                - !Ref AppVolumeSnapshotId
+                - !Ref 'AWS::NoValue'
               VolumeSize: !Ref AppVolumeSize
               VolumeType: !Ref AppVolumeType
           - !Ref 'AWS::NoValue'

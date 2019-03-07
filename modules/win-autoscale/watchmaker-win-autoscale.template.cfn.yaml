@@ -47,6 +47,10 @@ Conditions:
     - !Equals
       - !Ref WatchmakerAdminGroups
       - ''
+  UseAppVolumeSnapshot: !Not
+    - !Equals
+      - !Ref AppVolumeSnapshotId
+      - ''
   UseCfnUrl: !Not
     - !Equals
       - !Ref CfnEndpointUrl
@@ -138,6 +142,7 @@ Metadata:
         Parameters:
           - AppVolumeDevice
           - AppVolumeSize
+          - AppVolumeSnapshotId
           - AppVolumeType
       - Label:
           default: AutoScale Configuration
@@ -171,7 +176,7 @@ Metadata:
         default: Force Cfn Init Update
       ToggleNewInstances:
         default: Force New Instances
-  Version: 1.12.0
+  Version: 1.13.0
 Outputs:
   ScaleDownScheduledAction:
     Condition: UseScheduledAction
@@ -231,6 +236,14 @@ Parameters:
     MaxValue: 16384
     MinValue: 1
     Type: Number
+  AppVolumeSnapshotId:
+    AllowedPattern: '^$|snap-[a-z0-9]+'
+    Default: ''
+    Description: >-
+      (Optional) EBS Snapshot ID from which to create the AppVolume. "AppVolumeSize"
+      must be equal or greater than the size of the snapshot. Ignored if "AppVolumeDevice"
+      is blank
+    Type: String
   AppVolumeType:
     AllowedValues:
       - gp2
@@ -902,6 +915,10 @@ Resources:
           - DeviceName: !Ref AppVolumeDevice
             Ebs:
               DeleteOnTermination: true
+              SnapshotId: !If
+                - UseAppVolumeSnapshot
+                - !Ref AppVolumeSnapshotId
+                - !Ref 'AWS::NoValue'
               VolumeSize: !Ref AppVolumeSize
               VolumeType: !Ref AppVolumeType
           - !Ref 'AWS::NoValue'
