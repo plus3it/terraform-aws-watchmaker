@@ -62,3 +62,5 @@
   ParameterValue: __WATCHMAKEREXTRAARGS__
 - ParameterKey: WatchmakerOuPath
   ParameterValue: __WATCHMAKEROUPATH__
+- ParameterKey: WatchmakerStandaloneUrl
+  ParameterValue: __WATCHMAKERSTANDALONEURL__
