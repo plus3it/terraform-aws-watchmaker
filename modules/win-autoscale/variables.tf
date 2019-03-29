@@ -241,6 +241,12 @@ variable "WatchmakerExtraArgs" {
   default     = ""
 }
 
+variable "WatchmakerStandaloneUrl" {
+  type        = "string"
+  description = "(Optional) HTTP/S URL to a Watchmaker standalone executable. The file will be retrieved and used to run Watchmaker, instead of installing Watchmaker from PyPi"
+  default     = ""
+}
+
 variable "CloudWatchAgentUrl" {
   type        = "string"
   description = "(Optional) S3 URL to CloudWatch Agent installer. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.zip"

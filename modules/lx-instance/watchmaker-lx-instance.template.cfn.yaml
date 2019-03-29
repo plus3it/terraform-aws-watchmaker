@@ -77,6 +77,10 @@ Conditions:
     - !Equals
       - !Ref WatchmakerConfig
       - ''
+  UseWamStandalone: !Not
+    - !Equals
+      - !Ref WatchmakerStandaloneUrl
+      - ''
 Description: >-
   This template deploys a Linux instance using Watchmaker, which applies the
   DISA STIG.
@@ -156,6 +160,7 @@ Metadata:
           default: EC2 Watchmaker Configuration
         Parameters:
           - PypiIndexUrl
+          - WatchmakerStandaloneUrl
           - WatchmakerConfig
           - WatchmakerEnvironment
           - WatchmakerOuPath
@@ -474,6 +479,14 @@ Parameters:
       will be placed in a default container. Leave blank if not joining a
       domain, or if "WatchmakerEnvironment" is "false"
     Type: String
+  WatchmakerStandaloneUrl:
+    AllowedPattern: '^$|^(http[s]?)://.*$'
+    Default: ''
+    Description: >-
+      (Optional) HTTP/S URL to a Watchmaker standalone executable. The file will
+      be retrieved and used to run Watchmaker, instead of installing Watchmaker
+      from PyPi
+    Type: String
 Resources:
   WatchmakerInstance:
     CreationPolicy:
@@ -693,17 +706,25 @@ Resources:
               mode: '000400'
               owner: root
             /etc/cfn/scripts/watchmaker-install.sh:
-              content: !Sub |
-                  #!/bin/bash
-                  PYPI_URL=${PypiIndexUrl}
+              content:
+                !If
+                  - UseWamStandalone
+                  - !Sub |
+                      #!/bin/bash
+                      curl --fail -sSL -o /etc/cfn/scripts/watchmaker ${WatchmakerStandaloneUrl}
+                      chown root:root /etc/cfn/scripts/watchmaker
+                      chmod +x /etc/cfn/scripts/watchmaker
+                  - !Sub |
+                      #!/bin/bash
+                      PYPI_URL=${PypiIndexUrl}
 
-                  # Setup terminal support for UTF-8
-                  export LC_ALL=en_US.UTF-8
-                  export LANG=en_US.UTF-8
+                      # Setup terminal support for UTF-8
+                      export LC_ALL=en_US.UTF-8
+                      export LANG=en_US.UTF-8
 
-                  curl --silent --show-error --retry 5 -L ${CfnGetPipUrl} | python3 - --index-url="$PYPI_URL"
-                  pip install --index-url="$PYPI_URL" --upgrade pip setuptools boto3
-                  pip install --index-url="$PYPI_URL" --upgrade watchmaker
+                      curl --silent --show-error --retry 5 -L ${CfnGetPipUrl} | python3 - --index-url="$PYPI_URL"
+                      pip install --index-url="$PYPI_URL" --upgrade pip setuptools boto3
+                      pip install --index-url="$PYPI_URL" --upgrade watchmaker
               group: root
               mode: '000700'
               owner: root
@@ -724,7 +745,7 @@ Resources:
             10-watchmaker-launch:
               command: !Sub
                 - >-
-                  watchmaker --log-level debug --log-dir /var/log/watchmaker --no-reboot
+                  PATH="/etc/cfn/scripts:$PATH" watchmaker --log-level debug --log-dir /var/log/watchmaker --no-reboot
                   ${local_UseWamConfig}
                   ${local_UseEnvironment}
                   ${local_UseOUPath}
@@ -744,7 +765,7 @@ Resources:
             10-watchmaker-update:
               command: !Sub
                 - >-
-                  watchmaker --log-level debug --log-dir /var/log/watchmaker --no-reboot --salt-states None
+                  PATH="/etc/cfn/scripts:$PATH" watchmaker --log-level debug --log-dir /var/log/watchmaker --no-reboot --salt-states None
                   ${local_UseWamConfig}
                   ${local_UseEnvironment}
                   ${local_UseOUPath}

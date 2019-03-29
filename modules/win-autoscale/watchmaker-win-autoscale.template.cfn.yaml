@@ -95,6 +95,10 @@ Conditions:
     - !Equals
       - !Ref WatchmakerConfig
       - ''
+  UseWamStandalone: !Not
+    - !Equals
+      - !Ref WatchmakerStandaloneUrl
+      - ''
 Description: >-
   This template creates an Autoscaling Group and Launch Configuration that
   deploys Windows instances with Watchmaker, which applies the DISA STIG.
@@ -126,6 +130,7 @@ Metadata:
         Parameters:
           - PythonInstaller
           - PypiIndexUrl
+          - WatchmakerStandaloneUrl
           - WatchmakerBootstrapper
           - WatchmakerConfig
           - WatchmakerEnvironment
@@ -491,6 +496,14 @@ Parameters:
       will be placed in a default container. Leave blank if not joining a
       domain, or if "WatchmakerEnvironment" is "$false"
     Type: String
+  WatchmakerStandaloneUrl:
+    AllowedPattern: '^$|^(http[s]?)://.*$'
+    Default: ''
+    Description: >-
+      (Optional) HTTP/S URL to a Watchmaker standalone executable. The file will
+      be retrieved and used to run Watchmaker, instead of installing Watchmaker
+      from PyPi
+    Type: String
 Resources:
   ScaleDownScheduledAction:
     Condition: UseScheduledAction
@@ -764,7 +777,7 @@ Resources:
               waitAfterCompletion: forever
         setup:
           commands:
-            01-install-python-and-wam:
+            01-install-wam:
               command: !Sub
                 - >-
                   ${local_ShellCommandMap} -Command "Invoke-Command -ScriptBlock {
@@ -811,28 +824,35 @@ Resources:
                   local_AssignInstanceRole: !If [AssignInstanceRole, !Sub '--role ${InstanceRole}','']
                   local_UseCfnUrl: !If [UseCfnUrl, !Sub '--url ${CfnEndpointUrl}', '']
             'c:\cfn\scripts\watchmaker-install.ps1':
-              content: !Sub |
-                  $BootstrapUrl = "${WatchmakerBootstrapper}"
-                  $PythonUrl = "${PythonInstaller}"
-                  $PypiUrl = "${PypiIndexUrl}"
+              content:
+                !If
+                  - UseWamStandalone
+                  - !Sub |
+                      # Download watchmaker standalone pkg
+                      [Net.ServicePointManager]::SecurityProtocol = "Ssl3, Tls, Tls11, Tls12"
+                      (New-Object System.Net.WebClient).DownloadFile("${WatchmakerStandaloneUrl}", "c:\cfn\scripts\watchmaker.exe")
+                  - !Sub |
+                      $BootstrapUrl = "${WatchmakerBootstrapper}"
+                      $PythonUrl = "${PythonInstaller}"
+                      $PypiUrl = "${PypiIndexUrl}"
 
-                  # Get the host
-                  $PypiHost="$(([System.Uri]$PypiUrl).Host)"
+                      # Get the host
+                      $PypiHost="$(([System.Uri]$PypiUrl).Host)"
 
-                  # Download bootstrap file
-                  $BootstrapFile = "${!Env:Temp}\$(${!BootstrapUrl}.split('/')[-1])"
-                  (New-Object System.Net.WebClient).DownloadFile("$BootstrapUrl", "$BootstrapFile")
+                      # Download bootstrap file
+                      $BootstrapFile = "${!Env:Temp}\$(${!BootstrapUrl}.split('/')[-1])"
+                      (New-Object System.Net.WebClient).DownloadFile("$BootstrapUrl", "$BootstrapFile")
 
-                  # Install python
-                  & "$BootstrapFile" -PythonUrl "$PythonUrl" -Verbose -ErrorAction Stop
+                      # Install python
+                      & "$BootstrapFile" -PythonUrl "$PythonUrl" -Verbose -ErrorAction Stop
 
-                  # Install setup dependencies
-                  python -m pip install --index-url="$PypiUrl" --trusted-host="$PypiHost" --upgrade pip setuptools
-                  if (-not $?) { throw 'pip failed to install setup dependencies!' }
+                      # Install setup dependencies
+                      python -m pip install --index-url="$PypiUrl" --trusted-host="$PypiHost" --upgrade pip setuptools
+                      if (-not $?) { throw 'pip failed to install setup dependencies!' }
 
-                  # Install watchmaker
-                  pip install --index-url="$PypiUrl" --trusted-host="$PypiHost" --upgrade boto3 watchmaker
-                  if (-not $?) { throw 'pip failed to install watchmaker!' }
+                      # Install watchmaker
+                      pip install --index-url="$PypiUrl" --trusted-host="$PypiHost" --upgrade boto3 watchmaker
+                      if (-not $?) { throw 'pip failed to install watchmaker!' }
             'c:\cfn\scripts\update-path.ps1':
                 content: |
                     foreach( $Level in "Machine", "User" ) {
@@ -860,6 +880,7 @@ Resources:
                   ${local_ShellCommandMap} -Command "Invoke-Command -ScriptBlock {
                   $ErrorActionPreference = 'Stop';
                   c:\cfn\scripts\update-path.ps1 -ErrorAction Stop  -Verbose;
+                  $Env:Path = \"C:\cfn\scripts;$Env:Path\";
                   watchmaker --log-level debug --log-dir C:\Watchmaker\Logs --no-reboot
                   ${local_UseWamConfig}
                   ${local_UseEnvironment}
@@ -883,6 +904,7 @@ Resources:
                   ${local_ShellCommandMap} -Command "Invoke-Command -ScriptBlock {
                   $ErrorActionPreference = 'Stop';
                   c:\cfn\scripts\update-path.ps1 -ErrorAction Stop  -Verbose;
+                  $Env:Path = \"C:\cfn\scripts;$Env:Path\";
                   watchmaker --log-level debug --log-dir C:\Watchmaker\Logs --no-reboot --salt-states None
                   ${local_UseWamConfig}
                   ${local_UseEnvironment}
