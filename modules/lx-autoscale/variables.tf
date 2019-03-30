@@ -284,12 +284,6 @@ variable "CfnEndpointUrl" {
   default     = "https://cloudformation.us-east-1.amazonaws.com"
 }
 
-variable "CfnGetPipUrl" {
-  type        = "string"
-  description = "URL to get-pip.py"
-  default     = "https://bootstrap.pypa.io/2.6/get-pip.py"
-}
-
 variable "CfnBootstrapUtilsUrl" {
   type        = "string"
   description = "URL to aws-cfn-bootstrap-latest.tar.gz"

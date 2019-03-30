@@ -26,8 +26,6 @@
   ParameterValue: __CFNBOOTSTRAPUTILSURL__
 - ParameterKey: CfnEndpointUrl
   ParameterValue: __CFNENDPOINTURL__
-- ParameterKey: CfnGetPipUrl
-  ParameterValue: __CFNGETPIPURL__
 - ParameterKey: CloudWatchAgentUrl
   ParameterValue: __CWAGENTURL__
 - ParameterKey: CloudWatchAppLogs

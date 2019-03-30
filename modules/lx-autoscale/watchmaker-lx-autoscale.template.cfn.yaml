@@ -237,7 +237,6 @@ Metadata:
           default: CloudFormation Configuration
         Parameters:
           - CfnEndpointUrl
-          - CfnGetPipUrl
           - CfnBootstrapUtilsUrl
           - CloudWatchAgentUrl
           - CloudWatchAppLogs
@@ -377,11 +376,6 @@ Parameters:
     Description: >-
       (Optional) URL to the CloudFormation Endpoint. e.g.
       https://cloudformation.us-east-1.amazonaws.com
-    Type: String
-  CfnGetPipUrl:
-    AllowedPattern: '^http[s]?://.*\.py$'
-    Default: 'https://bootstrap.pypa.io/get-pip.py'
-    Description: URL to get-pip.py
     Type: String
   CloudWatchAgentUrl:
     AllowedPattern: '^$|^s3://.*$'
@@ -909,7 +903,7 @@ Resources:
                       export LC_ALL=en_US.UTF-8
                       export LANG=en_US.UTF-8
 
-                      curl --silent --show-error --retry 5 -L ${CfnGetPipUrl} | python3 - --index-url="$PYPI_URL"
+                      python3 -m ensurepip --upgrade --default-pip
                       pip install --index-url="$PYPI_URL" --upgrade pip setuptools boto3
                       pip install --index-url="$PYPI_URL" --upgrade watchmaker
               group: root
@@ -1049,13 +1043,13 @@ Resources:
               export AWS_DEFAULT_REGION=${AWS::Region}
 
               # Get pip
-              PYPI_URL=${PypiIndexUrl}
-              curl --silent --show-error --retry 5 -L ${CfnGetPipUrl} | python3 - --index-url="$PYPI_URL"
+              python3 -m ensurepip --upgrade --default-pip
 
               # Add pip to path
               hash pip 2> /dev/null || PATH="${!PATH}:/usr/local/bin"
 
               # Upgrade pip and setuptools
+              PYPI_URL=${PypiIndexUrl}
               pip install --index-url="$PYPI_URL" --upgrade pip setuptools
 
               # Fix python urllib3 warnings
