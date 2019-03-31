@@ -70,3 +70,5 @@
   ParameterValue: __WATCHMAKEROUPATH__
 - ParameterKey: WatchmakerStandaloneUrl
   ParameterValue: __WATCHMAKERSTANDALONEURL__
+- ParameterKey: WatchmakerVersion
+  ParameterValue: __WATCHMAKERVERSION__

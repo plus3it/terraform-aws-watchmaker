@@ -39,6 +39,10 @@ Conditions:
     - !Equals
       - !Ref NoUpdates
       - 'true'
+  PinWatchmakerVersion: !Not
+    - !Equals
+      - !Ref WatchmakerVersion
+      - ''
   Reboot: !Not
     - !Equals
       - !Ref NoReboot
@@ -192,14 +196,15 @@ Metadata:
       - Label:
           default: EC2 Watchmaker Configuration
         Parameters:
-          - PypiIndexUrl
-          - WatchmakerStandaloneUrl
           - WatchmakerConfig
           - WatchmakerEnvironment
           - WatchmakerOuPath
           - WatchmakerAdminGroups
           - WatchmakerAdminUsers
           - WatchmakerExtraArgs
+          - PypiIndexUrl
+          - WatchmakerVersion
+          - WatchmakerStandaloneUrl
       - Label:
           default: EC2 Application Configuration
         Parameters:
@@ -598,6 +603,13 @@ Parameters:
       be retrieved and used to run Watchmaker, instead of installing Watchmaker
       from PyPi
     Type: String
+  WatchmakerVersion:
+    AllowedPattern: '^$|^[0-9]*\.[0-9]*\.[0-9]*$'
+    Default: ''
+    Description: >-
+      (Optional) Watchmaker version to install. When blank (the default) the latest
+      version will be installed. Used only when Watchmaker is installed from PyPi
+    Type: String
 Resources:
   ScaleDownScheduledAction:
     Condition: UseScheduledAction
@@ -895,7 +907,8 @@ Resources:
                       curl --fail -sSL -o /etc/cfn/scripts/watchmaker ${WatchmakerStandaloneUrl}
                       chown root:root /etc/cfn/scripts/watchmaker
                       chmod +x /etc/cfn/scripts/watchmaker
-                  - !Sub |
+                  - !Sub
+                    - |
                       #!/bin/bash
                       PYPI_URL=${PypiIndexUrl}
 
@@ -905,7 +918,9 @@ Resources:
 
                       python3 -m ensurepip --upgrade --default-pip
                       pip install --index-url="$PYPI_URL" --upgrade pip setuptools boto3
-                      pip install --index-url="$PYPI_URL" --upgrade watchmaker
+                      pip install --index-url="$PYPI_URL" --upgrade ${local_WatchmakerPkg}
+                    -
+                      local_WatchmakerPkg: !If [PinWatchmakerVersion, !Sub 'watchmaker==${WatchmakerVersion}', 'watchmaker']
               group: root
               mode: '000700'
               owner: root

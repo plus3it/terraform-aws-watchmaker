@@ -236,6 +236,12 @@ variable "WatchmakerStandaloneUrl" {
   default     = ""
 }
 
+variable "WatchmakerVersion" {
+  type        = "string"
+  description = "(Optional) Watchmaker version to install. When blank (the default) the latest version will be installed. Used only when Watchmaker is installed from PyPi"
+  default     = ""
+}
+
 variable "CloudWatchAgentUrl" {
   type        = "string"
   description = "(Optional) S3 URL to CloudWatch Agent installer. Example: s3://amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip"
