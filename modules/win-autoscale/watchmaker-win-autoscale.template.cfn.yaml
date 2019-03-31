@@ -39,6 +39,10 @@ Conditions:
     - !Equals
       - !Ref CloudWatchAgentUrl
       - ''
+  PinWatchmakerVersion: !Not
+    - !Equals
+      - !Ref WatchmakerVersion
+      - ''
   Reboot: !Not
     - !Equals
       - !Ref NoReboot
@@ -128,15 +132,16 @@ Metadata:
       - Label:
           default: EC2 Watchmaker Configuration
         Parameters:
-          - PythonInstaller
-          - PypiIndexUrl
-          - WatchmakerStandaloneUrl
-          - WatchmakerBootstrapper
           - WatchmakerConfig
           - WatchmakerEnvironment
           - WatchmakerOuPath
           - WatchmakerAdminGroups
           - WatchmakerExtraArgs
+          - WatchmakerBootstrapper
+          - PythonInstaller
+          - PypiIndexUrl
+          - WatchmakerVersion
+          - WatchmakerStandaloneUrl
       - Label:
           default: EC2 Application Configuration
         Parameters:
@@ -504,6 +509,13 @@ Parameters:
       be retrieved and used to run Watchmaker, instead of installing Watchmaker
       from PyPi
     Type: String
+  WatchmakerVersion:
+    AllowedPattern: '^$|^[0-9]*\.[0-9]*\.[0-9]*$'
+    Default: ''
+    Description: >-
+      (Optional) Watchmaker version to install. When blank (the default) the latest
+      version will be installed. Used only when Watchmaker is installed from PyPi
+    Type: String
 Resources:
   ScaleDownScheduledAction:
     Condition: UseScheduledAction
@@ -831,7 +843,8 @@ Resources:
                       # Download watchmaker standalone pkg
                       [Net.ServicePointManager]::SecurityProtocol = "Ssl3, Tls, Tls11, Tls12"
                       (New-Object System.Net.WebClient).DownloadFile("${WatchmakerStandaloneUrl}", "c:\cfn\scripts\watchmaker.exe")
-                  - !Sub |
+                  - !Sub
+                    - |
                       $BootstrapUrl = "${WatchmakerBootstrapper}"
                       $PythonUrl = "${PythonInstaller}"
                       $PypiUrl = "${PypiIndexUrl}"
@@ -851,8 +864,10 @@ Resources:
                       if (-not $?) { throw 'pip failed to install setup dependencies!' }
 
                       # Install watchmaker
-                      pip install --index-url="$PypiUrl" --trusted-host="$PypiHost" --upgrade boto3 watchmaker
+                      pip install --index-url="$PypiUrl" --trusted-host="$PypiHost" --upgrade boto3 ${local_WatchmakerPkg}
                       if (-not $?) { throw 'pip failed to install watchmaker!' }
+                    -
+                      local_WatchmakerPkg: !If [PinWatchmakerVersion, !Sub 'watchmaker==${WatchmakerVersion}', 'watchmaker']
             'c:\cfn\scripts\update-path.ps1':
                 content: |
                     foreach( $Level in "Machine", "User" ) {

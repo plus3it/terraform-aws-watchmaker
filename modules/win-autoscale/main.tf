@@ -58,5 +58,6 @@ resource "aws_cloudformation_stack" "watchmaker-win-autoscale" {
     WatchmakerExtraArgs         = "${var.WatchmakerExtraArgs}"
     WatchmakerOuPath            = "${var.WatchmakerOuPath}"
     WatchmakerStandaloneUrl     = "${var.WatchmakerStandaloneUrl}"
+    WatchmakerVersion           = "${var.WatchmakerVersion}"
   }
 }
