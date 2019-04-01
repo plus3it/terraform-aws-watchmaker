@@ -5,6 +5,7 @@ data "aws_vpc" "this" {
 
 data "aws_ami" "centos6" {
   most_recent = true
+  owners      = ["701759196663"]
 
   filter {
     name   = "name"
@@ -20,15 +21,11 @@ data "aws_ami" "centos6" {
     name   = "state"
     values = ["available"]
   }
-
-  filter {
-    name   = "owner-id"
-    values = ["701759196663"]
-  }
 }
 
 data "aws_ami" "centos7" {
   most_recent = true
+  owners      = ["701759196663"]
 
   filter {
     name   = "name"
@@ -44,15 +41,11 @@ data "aws_ami" "centos7" {
     name   = "state"
     values = ["available"]
   }
-
-  filter {
-    name   = "owner-id"
-    values = ["701759196663"]
-  }
 }
 
 data "aws_ami" "windows2008R2" {
   most_recent = true
+  owners      = ["amazon"]
 
   filter {
     name   = "name"
@@ -63,15 +56,11 @@ data "aws_ami" "windows2008R2" {
     name   = "state"
     values = ["available"]
   }
-
-  filter {
-    name   = "owner-alias"
-    values = ["amazon"]
-  }
 }
 
 data "aws_ami" "windows2012R2" {
   most_recent = true
+  owners      = ["amazon"]
 
   filter {
     name   = "name"
@@ -82,15 +71,11 @@ data "aws_ami" "windows2012R2" {
     name   = "state"
     values = ["available"]
   }
-
-  filter {
-    name   = "owner-alias"
-    values = ["amazon"]
-  }
 }
 
 data "aws_ami" "windows2016" {
   most_recent = true
+  owners      = ["amazon"]
 
   filter {
     name   = "name"
@@ -100,11 +85,6 @@ data "aws_ami" "windows2016" {
   filter {
     name   = "state"
     values = ["available"]
-  }
-
-  filter {
-    name   = "owner-alias"
-    values = ["amazon"]
   }
 }
 

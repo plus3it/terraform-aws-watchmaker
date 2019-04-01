@@ -28,7 +28,6 @@ resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
     AppVolumeType           = "${var.AppVolumeType}"
     CfnBootstrapUtilsUrl    = "${var.CfnBootstrapUtilsUrl}"
     CfnEndpointUrl          = "${var.CfnEndpointUrl}"
-    CfnGetPipUrl            = "${var.CfnGetPipUrl}"
     CloudWatchAgentUrl      = "${var.CloudWatchAgentUrl}"
     CloudWatchAppLogs       = "${join(",", var.CloudWatchAppLogs)}"
     DisableApiTermination   = "${var.DisableApiTermination}"
