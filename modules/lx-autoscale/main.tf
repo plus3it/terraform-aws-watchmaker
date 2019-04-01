@@ -62,5 +62,6 @@ resource "aws_cloudformation_stack" "watchmaker-lx-autoscale" {
     WatchmakerExtraArgs         = "${var.WatchmakerExtraArgs}"
     WatchmakerOuPath            = "${var.WatchmakerOuPath}"
     WatchmakerStandaloneUrl     = "${var.WatchmakerStandaloneUrl}"
+    WatchmakerVersion           = "${var.WatchmakerVersion}"
   }
 }

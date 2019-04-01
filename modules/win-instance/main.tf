@@ -50,5 +50,6 @@ resource "aws_cloudformation_stack" "watchmaker-win-instance" {
     WatchmakerExtraArgs     = "${var.WatchmakerExtraArgs}"
     WatchmakerOuPath        = "${var.WatchmakerOuPath}"
     WatchmakerStandaloneUrl = "${var.WatchmakerStandaloneUrl}"
+    WatchmakerVersion       = "${var.WatchmakerVersion}"
   }
 }
