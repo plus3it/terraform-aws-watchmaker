@@ -383,11 +383,11 @@ Parameters:
       https://cloudformation.us-east-1.amazonaws.com
     Type: String
   CloudWatchAgentUrl:
-    AllowedPattern: '^$|^s3://.*$'
+    AllowedPattern: '^$|^s3://.*\.rpm$'
     Default: ''
     Description: >-
-      (Optional) S3 URL to CloudWatch Agent installer. Example:
-      s3://amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip
+      (Optional) S3 URL to CloudWatch Agent installer. Example(CentOS):
+      s3://amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm
     Type: String
   CloudWatchAppLogs:
     Default: ''
@@ -725,22 +725,15 @@ Resources:
               - !Ref 'AWS::NoValue'
         cw-agent-install:
           commands:
-            01-get-cloudwatch-agent:
+            01-install-cloudwatch-agent:
               command: !Sub >-
-                install -Dbm 700 -o root -g root /dev/null
-                /etc/cfn/scripts/AmazonCloudWatchAgent.zip &&
-                aws s3 cp ${CloudWatchAgentUrl}
-                /etc/cfn/scripts/AmazonCloudWatchAgent.zip
-            02-extract-cloudwatch-agent:
-              command: >-
-                yum -y install unzip &&
-                unzip /etc/cfn/scripts/AmazonCloudWatchAgent.zip -d /etc/cfn/scripts/aws-cw-agent
+                aws s3 cp ${CloudWatchAgentUrl} /etc/cfn/scripts/amazon-cloudwatch-agent.rpm &&
+                rpm --quiet -U /etc/cfn/scripts/amazon-cloudwatch-agent.rpm
             03-manipulate-cloudwatch-config:
               command: >-
                 python3 /etc/cfn/scripts/aws-cw-agent/cloudwatch-applog-config.py
-            10-install-cloudwatch-agent:
+            10-start-cloudwatch-agent:
               command: >-
-                bash -xe install.sh &&
                 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl
                 -a fetch-config -m ec2 -c
                 file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json -s
