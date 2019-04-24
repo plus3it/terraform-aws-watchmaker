@@ -899,10 +899,10 @@ Resources:
                   } -Verbose -ErrorAction Stop"
                 -
                   local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
-                  local_UseWamConfig: !If [UseWamConfig, !Sub '--config "${WatchmakerConfig}"' , '']
-                  local_UseEnvironment: !If [UseEnvironment, !Sub '--env "${WatchmakerEnvironment}"', '']
-                  local_UseOuPath: !If [UseOuPath, !Sub '--ou-path "${WatchmakerOuPath}"', '']
-                  local_UseAdminGroups: !If [UseAdminGroups, !Sub '--admin-groups "${WatchmakerAdminGroups}"', '']
+                  local_UseWamConfig: !If [UseWamConfig, !Sub "--config '${WatchmakerConfig}'" , ""]
+                  local_UseEnvironment: !If [UseEnvironment, !Sub "--env '${WatchmakerEnvironment}'", ""]
+                  local_UseOuPath: !If [UseOuPath, !Sub "--ou-path '${WatchmakerOuPath}'", ""]
+                  local_UseAdminGroups: !If [UseAdminGroups, !Sub "--admin-groups '${WatchmakerAdminGroups}'", ""]
               waitAfterCompletion: '0'
         watchmaker-update:
           commands:
@@ -923,10 +923,10 @@ Resources:
                   } -Verbose -ErrorAction Stop"
                 -
                   local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
-                  local_UseWamConfig: !If [UseWamConfig, !Sub '--config "${WatchmakerConfig}"', '']
-                  local_UseEnvironment: !If [UseEnvironment, !Sub '--env "${WatchmakerEnvironment}"', '']
-                  local_UseOuPath: !If [UseOuPath, !Sub '--ou-path "${WatchmakerOuPath}"', '']
-                  local_UseAdminGroups: !If [UseAdminGroups, !Sub '--admin-groups "${WatchmakerAdminGroups}"', '']
+                  local_UseWamConfig: !If [UseWamConfig, !Sub "--config '${WatchmakerConfig}'", ""]
+                  local_UseEnvironment: !If [UseEnvironment, !Sub "--env '${WatchmakerEnvironment}'", ""]
+                  local_UseOuPath: !If [UseOuPath, !Sub "--ou-path '${WatchmakerOuPath}'", ""]
+                  local_UseAdminGroups: !If [UseAdminGroups, !Sub "--admin-groups '${WatchmakerAdminGroups}'", ""]
               waitAfterCompletion: '0'
       ToggleCfnInitUpdate: !Ref ToggleCfnInitUpdate
     Properties:

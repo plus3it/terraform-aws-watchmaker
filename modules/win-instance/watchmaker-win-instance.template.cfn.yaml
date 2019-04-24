@@ -721,12 +721,12 @@ Resources:
                   } -Verbose -ErrorAction Stop"
                 -
                   local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
-                  local_UseWamConfig: !If [UseWamConfig, !Sub '--config "${WatchmakerConfig}"' , '']
-                  local_UseEnvironment: !If [UseEnvironment, !Sub '--env "${WatchmakerEnvironment}"', '']
-                  local_UseOuPath: !If [UseOuPath, !Sub '--ou-path "${WatchmakerOuPath}"', '']
-                  local_UseComputerName: !If [UseComputerName, !Sub '--computer-name "${WatchmakerComputerName}"', '']
-                  local_UseAdminGroups: !If [UseAdminGroups, !Sub '--admin-groups "${WatchmakerAdminGroups}"', '']
-                  local_UseAdminUsers: !If [UseAdminUsers, !Sub '--admin-users "${WatchmakerAdminUsers}"', '']
+                  local_UseWamConfig: !If [UseWamConfig, !Sub "--config '${WatchmakerConfig}'" , ""]
+                  local_UseEnvironment: !If [UseEnvironment, !Sub "--env '${WatchmakerEnvironment}'", ""]
+                  local_UseOuPath: !If [UseOuPath, !Sub "--ou-path '${WatchmakerOuPath}'", ""]
+                  local_UseComputerName: !If [UseComputerName, !Sub "--computer-name '${WatchmakerComputerName}'", ""]
+                  local_UseAdminGroups: !If [UseAdminGroups, !Sub "--admin-groups '${WatchmakerAdminGroups}'", ""]
+                  local_UseAdminUsers: !If [UseAdminUsers, !Sub "--admin-users '${WatchmakerAdminUsers}'", ""]
               waitAfterCompletion: '0'
         watchmaker-update:
           commands:
@@ -749,12 +749,12 @@ Resources:
                   } -Verbose -ErrorAction Stop"
                 -
                   local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
-                  local_UseWamConfig: !If [UseWamConfig, !Sub '--config "${WatchmakerConfig}"', '']
-                  local_UseEnvironment: !If [UseEnvironment, !Sub '--env "${WatchmakerEnvironment}"', '']
-                  local_UseOuPath: !If [UseOuPath, !Sub '--ou-path "${WatchmakerOuPath}"', '']
-                  local_UseComputerName: !If [UseComputerName, !Sub '--computer-name "${WatchmakerComputerName}"', '']
-                  local_UseAdminGroups: !If [UseAdminGroups, !Sub '--admin-groups "${WatchmakerAdminGroups}"', '']
-                  local_UseAdminUsers: !If [UseAdminUsers, !Sub '--admin-users "${WatchmakerAdminUsers}"', '']
+                  local_UseWamConfig: !If [UseWamConfig, !Sub "--config '${WatchmakerConfig}'", ""]
+                  local_UseEnvironment: !If [UseEnvironment, !Sub "--env '${WatchmakerEnvironment}'", ""]
+                  local_UseOuPath: !If [UseOuPath, !Sub "--ou-path '${WatchmakerOuPath}'", ""]
+                  local_UseComputerName: !If [UseComputerName, !Sub "--computer-name '${WatchmakerComputerName}'", ""]
+                  local_UseAdminGroups: !If [UseAdminGroups, !Sub "--admin-groups '${WatchmakerAdminGroups}'", ""]
+                  local_UseAdminUsers: !If [UseAdminUsers, !Sub "--admin-users '${WatchmakerAdminUsers}'", ""]
               waitAfterCompletion: '0'
       ToggleCfnInitUpdate: !Ref ToggleCfnInitUpdate
     Properties:
