@@ -51,6 +51,10 @@ Conditions:
     - !Equals
       - !Ref WatchmakerAdminGroups
       - ''
+  UseAdminUsers: !Not
+    - !Equals
+      - !Ref WatchmakerAdminUsers
+      - ''
   UseAppVolumeSnapshot: !Not
     - !Equals
       - !Ref AppVolumeSnapshotId
@@ -136,6 +140,7 @@ Metadata:
           - WatchmakerEnvironment
           - WatchmakerOuPath
           - WatchmakerAdminGroups
+          - WatchmakerAdminUsers
           - WatchmakerExtraArgs
           - WatchmakerBootstrapper
           - PythonInstaller
@@ -462,6 +467,12 @@ Parameters:
     Default: ''
     Description: >-
       (Optional) Colon-separated list of domain groups that should have admin
+      permissions on the EC2 instance
+    Type: String
+  WatchmakerAdminUsers:
+    Default: ''
+    Description: >-
+      (Optional) Colon-separated list of domain users that should have admin
       permissions on the EC2 instance
     Type: String
   WatchmakerExtraArgs:
@@ -894,6 +905,7 @@ Resources:
                   ${local_UseEnvironment}
                   ${local_UseOuPath}
                   ${local_UseAdminGroups}
+                  ${local_UseAdminUsers}
                   ${WatchmakerExtraArgs};
                   if (-not $?) { throw 'watchmaker execution failed!' }
                   } -Verbose -ErrorAction Stop"
@@ -903,6 +915,7 @@ Resources:
                   local_UseEnvironment: !If [UseEnvironment, !Sub "--env '${WatchmakerEnvironment}'", ""]
                   local_UseOuPath: !If [UseOuPath, !Sub "--ou-path '${WatchmakerOuPath}'", ""]
                   local_UseAdminGroups: !If [UseAdminGroups, !Sub "--admin-groups '${WatchmakerAdminGroups}'", ""]
+                  local_UseAdminUsers: !If [UseAdminUsers, !Sub "--admin-users '${WatchmakerAdminUsers}'", ""]
               waitAfterCompletion: '0'
         watchmaker-update:
           commands:
@@ -918,6 +931,7 @@ Resources:
                   ${local_UseEnvironment}
                   ${local_UseOuPath}
                   ${local_UseAdminGroups}
+                  ${local_UseAdminUsers}
                   ${WatchmakerExtraArgs};
                   if (-not $?) { throw 'watchmaker execution failed!' }
                   } -Verbose -ErrorAction Stop"
@@ -927,6 +941,7 @@ Resources:
                   local_UseEnvironment: !If [UseEnvironment, !Sub "--env '${WatchmakerEnvironment}'", ""]
                   local_UseOuPath: !If [UseOuPath, !Sub "--ou-path '${WatchmakerOuPath}'", ""]
                   local_UseAdminGroups: !If [UseAdminGroups, !Sub "--admin-groups '${WatchmakerAdminGroups}'", ""]
+                  local_UseAdminUsers: !If [UseAdminUsers, !Sub "--admin-users '${WatchmakerAdminUsers}'", ""]
               waitAfterCompletion: '0'
       ToggleCfnInitUpdate: !Ref ToggleCfnInitUpdate
     Properties:
