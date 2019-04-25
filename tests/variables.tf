@@ -13,13 +13,13 @@ variable "build_id" {
   type    = "string"
 }
 
-variable "cloudwatch_agent_url_lx" {
-  default = "s3://amazoncloudwatch-agent/linux/amd64/latest/AmazonCloudWatchAgent.zip"
+variable "cloudwatch_agent_url_centos" {
+  default = "s3://amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm"
   type    = "string"
 }
 
 variable "cloudwatch_agent_url_win" {
-  default = "s3://amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.zip"
+  default = "s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi"
   type    = "string"
 }
 
