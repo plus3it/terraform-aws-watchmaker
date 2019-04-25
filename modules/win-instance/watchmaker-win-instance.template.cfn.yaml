@@ -140,7 +140,7 @@ Metadata:
     ParameterLabels:
       ToggleCfnInitUpdate:
         default: Force Cfn Init Update
-  Version: 1.14.0
+  Version: 1.15.0
 Outputs:
   WatchmakerInstanceId:
     Description: Instance ID
@@ -215,11 +215,11 @@ Parameters:
       https://cloudformation.us-east-1.amazonaws.com
     Type: String
   CloudWatchAgentUrl:
-    AllowedPattern: '^$|^s3://.*$'
+    AllowedPattern: '^$|^s3://.*\.msi$'
     Default: ''
     Description: >-
       (Optional) S3 URL to CloudWatch Agent installer. Example:
-      s3://amazoncloudwatch-agent/windows/amd64/latest/AmazonCloudWatchAgent.zip
+      s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi
     Type: String
   CloudWatchAppLogs:
     Default: ''
@@ -478,25 +478,18 @@ Resources:
                   $ErrorActionPreference = 'Stop';
                   $CloudWatchAgentUri = [System.Uri]'${CloudWatchAgentUrl}';
                   $CloudWatchAgentScriptDir = 'c:\cfn\scripts\AmazonCloudWatchAgent';
-                  $CloudWatchAgentZipFile = Join-Path $CloudWatchAgentScriptDir $CloudWatchAgentUri.Segments[($CloudWatchAgentUri.Segments.Length-1)];
+                  $CloudWatchAgentInstaller = Join-Path $CloudWatchAgentScriptDir $CloudWatchAgentUri.Segments[($CloudWatchAgentUri.Segments.Length-1)];
                   $Null = New-Item $CloudWatchAgentScriptDir -Type Directory -Force;
                   Read-S3Object -BucketName $CloudWatchAgentUri.Host `
                   -Key ($CloudWatchAgentUri.Segments[1..($CloudWatchAgentUri.Segments.Length-1)] -Join '') `
-                  -File $CloudWatchAgentZipFile `
+                  -File $CloudWatchAgentInstaller `
                   -Region ${AWS::Region};
-                  $CloudWatchAgentInstallScript = $CloudWatchAgentScriptDir + '\install.ps1';
                   $CloudWatchAgentConfig = $CloudWatchAgentScriptDir + '\aws-cloudwatch-agent-config.json';
-                  if ($PSVersionTable.PSVersion.Major -ge 5) { Expand-Archive -Path $CloudWatchAgentZipFile -DestinationPath $CloudWatchAgentScriptDir;
-                  }
-                  else { $ShellApp = New-Object -Com Shell.Application;
-                  $ShellZip = $ShellApp.NameSpace([String]$CloudWatchAgentZipFile);
-                  $ShellDest = $ShellApp.NameSpace($CloudWatchAgentScriptDir);
-                  $ShellDest.CopyHere($ShellZip.items());
-                  }
-                  Push-Location -Path $CloudWatchAgentScriptDir;
-                  iex $CloudWatchAgentInstallScript;
-                  .\amazon-cloudwatch-agent-ctl.ps1 -a fetch-config -m ec2 -c file:$CloudWatchAgentConfig -s;
-                  Pop-Location;} -Verbose -ErrorAction Stop "
+                  Start-Process msiexec.exe -ArgumentList @('/i', $CloudWatchAgentInstaller, '/qn') -NoNewWindow -PassThru -Wait;
+                  $CloudWatchAgentCtl = ${!Env:ProgramFiles} + '\Amazon\AmazonCloudWatchAgent\amazon-cloudwatch-agent-ctl.ps1';
+                  & $CloudWatchAgentCtl -Action cond-restart;
+                  & $CloudWatchAgentCtl -a fetch-config -m ec2 -c file:$CloudWatchAgentConfig -s;
+                  } -Verbose -ErrorAction Stop "
                 -
                   local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
               waitAfterCompletion: '0'
@@ -728,12 +721,12 @@ Resources:
                   } -Verbose -ErrorAction Stop"
                 -
                   local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
-                  local_UseWamConfig: !If [UseWamConfig, !Sub '--config "${WatchmakerConfig}"' , '']
-                  local_UseEnvironment: !If [UseEnvironment, !Sub '--env "${WatchmakerEnvironment}"', '']
-                  local_UseOuPath: !If [UseOuPath, !Sub '--ou-path "${WatchmakerOuPath}"', '']
-                  local_UseComputerName: !If [UseComputerName, !Sub '--computer-name "${WatchmakerComputerName}"', '']
-                  local_UseAdminGroups: !If [UseAdminGroups, !Sub '--admin-groups "${WatchmakerAdminGroups}"', '']
-                  local_UseAdminUsers: !If [UseAdminUsers, !Sub '--admin-users "${WatchmakerAdminUsers}"', '']
+                  local_UseWamConfig: !If [UseWamConfig, !Sub "--config '${WatchmakerConfig}'" , ""]
+                  local_UseEnvironment: !If [UseEnvironment, !Sub "--env '${WatchmakerEnvironment}'", ""]
+                  local_UseOuPath: !If [UseOuPath, !Sub "--ou-path '${WatchmakerOuPath}'", ""]
+                  local_UseComputerName: !If [UseComputerName, !Sub "--computer-name '${WatchmakerComputerName}'", ""]
+                  local_UseAdminGroups: !If [UseAdminGroups, !Sub "--admin-groups '${WatchmakerAdminGroups}'", ""]
+                  local_UseAdminUsers: !If [UseAdminUsers, !Sub "--admin-users '${WatchmakerAdminUsers}'", ""]
               waitAfterCompletion: '0'
         watchmaker-update:
           commands:
@@ -756,12 +749,12 @@ Resources:
                   } -Verbose -ErrorAction Stop"
                 -
                   local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
-                  local_UseWamConfig: !If [UseWamConfig, !Sub '--config "${WatchmakerConfig}"', '']
-                  local_UseEnvironment: !If [UseEnvironment, !Sub '--env "${WatchmakerEnvironment}"', '']
-                  local_UseOuPath: !If [UseOuPath, !Sub '--ou-path "${WatchmakerOuPath}"', '']
-                  local_UseComputerName: !If [UseComputerName, !Sub '--computer-name "${WatchmakerComputerName}"', '']
-                  local_UseAdminGroups: !If [UseAdminGroups, !Sub '--admin-groups "${WatchmakerAdminGroups}"', '']
-                  local_UseAdminUsers: !If [UseAdminUsers, !Sub '--admin-users "${WatchmakerAdminUsers}"', '']
+                  local_UseWamConfig: !If [UseWamConfig, !Sub "--config '${WatchmakerConfig}'", ""]
+                  local_UseEnvironment: !If [UseEnvironment, !Sub "--env '${WatchmakerEnvironment}'", ""]
+                  local_UseOuPath: !If [UseOuPath, !Sub "--ou-path '${WatchmakerOuPath}'", ""]
+                  local_UseComputerName: !If [UseComputerName, !Sub "--computer-name '${WatchmakerComputerName}'", ""]
+                  local_UseAdminGroups: !If [UseAdminGroups, !Sub "--admin-groups '${WatchmakerAdminGroups}'", ""]
+                  local_UseAdminUsers: !If [UseAdminUsers, !Sub "--admin-users '${WatchmakerAdminUsers}'", ""]
               waitAfterCompletion: '0'
       ToggleCfnInitUpdate: !Ref ToggleCfnInitUpdate
     Properties:

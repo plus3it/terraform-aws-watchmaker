@@ -235,6 +235,12 @@ variable "WatchmakerAdminGroups" {
   default     = ""
 }
 
+variable "WatchmakerAdminUsers" {
+  type        = "string"
+  description = "(Optional) Colon-separated list of domain users that should have admin permissions on the EC2 instance"
+  default     = ""
+}
+
 variable "WatchmakerExtraArgs" {
   type        = "string"
   description = "(Optional) Additional parameters to be passed to the Watchmaker CLI"
