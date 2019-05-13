@@ -4,7 +4,7 @@ before_script:
   - sudo yum -y install python36 python36-libs python36-setuptools make
   - sudo python3.6 -m ensurepip --upgrade
   - test -f /usr/bin/pip3 || sudo ln -sf /usr/local/bin/pip3 /usr/bin/pip3
-  - sudo pip3 install --upgrade -r requirements/cfn-lint.txt
+  - sudo pip3 install --upgrade -r _requirements/cfn-lint.txt
 
 lint:
   script:
