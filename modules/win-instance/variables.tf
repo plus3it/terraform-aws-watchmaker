@@ -239,7 +239,7 @@ variable "CloudWatchAgentUrl" {
 
 variable "CloudWatchAppLogs" {
   type        = "list"
-  description = "(Optional) List of application log file paths to send to CloudWatch. Example: C:\\dir1\\file1,C:\\dir2\file2,C:\\dir3\\file3"
+  description = "(Optional) List of application log file paths to send to CloudWatch. Example: C:\\dir1\\file1,C:\\dir2\\file2,C:\\dir3\\file3"
   default     = []
 }
 
