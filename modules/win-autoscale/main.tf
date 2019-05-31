@@ -15,7 +15,7 @@ resource "aws_cloudformation_stack" "watchmaker-win-autoscale" {
   tags               = "${var.StackTags}"
   timeout_in_minutes = "${var.TimeoutInMinutes}"
 
-  parameters {
+  parameters = {
     AmiId                       = "${var.AmiId}"
     AppScriptParams             = "${var.AppScriptParams}"
     AppScriptUrl                = "${var.AppScriptUrl}"

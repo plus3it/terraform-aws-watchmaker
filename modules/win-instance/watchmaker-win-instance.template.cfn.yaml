@@ -140,7 +140,7 @@ Metadata:
     ParameterLabels:
       ToggleCfnInitUpdate:
         default: Force Cfn Init Update
-  Version: 1.15.1
+  Version: 1.15.2
 Outputs:
   WatchmakerInstanceId:
     Description: Instance ID
@@ -224,7 +224,7 @@ Parameters:
   CloudWatchAppLogs:
     Default: ''
     Description: >-
-      (Optional) List of application log file paths to send to CloudWatch. Example: C:\\dir1\\file1,C:\\dir2\file2,C:\\dir3\\file3
+      (Optional) List of application log file paths to send to CloudWatch. Example: C:\\dir1\\file1,C:\\dir2\\file2,C:\\dir3\\file3
     Type: CommaDelimitedList
   DisableApiTermination:
     AllowedValues:

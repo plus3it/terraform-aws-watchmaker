@@ -12,7 +12,7 @@ resource "aws_security_group" "this" {
   name   = "${local.test_prefix}-aws-terraform-wam-test"
   vpc_id = "${data.aws_subnet.selected.vpc_id}"
 
-  tags {
+  tags = {
     Name = "${local.test_prefix}-terraform-aws-wam"
   }
 

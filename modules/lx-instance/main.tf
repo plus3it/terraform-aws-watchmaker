@@ -15,7 +15,7 @@ resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
   tags               = "${var.StackTags}"
   timeout_in_minutes = "${var.TimeoutInMinutes}"
 
-  parameters {
+  parameters = {
     AmiDistro               = "${var.AmiDistro}"
     AmiId                   = "${var.AmiId}"
     AppScriptParams         = "${var.AppScriptParams}"

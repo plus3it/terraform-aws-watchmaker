@@ -191,7 +191,7 @@ Metadata:
         default: Force Cfn Init Update
       ToggleNewInstances:
         default: Force New Instances
-  Version: 1.15.1
+  Version: 1.15.2
 Outputs:
   ScaleDownScheduledAction:
     Condition: UseScheduledAction
@@ -306,7 +306,7 @@ Parameters:
   CloudWatchAppLogs:
     Default: ''
     Description: >-
-      (Optional) List of application log file paths to send to CloudWatch. Example: C:\\dir1\\file1,C:\\dir2\file2,C:\\dir3\\file3
+      (Optional) List of application log file paths to send to CloudWatch. Example: C:\\dir1\\file1,C:\\dir2\\file2,C:\\dir3\\file3
     Type: CommaDelimitedList
   DesiredCapacity:
     Default: 1
