@@ -702,47 +702,45 @@ Resources:
                   }
             'c:\cfn\scripts\AmazonCloudWatchAgent\cloudwatch-applog-config.py':
               content: !Sub
-                - |-
+                - |
                   import json
                   import os
 
-                  cloudwatch_baseline = 'c:/cfn/scripts/AmazonCloudWatchAgent/aws-cloudwatch-agent-config.json'
-                  log_group_name = "/aws/ec2/win/${AWS::StackName}"
-                  log_paths_input = (r'''${local_addCWLtarget}''').split(",")
+                  CWA_CONFIG = 'c:/cfn/scripts/AmazonCloudWatchAgent/aws-cloudwatch-agent-config.json'
+                  LOG_GROUP = "/aws/ec2/win/${AWS::StackName}"
+                  LOG_PATHS = (r'''${local_addCWLtarget}''').split(",")
 
 
-                  def get_stream_name(log_path):
-                      log_no_ext = os.path.splitext(os.path.basename(log_path))[0]
-                      return "{}_logs_{{instance_id}}".format(log_no_ext)
+                  def get_stream_name(path):
+                      return '{{instance_id}}/{}'.format(path.replace('*', '%'))
 
 
-                  def load_baseline():
+                  def load_json(path):
+                      with open(path, 'r') as fh_:
+                          return json.load(fh_)
+
+
+                  def dump_json(path, data):
+                      with open(path, 'w') as fh_:
+                          fh_.write(json.dumps(data, sort_keys=True, indent=4))
+
+
+                  if LOG_PATHS:
+                      print('Additional cwl paths were defined...')
                       print('Loading existing cwl baseline')
-                      with open(cloudwatch_baseline, 'r') as f:
-                          return json.load(f)
-
-
-                  def write_baseline(baseline):
-                      print('Writing new cwl baseline')
-                      with open(cloudwatch_baseline, 'w') as f:
-                          f.write(json.dumps(baseline, sort_keys=True, indent=4))
-
-
-                  if log_paths_input:
-                      print('Additional cwl paths were defined.')
-                      baseline = load_baseline()
-                      for log_path in log_paths_input:
-                          baseline['logs']['logs_collected']['files']['collect_list'].append({
-                              'file_path': log_path,
-                              'log_group_name': log_group_name,
-                              'log_stream_name': get_stream_name(log_path),
+                      config = load_json(CWA_CONFIG)
+                      for log in LOG_PATHS:
+                          config['logs']['logs_collected']['files']['collect_list'].append({
+                              'file_path': log,
+                              'log_group_name': LOG_GROUP,
+                              'log_stream_name': get_stream_name(log),
                               'timestamp_format': "%H:%M:%S %y %b %-d"
                           })
-                      write_baseline(baseline)
+                      print('Writing new cwl baseline')
+                      dump_json(CWA_CONFIG, config)
                       print('CWL baseline modification complete')
-                # convert CommanDelimitedList to a string for Fn::Sub compatibility
-                -
-                  local_addCWLtarget: !Join ["," ,!Ref CloudWatchAppLogs]
+                # convert CommaDelimitedList to a string for Fn::Sub compatibility
+                - local_addCWLtarget: !Join [",", !Ref CloudWatchAppLogs]
         make-app:
           commands:
             10-make-app:
