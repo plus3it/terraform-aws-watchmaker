@@ -62,7 +62,7 @@ variable "StackTags" {
 variable "TimeoutInMinutes" {
   type        = "string"
   description = "The amount of time that can pass before the stack status becomes CREATE_FAILED"
-  default     = "120"
+  default     = "30"
 }
 
 variable "AmiId" {
