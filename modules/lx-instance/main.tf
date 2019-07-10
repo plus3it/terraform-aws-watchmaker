@@ -1,5 +1,5 @@
-# Terraform module to create a Watchmaker Linux instance using a CloudFormation cfn.json
-# Assumes that watchmaker-lx-instance.cfn.json is stored in the same directory as main.tf of the module.
+# Terraform module to create a Watchmaker Linux instance using a CloudFormation template
+# Assumes that the template is stored in the same directory as main.tf of the module.
 
 resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
   template_body = "${file("${path.module}/watchmaker-lx-instance.template.cfn.yaml")}"
@@ -28,6 +28,7 @@ resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
     AppVolumeType           = "${var.AppVolumeType}"
     CfnBootstrapUtilsUrl    = "${var.CfnBootstrapUtilsUrl}"
     CfnEndpointUrl          = "${var.CfnEndpointUrl}"
+    CfnStackSignalTimeout   = "${var.TimeoutInMinutes}"
     CloudWatchAgentUrl      = "${var.CloudWatchAgentUrl}"
     CloudWatchAppLogs       = "${join(",", var.CloudWatchAppLogs)}"
     DisableApiTermination   = "${var.DisableApiTermination}"
@@ -54,5 +55,11 @@ resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
     WatchmakerOuPath        = "${var.WatchmakerOuPath}"
     WatchmakerStandaloneUrl = "${var.WatchmakerStandaloneUrl}"
     WatchmakerVersion       = "${var.WatchmakerVersion}"
+  }
+
+  timeouts {
+    create  = "${var.TimeoutInMinutes}m"
+    delete  = "${var.TimeoutInMinutes}m"
+    update  = "${var.TimeoutInMinutes}m"
   }
 }
