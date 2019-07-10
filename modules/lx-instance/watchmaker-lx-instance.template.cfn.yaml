@@ -146,13 +146,14 @@ Metadata:
         Parameters:
           - CfnEndpointUrl
           - CfnBootstrapUtilsUrl
+          - CfnStackSignalTimeout
           - CloudWatchAgentUrl
           - CloudWatchAppLogs
           - ToggleCfnInitUpdate
     ParameterLabels:
       ToggleCfnInitUpdate:
         default: Force Cfn Init Update
-  Version: 1.15.3
+  Version: 1.15.4
 Outputs:
   WatchmakerInstanceId:
     Description: Instance ID
@@ -251,6 +252,14 @@ Parameters:
       (Optional) URL to the CloudFormation Endpoint. e.g.
       https://cloudformation.us-east-1.amazonaws.com
     Type: String
+  CfnStackSignalTimeout:
+    ConstraintDescription: Set a value between 1 and 720.
+    Default: 30
+    Description: >-
+      The amount of time in minutes that can pass before the stack status becomes CREATE_FAILED
+    MaxValue: 720
+    MinValue: 1
+    Type: Number
   CloudWatchAgentUrl:
     AllowedPattern: '^$|^s3://.*\.rpm$'
     Default: ''
@@ -425,7 +434,7 @@ Resources:
     CreationPolicy:
       ResourceSignal:
         Count: '1'
-        Timeout: PT30M
+        Timeout: !Sub PT${CfnStackSignalTimeout}M
     Metadata:
       'AWS::CloudFormation::Init':
         configSets:

@@ -192,6 +192,7 @@ Metadata:
         Parameters:
           - CfnEndpointUrl
           - CfnBootstrapUtilsUrl
+          - CfnStackSignalTimeout
           - CloudWatchAgentUrl
           - CloudWatchAppLogs
           - ToggleCfnInitUpdate
@@ -201,7 +202,7 @@ Metadata:
         default: Force Cfn Init Update
       ToggleNewInstances:
         default: Force New Instances
-  Version: 1.15.3
+  Version: 1.15.4
 Outputs:
   ScaleDownScheduledAction:
     Condition: UseScheduledAction
@@ -331,6 +332,14 @@ Parameters:
       (Optional) URL to the CloudFormation Endpoint. e.g.
       https://cloudformation.us-east-1.amazonaws.com
     Type: String
+  CfnStackSignalTimeout:
+    ConstraintDescription: Set a value between 1 and 720.
+    Default: 30
+    Description: >-
+      The amount of time in minutes that can pass before the stack status becomes CREATE_FAILED
+    MaxValue: 720
+    MinValue: 1
+    Type: Number
   CloudWatchAgentUrl:
     AllowedPattern: '^$|^s3://.*\.rpm$'
     Default: ''
@@ -556,7 +565,7 @@ Resources:
     CreationPolicy:
       ResourceSignal:
         Count: !Ref DesiredCapacity
-        Timeout: PT30M
+        Timeout: !Sub PT${CfnStackSignalTimeout}M
     Properties:
       DesiredCapacity: !Ref DesiredCapacity
       HealthCheckGracePeriod: !If
