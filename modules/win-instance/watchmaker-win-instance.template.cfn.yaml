@@ -536,7 +536,8 @@ Resources:
 
 
                   def get_stream_name(path):
-                      return '{{instance_id}}/{}'.format(path.replace('*', '('))
+                      return '{{instance_id}}//{}'.format(
+                          path.replace('*', '(').replace(':\\', '/').replace('\\', '/'))
 
 
                   def load_json(path):
