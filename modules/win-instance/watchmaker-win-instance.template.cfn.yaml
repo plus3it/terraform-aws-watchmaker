@@ -141,7 +141,7 @@ Metadata:
     ParameterLabels:
       ToggleCfnInitUpdate:
         default: Force Cfn Init Update
-  Version: 1.15.4
+  Version: 1.15.5
 Outputs:
   WatchmakerInstanceId:
     Description: Instance ID
@@ -491,25 +491,31 @@ Resources:
                             {
                               "file_path": "c:\\ProgramData\\Amazon\\AmazonCloudWatchAgent\\Logs\\amazon-cloudwatch-agent.log",
                               "log_group_name": "/aws/ec2/win/${AWS::StackName}",
-                              "log_stream_name": "cloudwatch_agent_logs_{instance_id}",
+                              "log_stream_name": "{instance_id}//c/ProgramData/Amazon/AmazonCloudWatchAgent/Logs/amazon-cloudwatch-agent.log",
                               "timestamp_format": "%H:%M:%S %y %b %-d"
                             },
                             {
                               "file_path": "c:\\cfn\\log\\cfn-init.log",
                               "log_group_name": "/aws/ec2/win/${AWS::StackName}",
-                              "log_stream_name": "cloudformation_init_logs_{instance_id}",
+                              "log_stream_name": "{instance_id}//c/cfn/log/cfn-init.log",
+                              "timestamp_format": "%H:%M:%S %y %b %-d"
+                            },
+                            {
+                              "file_path": "c:\\cfn\\log\\cfn-init-cmd.log",
+                              "log_group_name": "/aws/ec2/win/${AWS::StackName}",
+                              "log_stream_name": "{instance_id}//c/cfn/log/cfn-init-cmd.log",
                               "timestamp_format": "%H:%M:%S %y %b %-d"
                             },
                             {
                               "file_path": "c:\\Watchmaker\\Logs\\salt_call.debug.log",
                               "log_group_name": "/aws/ec2/win/${AWS::StackName}",
-                              "log_stream_name": "salt_call_debug_logs_{instance_id}",
+                              "log_stream_name": "{instance_id}//c/Watchmaker/Logs/salt_call.debug.log",
                               "timestamp_format": "%H:%M:%S %y %b %-d"
                             },
                             {
                               "file_path": "c:\\Watchmaker\\Logs\\watchmaker.log",
                               "log_group_name": "/aws/ec2/win/${AWS::StackName}",
-                              "log_stream_name": "watchmaker_logs_{instance_id}",
+                              "log_stream_name": "{instance_id}//c/Watchmaker/Logs/watchmaker.log",
                               "timestamp_format": "%H:%M:%S %y %b %-d"
                             }
                           ]
@@ -530,7 +536,8 @@ Resources:
 
 
                   def get_stream_name(path):
-                      return '{{instance_id}}/{}'.format(path.replace('*', '('))
+                      return '{{instance_id}}//{}'.format(
+                          path.replace('*', '(').replace(':\\', '/').replace('\\', '/'))
 
 
                   def load_json(path):
