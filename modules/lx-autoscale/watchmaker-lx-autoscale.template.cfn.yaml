@@ -664,7 +664,7 @@ Resources:
             01-install-cloudwatch-agent:
               command: !Sub >-
                 aws s3 cp ${CloudWatchAgentUrl} /etc/cfn/scripts/amazon-cloudwatch-agent.rpm &&
-                rpm -v -U /etc/cfn/scripts/amazon-cloudwatch-agent.rpm
+                yum -y --nogpgcheck localinstall /etc/cfn/scripts/amazon-cloudwatch-agent.rpm
             03-manipulate-cloudwatch-config:
               command: >-
                 python3 /etc/cfn/scripts/aws-cw-agent/cloudwatch-applog-config.py
