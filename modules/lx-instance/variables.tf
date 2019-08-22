@@ -283,3 +283,9 @@ variable "EbsOptimized" {
   description = "Specifies whether the instance is optimized for Amazon Elastic Block Store I/O. See complete list of supported instances here: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html#ebs-optimization-support"
   default     = "false"
 }
+
+variable "EnableRepos" {
+  type        = "string"
+  description = "(Optional) Specify repos to be enabled by yum-config-manager"
+  default     = ""
+}

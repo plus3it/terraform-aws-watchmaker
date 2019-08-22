@@ -33,6 +33,7 @@ resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
     CloudWatchAppLogs       = "${join(",", var.CloudWatchAppLogs)}"
     DisableApiTermination   = "${var.DisableApiTermination}"
     EbsOptimized            = "${var.EbsOptimized}"
+    EnableRepos             = "${var.EnableRepos}"
     InstanceRole            = "${var.InstanceRole}"
     InstanceType            = "${var.InstanceType}"
     KeyPairName             = "${var.KeyPairName}"
@@ -58,8 +59,8 @@ resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
   }
 
   timeouts {
-    create  = "${var.TimeoutInMinutes}m"
-    delete  = "${var.TimeoutInMinutes}m"
-    update  = "${var.TimeoutInMinutes}m"
+    create = "${var.TimeoutInMinutes}m"
+    delete = "${var.TimeoutInMinutes}m"
+    update = "${var.TimeoutInMinutes}m"
   }
 }

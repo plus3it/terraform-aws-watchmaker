@@ -36,6 +36,7 @@ resource "aws_cloudformation_stack" "watchmaker-lx-autoscale" {
     CloudWatchAppLogs           = "${join(",", var.CloudWatchAppLogs)}"
     DesiredCapacity             = "${var.DesiredCapacity}"
     EbsOptimized                = "${var.EbsOptimized}"
+    EnableRepos                 = "${var.EnableRepos}"
     InstanceRole                = "${var.InstanceRole}"
     InstanceTerminationPolicies = "${join(",", var.InstanceTerminationPolicies)}"
     InstanceType                = "${var.InstanceType}"
@@ -67,8 +68,8 @@ resource "aws_cloudformation_stack" "watchmaker-lx-autoscale" {
   }
 
   timeouts {
-    create  = "${var.TimeoutInMinutes}m"
-    delete  = "${var.TimeoutInMinutes}m"
-    update  = "${var.TimeoutInMinutes}m"
+    create = "${var.TimeoutInMinutes}m"
+    delete = "${var.TimeoutInMinutes}m"
+    update = "${var.TimeoutInMinutes}m"
   }
 }
