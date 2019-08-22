@@ -19,6 +19,7 @@ module "lx-instance-centos6" {
   SubnetId              = "${var.subnet_id}"
   WatchmakerConfig      = "${var.watchmaker_config}"
   WatchmakerEnvironment = "${var.watchmaker_env}"
+  EnableRepos           = "epel"
 }
 
 module "lx-instance-centos7" {
@@ -39,6 +40,7 @@ module "lx-instance-centos7" {
   SubnetId              = "${var.subnet_id}"
   WatchmakerConfig      = "${var.watchmaker_config}"
   WatchmakerEnvironment = "${var.watchmaker_env}"
+  EnableRepos           = "epel"
 }
 
 module "lx-autoscale-centos6" {
@@ -61,6 +63,7 @@ module "lx-autoscale-centos6" {
   SubnetIds             = "${var.subnet_id}"
   WatchmakerConfig      = "${var.watchmaker_config}"
   WatchmakerEnvironment = "${var.watchmaker_env}"
+  EnableRepos           = "epel"
 }
 
 module "lx-autoscale-centos7" {
@@ -84,6 +87,7 @@ module "lx-autoscale-centos7" {
   SubnetIds             = "${var.subnet_id}"
   WatchmakerConfig      = "${var.watchmaker_config}"
   WatchmakerEnvironment = "${var.watchmaker_env}"
+  EnableRepos           = "epel"
 }
 
 module "win-instance-2008R2" {
