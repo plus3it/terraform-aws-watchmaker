@@ -457,6 +457,7 @@ Resources:
                   if (-not $?) { throw 'CloudWatch Logs modification failed!'; }"
                 -
                   local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
+              waitAfterCompletion: '0'
             10-install-cloudwatch-agent:
               command: !Sub
                 - >-
@@ -601,6 +602,7 @@ Resources:
                   $ErrorActionPreference = 'Stop'; c:\cfn\scripts\watchmaker-install.ps1; } -Verbose -ErrorAction Stop"
                 -
                   local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
+              waitAfterCompletion: '0'
             10-initialize-disks:
               command: !If
                 - CreateAppVolume
