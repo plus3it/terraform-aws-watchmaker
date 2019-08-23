@@ -182,3 +182,9 @@ variable "ToggleCfnInitUpdate" {
   description = "A/B toggle that forces a change to instance metadata, triggering the cfn-init update sequence"
   default     = "A"
 }
+
+variable "EnableRepos" {
+  type        = "string"
+  description = "(Optional) Specify repos to be enabled by yum-config-manager"
+  default     = ""
+}

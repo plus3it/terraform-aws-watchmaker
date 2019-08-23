@@ -19,6 +19,10 @@ Conditions:
     - !Equals
       - !Ref PatchGroup
       - ''
+  EnablingRepos: !Not
+    - !Equals
+      - !Ref EnableRepos
+      - ''
   ExecuteAppScript: !Not
     - !Equals
       - !Ref AppScriptUrl
@@ -153,7 +157,7 @@ Metadata:
     ParameterLabels:
       ToggleCfnInitUpdate:
         default: Force Cfn Init Update
-  Version: 1.15.6
+  Version: 1.15.7
 Outputs:
   WatchmakerInstanceId:
     Description: Instance ID
@@ -287,6 +291,10 @@ Parameters:
       Warning: Stack creation will fail if set to true and the instance type does not support EBS Optimization.
       See complete list of supported instances here:
       https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html#ebs-optimization-support
+    Type: String
+  EnableRepos:
+    Default: ''
+    Description: '(Optional) Specify repos to be enabled by yum-config-manager. Example: epel'
     Type: String
   InstanceRole:
     Default: ''
@@ -444,6 +452,10 @@ Resources:
               - InstallCloudWatchAgent
               - cw-agent-install
               - !Ref 'AWS::NoValue'
+            - !If
+              - EnablingRepos
+              - enable-repos
+              - !Ref 'AWS::NoValue'
             - watchmaker-install
             - watchmaker-launch
             - !If
@@ -597,6 +609,11 @@ Resources:
           commands:
             10-install-updates:
               command: yum -y update
+        enable-repos:
+          commands:
+            10-enable-repos:
+              command:
+                !Sub 'yum-config-manager --enable ${EnableRepos}'
         make-app:
           commands:
             05-get-appscript:

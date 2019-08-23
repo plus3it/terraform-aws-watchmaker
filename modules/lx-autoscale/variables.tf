@@ -337,3 +337,9 @@ variable "EbsOptimized" {
   description = "Specifies whether the launch configuration is optimized for EBS I/O. This optimization provides dedicated throughput to Amazon EBS and an optimized configuration stack to provide optimal EBS I/O performance. Warning: Stack creation will fail if set to true and the instance type does not support EBS Optimization. See complete list of supported instances here: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html#ebs-optimization-support"
   default     = "false"
 }
+
+variable "EnableRepos" {
+  type        = "string"
+  description = "(Optional) Specify repos to be enabled by yum-config-manager"
+  default     = ""
+}

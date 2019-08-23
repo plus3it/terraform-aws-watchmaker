@@ -28,6 +28,8 @@
   ParameterValue: __DISABLEAPITERMINATION__
 - ParameterKey: EbsOptimized
   ParameterValue: __EBSOPTIMIZED__
+- ParameterKey: EnableRepos
+  ParameterValue: __ENABLEREPOS__
 - ParameterKey: InstanceRole
   ParameterValue: __INSTANCEROLE__
 - ParameterKey: InstanceType
