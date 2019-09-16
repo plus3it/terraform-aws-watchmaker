@@ -171,12 +171,6 @@ variable "CfnGetPipUrl" {
   default     = "https://bootstrap.pypa.io/2.6/get-pip.py"
 }
 
-variable "CfnBootstrapUtilsUrl" {
-  type        = "string"
-  description = "URL to aws-cfn-bootstrap-latest.tar.gz"
-  default     = "https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz"
-}
-
 variable "ToggleCfnInitUpdate" {
   type        = "string"
   description = "A/B toggle that forces a change to instance metadata, triggering the cfn-init update sequence"
