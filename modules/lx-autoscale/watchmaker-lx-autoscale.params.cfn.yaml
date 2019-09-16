@@ -22,8 +22,6 @@
   ParameterValue: __ASGNOTIFICATION__
 - ParameterKey: AsgSnsArn
   ParameterValue: __ASGSNSARN__
-- ParameterKey: CfnBootstrapUtilsUrl
-  ParameterValue: __CFNBOOTSTRAPUTILSURL__
 - ParameterKey: CfnEndpointUrl
   ParameterValue: __CFNENDPOINTURL__
 - ParameterKey: CloudWatchAgentUrl

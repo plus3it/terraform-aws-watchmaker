@@ -16,8 +16,6 @@
   ParameterValue: __APPVOLUMESIZE__
 - ParameterKey: AppVolumeType
   ParameterValue: __APPVOLUMETYPE__
-- ParameterKey: CfnBootstrapUtilsUrl
-  ParameterValue: __CFNBOOTSTRAPUTILSURL__
 - ParameterKey: CfnEndpointUrl
   ParameterValue: __CFNENDPOINTURL__
 - ParameterKey: CloudWatchAgentUrl

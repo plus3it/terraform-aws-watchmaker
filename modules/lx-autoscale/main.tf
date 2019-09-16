@@ -29,7 +29,6 @@ resource "aws_cloudformation_stack" "watchmaker-lx-autoscale" {
     AsgMetrics                  = "${join(",", var.AsgMetrics)}"
     AsgNotificationTypes        = "${join(",", var.AsgNotificationTypes)}"
     AsgSnsArn                   = "${var.AsgSnsArn}"
-    CfnBootstrapUtilsUrl        = "${var.CfnBootstrapUtilsUrl}"
     CfnEndpointUrl              = "${var.CfnEndpointUrl}"
     CfnStackSignalTimeout       = "${var.TimeoutInMinutes}"
     CloudWatchAgentUrl          = "${var.CloudWatchAgentUrl}"
