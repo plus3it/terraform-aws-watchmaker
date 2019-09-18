@@ -1,51 +1,6 @@
 #Outputs from the Windows Autoscaling Terraform module.
 
-output "watchmaker-win-autoscale-stack-id" {
-  description = "CloudFormation stack id"
-  value       = aws_cloudformation_stack.watchmaker-win-autoscale.id
-}
-
-output "watchmaker-win-autoscale-scale-down-scheduled-action" {
-  description = "Scale Down Scheduled Action ID"
-  value = lookup(
-    aws_cloudformation_stack.watchmaker-win-autoscale.outputs,
-    "ScaleDownScheduledAction",
-    "",
-  )
-}
-
-output "watchmaker-win-autoscale-scale-up-scheduled-action" {
-  description = "Scale Up Scheduled Action ID"
-  value = lookup(
-    aws_cloudformation_stack.watchmaker-win-autoscale.outputs,
-    "ScaleUpScheduledAction",
-    "",
-  )
-}
-
-output "watchmaker-win-autoscale-autoscaling-group-id" {
-  description = "Autoscaling Group ID"
-  value = lookup(
-    aws_cloudformation_stack.watchmaker-win-autoscale.outputs,
-    "WatchmakerAutoScalingGroupId",
-    "",
-  )
-}
-
-output "watchmaker-win-autoscale-launch-config-id" {
-  description = "Launch Configuration ID"
-  value = lookup(
-    aws_cloudformation_stack.watchmaker-win-autoscale.outputs,
-    "WatchmakerLaunchConfigId",
-    "",
-  )
-}
-
-output "watchmaker-win-autoscale-launch-config-log-group-name" {
-  description = "Log Group Name"
-  value = lookup(
-    aws_cloudformation_stack.watchmaker-win-autoscale.outputs,
-    "WatchmakerLaunchConfigLogGroupName",
-    "",
-  )
+output "watchmaker-win-autoscale" {
+  description = "CloudFormation stack object for watchmaker-win-autoscale"
+  value       = aws_cloudformation_stack.watchmaker-win-autoscale
 }
