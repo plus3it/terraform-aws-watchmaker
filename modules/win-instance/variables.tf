@@ -81,7 +81,7 @@ variable "AmiId" {
 variable "AppScriptParams" {
   type        = string
   description = "(Optional) Parameter string to pass to the application script. Ignored if AppScriptUrl is blank"
-  default     = null
+  default     = ""
 }
 
 variable "AppScriptUrl" {

@@ -11,8 +11,9 @@ module "lx-instance-centos6" {
   AppVolumeSize         = "10"
   CloudWatchAgentUrl    = var.cloudwatch_agent_url_centos
   DisableRollback       = "true"
+  EbsOptimized          = "false"
   InstanceRole          = var.instance_role
-  InstanceType          = "t2.micro"
+  InstanceType          = "t2.medium"
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
   OnFailureAction       = ""
@@ -35,7 +36,7 @@ module "lx-instance-centos7" {
   DisableRollback       = "true"
   EbsOptimized          = "true"
   InstanceRole          = var.instance_role
-  InstanceType          = "t3.micro"
+  InstanceType          = "t3.medium"
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
   OnFailureAction       = ""
@@ -59,8 +60,9 @@ module "lx-autoscale-centos6" {
   AsgSnsArn             = aws_sns_topic.tf-aws-wam.arn
   CloudWatchAgentUrl    = var.cloudwatch_agent_url_centos
   DisableRollback       = "true"
+  EbsOptimized          = "false"
   InstanceRole          = var.instance_role
-  InstanceType          = "t2.micro"
+  InstanceType          = "t2.medium"
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
   OnFailureAction       = ""
@@ -86,7 +88,7 @@ module "lx-autoscale-centos7" {
   DisableRollback       = "true"
   EbsOptimized          = "true"
   InstanceRole          = var.instance_role
-  InstanceType          = "t3.micro"
+  InstanceType          = "t3.medium"
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
   OnFailureAction       = ""
@@ -108,7 +110,7 @@ module "win-instance-2008R2" {
   DisableRollback       = "true"
   EbsOptimized          = "true"
   InstanceRole          = var.instance_role
-  InstanceType          = "t3.medium"
+  InstanceType          = "t3.large"
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
   OnFailureAction       = ""
@@ -129,7 +131,7 @@ module "win-instance-2012R2" {
   DisableRollback       = "true"
   EbsOptimized          = "true"
   InstanceRole          = var.instance_role
-  InstanceType          = "t3.medium"
+  InstanceType          = "t3.large"
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
   OnFailureAction       = ""
@@ -150,7 +152,7 @@ module "win-instance-2016" {
   DisableRollback       = "true"
   EbsOptimized          = "true"
   InstanceRole          = var.instance_role
-  InstanceType          = "t3.medium"
+  InstanceType          = "t3.large"
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
   OnFailureAction       = ""
@@ -174,7 +176,7 @@ module "win-autoscale-2008R2" {
   DisableRollback       = "true"
   EbsOptimized          = "true"
   InstanceRole          = var.instance_role
-  InstanceType          = "t3.medium"
+  InstanceType          = "t3.large"
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
   OnFailureAction       = ""
@@ -197,7 +199,7 @@ module "win-autoscale-2012R2" {
   CloudWatchAgentUrl    = var.cloudwatch_agent_url_win
   DisableRollback       = "true"
   InstanceRole          = var.instance_role
-  InstanceType          = "t3.medium"
+  InstanceType          = "t3.large"
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
   OnFailureAction       = ""
@@ -220,7 +222,7 @@ module "win-autoscale-2016" {
   CloudWatchAgentUrl    = var.cloudwatch_agent_url_win
   DisableRollback       = "true"
   InstanceRole          = var.instance_role
-  InstanceType          = "t3.medium"
+  InstanceType          = "t3.large"
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
   OnFailureAction       = ""
