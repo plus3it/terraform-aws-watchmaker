@@ -12,7 +12,8 @@ variable "AsgNotificationTypes" {
 
 variable "build_id" {
   type        = string
-  description = "(Required) Build ID"
+  description = "(Optional) Build ID"
+  default     = null
 }
 
 variable "cloudwatch_agent_url_centos" {
