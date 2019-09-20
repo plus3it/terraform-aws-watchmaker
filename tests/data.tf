@@ -89,5 +89,5 @@ data "aws_ami" "windows2016" {
 }
 
 data "aws_subnet" "selected" {
-  id = "${var.subnet_id}"
+  id = var.subnet_id
 }

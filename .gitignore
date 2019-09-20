@@ -14,6 +14,9 @@ $RECYCLE.BIN/
 #*.msm
 #*.msp
 
+# local environment
+.env
+
 # =========================
 # Operating System Files
 # =========================
@@ -97,3 +100,4 @@ htmlcov
 *.tfstate
 *.tfstate.backup
 .terraform/
+terraform.log

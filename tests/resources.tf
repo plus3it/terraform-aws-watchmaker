@@ -5,12 +5,12 @@ resource "tls_private_key" "this" {
 
 resource "aws_key_pair" "this" {
   key_name   = "${local.test_prefix}-aws-terraform-wam-test"
-  public_key = "${tls_private_key.this.public_key_openssh}"
+  public_key = tls_private_key.this.public_key_openssh
 }
 
 resource "aws_security_group" "this" {
   name   = "${local.test_prefix}-aws-terraform-wam-test"
-  vpc_id = "${data.aws_subnet.selected.vpc_id}"
+  vpc_id = data.aws_subnet.selected.vpc_id
 
   tags = {
     Name = "${local.test_prefix}-terraform-aws-wam"
