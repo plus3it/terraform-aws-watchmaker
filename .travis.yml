@@ -10,18 +10,15 @@ env:
 jobs:
   include:
     - stage: test
-      env:
-        - JOB="Terraform Format Verification"
+      name: "Terraform Format Verification"
       script:
         - make terraform/lint
     - stage: test
-      env:
-        - JOB="JSON Lint/Format"
+      name: "JSON Lint/Format"
       script:
         - make json/lint
     - stage: test
-      env:
-        - JOB="CFN Lint"
+      name: "CFN Lint"
       install:
         - pip install -r _requirements/cfn-lint.txt
         - cfn-lint --version
@@ -29,8 +26,7 @@ jobs:
       script:
         - make cfn/lint
     - stage: test
-      env:
-        - JOB="EditorConfig Lint"
+      name: "EditorConfig Lint"
       install:
         - npm install -g eclint
         - eclint --version
@@ -39,18 +35,27 @@ jobs:
       script:
         - make eclint/lint
     - stage: test
-      env:
-        - JOB="CFN Version Validation"
+      name: "CFN Version Validation"
       install:
         - pip install -r _requirements/cfn-version-check.txt
         - yq --version
       language: python
       script:
         - make cfn/version VERSION=$RELEASE_VERSION
+    - stage: test
+      name: "Module Docs Lint"
+      install:
+        - pip install -r _requirements/jinja2-cli.txt
+        - make terraform-docs/install
+        - make terraform/install
+        - terraform-docs --version
+      language: python
+      script:
+        - make docs/lint/modules
     - stage: deploy
+      name: "Deploy to GitHub Releases"
       if: branch = env(RELEASE_BRANCH) AND tag IS blank
       env:
-        - JOB="Deploy to GitHub Releases"
         - PRIOR_VERSION=$(git describe --abbrev=0 --tags)
         - RELEASE_BODY="* [$REPO v$RELEASE_VERSION changes](https://github.com/$OWNER/$REPO/compare/$PRIOR_VERSION...$RELEASE_VERSION)"
       before_script:
