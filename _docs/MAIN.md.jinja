@@ -1,0 +1,5 @@
+{%- set modules = {'modules/lx-autoscale': 'Linux AutoScaling Group', 'modules/lx-instance': 'Linux Instance', 'modules/win-autoscale':'Windows AutoScaling Group', 'modules/win-instance': 'Windows Instance'} -%}
+# Terraform Module - Watchmaker {{ modules[name] }}
+
+This module utilizes the Terraform CloudFormation resource in conjunction
+with an AWS CloudFormation template to deploy a Watchmaker {{ modules[name] }}.

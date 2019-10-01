@@ -101,3 +101,7 @@ htmlcov
 *.tfstate.backup
 .terraform/
 terraform.log
+
+
+# Templated module MD
+MAIN.md
