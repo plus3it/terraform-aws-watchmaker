@@ -54,6 +54,9 @@ install/gh-release/%:
 	$* --version
 	@ echo "[$@]: Completed successfully!"
 
+jinja2/install:
+	pip install --user -r _requirements/jinja2-cli.txt
+
 terraform/install: TERRAFORM_VERSION_LATEST := $(CURL) https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M '.current_version' | sed 's/^v//'
 terraform/install: TERRAFORM_VERSION ?= $(shell $(TERRAFORM_VERSION_LATEST))
 terraform/install: | $(BIN_DIR) guard/program/jq
@@ -126,10 +129,10 @@ docs/%: FOUND_DIR ?= find ${@F} -type d \( -name "lx*" -o -name "win*" \)
 docs/%: README_DIR ?= .
 docs/%: README_BASE ?= _docs/MAIN.md.jinja
 docs/%: README_MAIN := $(README_DIR)/MAIN.md
-docs/%: README_PARTS ?= $(README_MAIN) <(echo) <($(BIN_DIR)/terraform-docs.sh markdown table $(README_DIR))
+docs/%: README_PARTS ?= $(README_MAIN) <(echo) <($(BIN_DIR)/terraform-docs.sh markdown $(README_DIR))
 docs/%: README_FILE ?= $(README_DIR)/README.md
 
-docs/template:
+docs/template: | guard/program/jinja2
 	@ echo "[$@/$(README_DIR)]: Templating doc..."
 	jinja2 -D name=$(README_DIR) $(README_BASE) > $(README_MAIN)
 
