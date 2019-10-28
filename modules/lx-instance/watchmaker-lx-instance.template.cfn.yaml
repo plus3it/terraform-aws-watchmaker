@@ -156,7 +156,7 @@ Metadata:
     ParameterLabels:
       ToggleCfnInitUpdate:
         default: Force Cfn Init Update
-  Version: 2.0.1
+  Version: 2.0.2
 Outputs:
   WatchmakerInstanceId:
     Description: Instance ID
