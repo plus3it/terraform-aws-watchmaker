@@ -9,49 +9,16 @@ env:
 
 jobs:
   include:
-    - stage: test
-      name: "Terraform Format Verification"
-      script:
-        - make terraform/lint
-    - stage: test
-      name: "JSON Lint/Format"
-      script:
-        - make json/lint
-    - stage: test
-      name: "CFN Lint"
-      install:
-        - pip install -r _requirements/cfn-lint.txt
-        - cfn-lint --version
-      language: python
-      script:
-        - make cfn/lint
-    - stage: test
-      name: "EditorConfig Lint"
-      install:
-        - npm install -g eclint
-        - eclint --version
-      language: node_js
-      node_js: 8
-      script:
-        - make eclint/lint
-    - stage: test
+    - stage: lint
+      name: Project Syntax Verification
+      script: make && make docker/run target=lint
+    - stage: lint
       name: "CFN Version Validation"
       install:
         - pip install -r _requirements/cfn-version-check.txt
         - yq --version
       language: python
-      script:
-        - make cfn/version VERSION=$RELEASE_VERSION
-    - stage: test
-      name: "Module Docs Lint"
-      install:
-        - pip install -r _requirements/jinja2-cli.txt
-        - make terraform-docs/install
-        - make terraform/install
-        - terraform-docs --version
-      language: python
-      script:
-        - make docs/lint/modules
+      script: make cfn/version VERSION=$RELEASE_VERSION
     - stage: deploy
       name: "Deploy to GitHub Releases"
       if: branch = env(RELEASE_BRANCH) AND tag IS blank

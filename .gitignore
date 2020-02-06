@@ -105,3 +105,10 @@ terraform.log
 
 # Templated module MD
 MAIN.md
+
+# tardigrade-ci
+.tardigrade-ci
+tardigrade-ci/
+
+# eclint
+.git/
