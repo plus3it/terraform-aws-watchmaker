@@ -43,21 +43,6 @@ data "aws_ami" "centos7" {
   }
 }
 
-data "aws_ami" "windows2008R2" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["Windows_Server-2008-R2_SP1-English-64Bit-Base*"]
-  }
-
-  filter {
-    name   = "state"
-    values = ["available"]
-  }
-}
-
 data "aws_ami" "windows2012R2" {
   most_recent = true
   owners      = ["amazon"]
