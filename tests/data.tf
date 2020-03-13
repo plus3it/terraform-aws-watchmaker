@@ -43,21 +43,6 @@ data "aws_ami" "centos7" {
   }
 }
 
-data "aws_ami" "windows2008R2" {
-  most_recent = true
-  owners      = ["amazon"]
-
-  filter {
-    name   = "name"
-    values = ["Windows_Server-2008-R2_SP1-English-64Bit-Base*"]
-  }
-
-  filter {
-    name   = "state"
-    values = ["available"]
-  }
-}
-
 data "aws_ami" "windows2012R2" {
   most_recent = true
   owners      = ["amazon"]
@@ -80,6 +65,21 @@ data "aws_ami" "windows2016" {
   filter {
     name   = "name"
     values = ["Windows_Server-2016-English-Full-Base*"]
+  }
+
+  filter {
+    name   = "state"
+    values = ["available"]
+  }
+}
+
+data "aws_ami" "windows2019" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["Windows_Server-2019-English-Full-Base*"]
   }
 
   filter {
