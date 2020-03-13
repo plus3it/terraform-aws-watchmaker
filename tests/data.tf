@@ -73,6 +73,21 @@ data "aws_ami" "windows2016" {
   }
 }
 
+data "aws_ami" "windows2019" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["Windows_Server-2019-English-Full-Base*"]
+  }
+
+  filter {
+    name   = "state"
+    values = ["available"]
+  }
+}
+
 data "aws_subnet" "selected" {
   id = var.subnet_id
 }
