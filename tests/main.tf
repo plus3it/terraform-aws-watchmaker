@@ -196,8 +196,8 @@ module "win-autoscale-2016" {
   Name                  = "${local.test_prefix}-win-autoscale-2016"
   AmiId                 = data.aws_ami.windows2016.image_id
   AppVolumeSize         = "10"
-  AsgMetrics            = ["GroupMinSize", "GroupMaxSize", "GroupDesiredCapacity", "GroupInServiceInstances", "GroupPendingInstances", "GroupStandbyInstances", "GroupTerminatingInstances", "GroupTotalInstances"]
-  AsgNotificationTypes  = ["autoscaling:EC2_INSTANCE_LAUNCH", "autoscaling:EC2_INSTANCE_LAUNCH_ERROR", "autoscaling:EC2_INSTANCE_TERMINATE", "autoscaling:EC2_INSTANCE_TERMINATE_ERROR", "autoscaling:TEST_NOTIFICATION"]
+  AsgMetrics            = var.AsgMetrics
+  AsgNotificationTypes  = var.AsgNotificationTypes
   AsgSnsArn             = aws_sns_topic.tf-aws-wam.arn
   CloudWatchAgentUrl    = var.cloudwatch_agent_url_win
   DisableRollback       = "true"
