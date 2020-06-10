@@ -141,7 +141,7 @@ Metadata:
     ParameterLabels:
       ToggleCfnInitUpdate:
         default: Force Cfn Init Update
-  Version: 2.0.2
+  Version: 2.0.3
 Outputs:
   WatchmakerInstanceId:
     Description: Instance ID
@@ -489,6 +489,30 @@ Resources:
                       "logs_collected": {
                         "files": {
                           "collect_list": [
+                            {
+                              "file_path": "c:\\ProgramData\\Amazon\\SSM\\Logs\\AmazonSSMAgent-update.txt",
+                              "log_group_name": "/aws/ec2/win/${AWS::StackName}",
+                              "log_stream_name": "{instance_id}//c/ProgramData/Amazon/SSM/Logs/AmazonSSMAgent-update.txt",
+                              "timestamp_format": "%H:%M:%S %y %b %-d"
+                            },
+                            {
+                              "file_path": "c:\\ProgramData\\Amazon\\SSM\\Logs\\errors.txt",
+                              "log_group_name": "/aws/ec2/win/${AWS::StackName}",
+                              "log_stream_name": "{instance_id}//c/ProgramData/Amazon/SSM/Logs/errors.txt",
+                              "timestamp_format": "%H:%M:%S %y %b %-d"
+                            },
+                            {
+                              "file_path": "c:\\ProgramData\\Amazon\\SSM\\Logs\\amazon-ssm-agent.log",
+                              "log_group_name": "/aws/ec2/win/${AWS::StackName}",
+                              "log_stream_name": "{instance_id}//c/ProgramData/Amazon/SSM/Logs/amazon-ssm-agent.log",
+                              "timestamp_format": "%H:%M:%S %y %b %-d"
+                            },
+                            {
+                              "file_path": "c:\\ProgramData\\Amazon\\SSM\\Logs\\amazon-ssm-cloudwatch.log",
+                              "log_group_name": "/aws/ec2/win/${AWS::StackName}",
+                              "log_stream_name": "{instance_id}//c/ProgramData/Amazon/SSM/Logs/amazon-ssm-cloudwatch.log",
+                              "timestamp_format": "%H:%M:%S %y %b %-d"
+                            },
                             {
                               "file_path": "c:\\ProgramData\\Amazon\\AmazonCloudWatchAgent\\Logs\\amazon-cloudwatch-agent.log",
                               "log_group_name": "/aws/ec2/win/${AWS::StackName}",
