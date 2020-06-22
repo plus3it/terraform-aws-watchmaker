@@ -55,6 +55,12 @@ variable "PolicyUrl" {
   default     = null
 }
 
+variable "RootVolumeEncrypted" {
+  type        = bool
+  description = "(Optional) Controls whether the root volume will be encrypted"
+  default     = false
+}
+
 variable "RootVolumeSize" {
   type        = string
   description = "(Optional) Root Volume Size in GB **NOTE** This value can be set larger than the default (20GB) but NOT smaller. If set larger than default value partition will need to be expanded manually."
@@ -104,6 +110,12 @@ variable "AppScriptUrl" {
 variable "AppVolumeDevice" {
   type        = bool
   description = "(Optional) Decision whether to mount an extra EBS volume. Leave as default (\"false\") to launch without an extra application volume"
+  default     = false
+}
+
+variable "AppVolumeEncrypted" {
+  type        = bool
+  description = "(Optional) Controls whether the EBS volume will be encrypted"
   default     = false
 }
 

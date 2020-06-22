@@ -23,3 +23,17 @@ resource "aws_security_group" "this" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+resource "aws_kms_alias" "this" {
+  name          = "alias/${local.test_prefix}-aws-terraform-wam-test"
+  target_key_id = aws_kms_key.this.key_id
+}
+
+resource "aws_kms_key" "this" {
+  description             = "KMS key for aws terraform wam test"
+  deletion_window_in_days = 10
+
+  tags = {
+    Name = "${local.test_prefix}-terraform-aws-wam"
+  }
+}

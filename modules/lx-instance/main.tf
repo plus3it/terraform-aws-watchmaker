@@ -22,6 +22,7 @@ resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
     AppScriptShell          = var.AppScriptShell
     AppScriptUrl            = var.AppScriptUrl
     AppVolumeDevice         = var.AppVolumeDevice
+    AppVolumeEncrypted      = var.AppVolumeEncrypted
     AppVolumeMountPath      = var.AppVolumeMountPath
     AppVolumeSize           = var.AppVolumeSize
     AppVolumeSnapshotId     = var.AppVolumeSnapshotId
@@ -36,12 +37,14 @@ resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
     InstanceRole            = var.InstanceRole
     InstanceType            = var.InstanceType
     KeyPairName             = var.KeyPairName
+    KmsKeyId                = var.KmsKeyId
     NoPublicIp              = var.NoPublicIp
     NoReboot                = var.NoReboot
     NoUpdates               = var.NoUpdates
     PatchGroup              = var.PatchGroup
     PrivateIp               = var.PrivateIp
     PypiIndexUrl            = var.PypiIndexUrl
+    RootVolumeEncrypted     = var.RootVolumeEncrypted
     RootVolumeSize          = var.RootVolumeSize
     SecurityGroupIds        = var.SecurityGroupIds
     SubnetId                = var.SubnetId

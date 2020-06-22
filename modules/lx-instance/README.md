@@ -30,6 +30,7 @@ with an AWS CloudFormation template to deploy a Watchmaker Linux Instance.
 | AppScriptShell | (Optional) Shell with which to execute the application script. Ignored if AppScriptUrl is blank | `string` | `"bash"` | no |
 | AppScriptUrl | (Optional) S3 URL to the application script in an S3 bucket (s3://). Leave blank to launch without an application script. If specified, an appropriate InstanceRole is required | `string` | `null` | no |
 | AppVolumeDevice | (Optional) Decision whether to mount an extra EBS volume. Leave as default (false) to launch without an extra application volume | `bool` | `false` | no |
+| AppVolumeEncrypted | (Optional) Controls whether the EBS volume will be encrypted. When KmsKeyId is specified, EBS encryption will be done using that, otherwise encrypted using AWS managed CMK | `bool` | `false` | no |
 | AppVolumeMountPath | (Optional) Filesystem path to mount the extra app volume. Ignored if AppVolumeDevice is false | `string` | `"/opt/data"` | no |
 | AppVolumeSize | (Optional) Size in GB of the EBS volume to create. Ignored if AppVolumeDevice is false | `string` | `"1"` | no |
 | AppVolumeSnapshotId | (Optional) EBS Snapshot ID from which to create the AppVolume. "AppVolumeSize" must be equal or greater than the size of the snapshot. Ignored if "AppVolumeDevice" is false | `string` | `null` | no |
@@ -45,6 +46,7 @@ with an AWS CloudFormation template to deploy a Watchmaker Linux Instance.
 | IamRoleArn | (Optional) The ARN of an IAM role that AWS CloudFormation assumes to create the stack. If you don't specify a value, AWS CloudFormation uses the role that was previously associated with the stack. If no role is available, AWS CloudFormation uses a temporary session that is generated from your user credentials | `string` | `null` | no |
 | InstanceRole | (Optional) IAM instance role to apply to the instance | `string` | `null` | no |
 | InstanceType | (Optional) Amazon EC2 instance type | `string` | `"t2.micro"` | no |
+| KmsKeyId | (Optional) Identifier (key ID, key alias, ID ARN, or alias ARN) for a customer managed CMK under which the EBS volume is encrypted. If this is unspecified and encryption is requested, AWS managed CMK for EBS is used to encrypt the volume | `string` | `null` | no |
 | NoPublicIp | (Optional) Controls whether to assign the instance a public IP. Recommended to leave at true _unless_ launching in a public subnet | `bool` | `true` | no |
 | NoReboot | (Optional) Controls whether to reboot the instance as the last step of cfn-init execution | `bool` | `false` | no |
 | NoUpdates | (Optional) Controls whether to run yum update during a stack update (On the initial instance launch, Watchmaker _always_ installs updates) | `bool` | `false` | no |
@@ -55,6 +57,7 @@ with an AWS CloudFormation template to deploy a Watchmaker Linux Instance.
 | PolicyUrl | (Optional) URL to a file containing the stack policy. Conflicts with PolicyBody | `string` | `null` | no |
 | PrivateIp | (Optional) Set a static, primary private IP. Leave blank to auto-select a free IP | `string` | `null` | no |
 | PypiIndexUrl | (Optional) URL to the PyPi Index | `string` | `"https://pypi.org/simple"` | no |
+| RootVolumeEncrypted | (Optional) Controls whether the root volume will be encrypted. When KmsKeyId is specified, EBS encryption will be done using that, otherwise encrypted using AWS managed CMK | `bool` | `false` | no |
 | RootVolumeSize | (Optional) Root Volume Size in GB **NOTE** This value can be set larger than the default (20GB) but NOT smaller. If set larger than default value partition will need to be expanded manually. | `string` | `"20"` | no |
 | StackTags | (Optional) A map of tag keys/values to associate with this stack | `map(string)` | `{}` | no |
 | TimeoutInMinutes | (Optional) The amount of time that can pass before the stack status becomes CREATE\_FAILED | `string` | `"30"` | no |

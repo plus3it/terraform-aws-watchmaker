@@ -13,6 +13,7 @@ with an AWS CloudFormation template to deploy a Watchmaker Linux AutoScaling Gro
 | AppScriptShell | \(Optional\) Shell with which to execute the application script. Ignored if AppScriptUrl is blank | string | `"bash"` | no |
 | AppScriptUrl | \(Optional\) S3 URL to the application script in an S3 bucket \(s3://\). Leave blank to launch without an application script. If specified, an appropriate InstanceRole is required | string | `"null"` | no |
 | AppVolumeDevice | \(Optional\) Decision whether to mount an extra EBS volume. Leave as default \("false"\) to launch without an extra application volume | bool | `"false"` | no |
+| AppVolumeEncrypted | (Optional) Controls whether the EBS volume will be encrypted. | `bool` | `false` | no |
 | AppVolumeMountPath | \(Optional\) Filesystem path to mount the extra app volume. Ignored if AppVolumeDevice is false | string | `"/opt/data"` | no |
 | AppVolumeSize | \(Optional\) Size in GB of the EBS volume to create. Ignored if AppVolumeDevice is false | string | `"1"` | no |
 | AppVolumeSnapshotId | \(Optional\) EBS Snapshot ID from which to create the AppVolume. "AppVolumeSize" must be equal or greater than the size of the snapshot. Ignored if "AppVolumeDevice" is false | string | `"null"` | no |
@@ -46,6 +47,7 @@ with an AWS CloudFormation template to deploy a Watchmaker Linux AutoScaling Gro
 | PolicyBody | \(Optional\) String containing the stack policy body. Conflicts with PolicyUrl | string | `"null"` | no |
 | PolicyUrl | \(Optional\) URL to a file containing the stack policy. Conflicts with PolicyBody | string | `"null"` | no |
 | PypiIndexUrl | \(Optional\) URL to the PyPi Index | string | `"https://pypi.org/simple"` | no |
+| RootVolumeEncrypted | (Optional) Controls whether the root volume will be encrypted. | `bool` | `false` | no |
 | RootVolumeSize | \(Optional\) Root Volume Size in GB \*\*NOTE\*\* This value can be set larger than the default \(20GB\) but NOT smaller. If set larger than default value partition will need to be expanded manually. | string | `"20"` | no |
 | ScaleDownSchedule | \(Optional\) Scheduled Action in cron-format \(UTC\) to scale down to MinCapacity; ignored if empty or ScaleUpSchedule is unset \(E.g. "0 0 \* \* \*"\) | string | `"null"` | no |
 | ScaleUpSchedule | \(Optional\) Scheduled Action in cron-format \(UTC\) to scale up to MaxCapacity; ignored if empty or ScaleDownSchedule is unset \(E.g. "0 10 \* \* Mon-Fri"\) | string | `"null"` | no |
@@ -70,4 +72,3 @@ with an AWS CloudFormation template to deploy a Watchmaker Linux AutoScaling Gro
 | Name | Description |
 |------|-------------|
 | watchmaker-lx-autoscale | CloudFormation stack object for watchmaker-lx-autoscale |
-

@@ -8,6 +8,8 @@
   ParameterValue: __APPSCRIPTURL__
 - ParameterKey: AppVolumeDevice
   ParameterValue: __APPVOLUMEDEVICE__
+- ParameterKey: AppVolumeEncrypted
+  ParameterValue: __APPVOLUMEENCRYPTED__
 - ParameterKey: AppVolumeSize
   ParameterValue: __APPVOLUMESIZE__
 - ParameterKey: AppVolumeType
@@ -28,6 +30,8 @@
   ParameterValue: __INSTANCETYPE__
 - ParameterKey: KeyPairName
   ParameterValue: __KEYPAIRNAME__
+- ParameterKey: KmsKeyId
+  ParameterValue: __KMSKEYID__
 - ParameterKey: NoPublicIp
   ParameterValue: __NOPUBLICIP__
 - ParameterKey: NoReboot
@@ -40,6 +44,8 @@
   ParameterValue: __PYPIINDEXURL__
 - ParameterKey: PythonInstaller
   ParameterValue: __PYTHONINSTALLER__
+- ParameterKey: RootVolumeEncrypted
+  ParameterValue: __ROOTVOLUMEENCRYPTED__
 - ParameterKey: RootVolumeSize
   ParameterValue: __ROOTVOLUMESIZE__
 - ParameterKey: SecurityGroupIds
