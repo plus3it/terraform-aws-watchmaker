@@ -28,6 +28,7 @@ with an AWS CloudFormation template to deploy a Watchmaker Windows AutoScaling G
 | AppScriptParams | (Optional) Parameter string to pass to the application script. Ignored if AppScriptUrl is blank | `string` | `""` | no |
 | AppScriptUrl | (Optional) S3 URL to the .ps1 or .bat application script in an S3 bucket (s3://). Leave blank to launch without an application script. If specified, an appropriate InstanceRole is required | `string` | `null` | no |
 | AppVolumeDevice | #(Optional) Device to mount an extra EBS volume. Leave blank to launch without an extra application volume | `string` | `null` | no |
+| AppVolumeEncrypted | (Optional) Controls whether the EBS volume will be encrypted | `bool` | `false` | no |
 | AppVolumeSize | (Optional) Size in GB of the EBS volume to create. Ignored if AppVolumeDevice is blank | `string` | `"1"` | no |
 | AppVolumeSnapshotId | (Optional) EBS Snapshot ID from which to create the AppVolume. "AppVolumeSize" must be equal or greater than the size of the snapshot. Ignored if "AppVolumeDevice" is blank | `string` | `null` | no |
 | AppVolumeType | (Optional) Type of EBS volume to create. Ignored if AppVolumeDevice is blank | `string` | `"gp2"` | no |
@@ -57,6 +58,7 @@ with an AWS CloudFormation template to deploy a Watchmaker Windows AutoScaling G
 | PolicyUrl | (Optional) URL to a file containing the stack policy. Conflicts with PolicyBody | `string` | `null` | no |
 | PypiIndexUrl | (Optional) URL to the PyPi Index | `string` | `"https://pypi.org/simple"` | no |
 | PythonInstaller | (Optional) URL to the Python Installer Executable | `string` | `"https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe"` | no |
+| RootVolumeEncrypted | (Optional) Controls whether the root volume will be encrypted | `bool` | `false` | no |
 | RootVolumeSize | (Optional) Root Volume Size in GB **NOTE** This value can be set larger than the default (30GB) but NOT smaller. | `string` | `"30"` | no |
 | ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down to MinCapacity; ignored if empty or ScaleUpSchedule is unset (E.g. "0 0 \* \* \*") | `string` | `null` | no |
 | ScaleUpSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale up to MaxCapacity; ignored if empty or ScaleDownSchedule is unset (E.g. "0 10 \* \* Mon-Fri") | `string` | `null` | no |

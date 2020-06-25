@@ -10,6 +10,8 @@
   ParameterValue: __APPSCRIPTURL__
 - ParameterKey: AppVolumeDevice
   ParameterValue: __APPVOLUMEDEVICE__
+- ParameterKey: AppVolumeEncrypted
+  ParameterValue: __APPVOLUMEENCRYPTED__
 - ParameterKey: AppVolumeMountPath
   ParameterValue: __APPVOLUMEMOUNTPATH__
 - ParameterKey: AppVolumeSize
@@ -58,6 +60,8 @@
   ParameterValue: __PATCHGROUP__
 - ParameterKey: PypiIndexUrl
   ParameterValue: __PYPIINDEXURL__
+- ParameterKey: RootVolumeEncrypted
+  ParameterValue: __ROOTVOLUMEENCRYPTED__
 - ParameterKey: RootVolumeSize
   ParameterValue: __ROOTVOLUMESIZE__
 - ParameterKey: SecurityGroupIds

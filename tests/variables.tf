@@ -40,6 +40,12 @@ variable "keypair_name" {
   default     = null
 }
 
+variable "kmskey_id" {
+  type        = string
+  description = "(Optional) KMS key id/arn"
+  default     = null
+}
+
 variable "subnet_id" {
   type        = string
   description = "(Required) Subnet ID"

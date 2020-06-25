@@ -20,6 +20,7 @@ resource "aws_cloudformation_stack" "watchmaker-win-autoscale" {
     AppScriptParams             = var.AppScriptParams
     AppScriptUrl                = var.AppScriptUrl
     AppVolumeDevice             = var.AppVolumeDevice
+    AppVolumeEncrypted          = var.AppVolumeEncrypted
     AppVolumeSize               = var.AppVolumeSize
     AppVolumeSnapshotId         = var.AppVolumeSnapshotId
     AppVolumeType               = var.AppVolumeType
@@ -44,6 +45,7 @@ resource "aws_cloudformation_stack" "watchmaker-win-autoscale" {
     PatchGroup                  = var.PatchGroup
     PypiIndexUrl                = var.PypiIndexUrl
     PythonInstaller             = var.PythonInstaller
+    RootVolumeEncrypted         = var.RootVolumeEncrypted
     RootVolumeSize              = var.RootVolumeSize
     ScaleDownSchedule           = var.ScaleDownSchedule
     ScaleUpSchedule             = var.ScaleUpSchedule

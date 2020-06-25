@@ -24,6 +24,10 @@ Conditions:
     - !Equals
       - !Ref AppScriptUrl
       - ''
+  HasKmsKey: !Not
+    - !Equals
+      - !Ref KmsKeyId
+      - ''
   InstallCloudWatchAgent: !Not
     - !Equals
       - !Ref CloudWatchAgentUrl
@@ -93,9 +97,11 @@ Metadata:
           - InstanceType
           - InstanceRole
           - KeyPairName
+          - KmsKeyId
           - NoPublicIp
           - NoReboot
           - PatchGroup
+          - RootVolumeEncrypted
           - RootVolumeSize
           - SecurityGroupIds
       - Label:
@@ -122,6 +128,7 @@ Metadata:
           default: EC2 Application EBS Volume
         Parameters:
           - AppVolumeDevice
+          - AppVolumeEncrypted
           - AppVolumeSize
           - AppVolumeSnapshotId
           - AppVolumeType
@@ -141,7 +148,7 @@ Metadata:
     ParameterLabels:
       ToggleCfnInitUpdate:
         default: Force Cfn Init Update
-  Version: 2.0.3
+  Version: 2.1.0
 Outputs:
   WatchmakerInstanceId:
     Description: Instance ID
@@ -180,6 +187,14 @@ Parameters:
     Description: >-
       (Optional) Device to mount an extra EBS volume. Leave blank to launch
       without an extra application volume
+    Type: String
+  AppVolumeEncrypted:
+    AllowedValues:
+      - 'false'
+      - 'true'
+    Default: 'false'
+    Description: >-
+      Controls whether to encrypt the EBS volume.
     Type: String
   AppVolumeSize:
     ConstraintDescription: Must be between 1GB and 16384GB.
@@ -265,6 +280,12 @@ Parameters:
       Public/private key pairs allow you to securely connect to your instance
       after it launches
     Type: 'AWS::EC2::KeyPair::KeyName'
+  KmsKeyId:
+    Default: ''
+    Description: >-
+      (Optional) The identifier (key ID, key alias, ID ARN, or alias ARN) for a
+      customer managed CMK to use for EBS encryption.
+    Type: String
   NoPublicIp:
     AllowedValues:
       - 'false'
@@ -304,6 +325,14 @@ Parameters:
     AllowedPattern: '^http[s]?://.*\.exe$'
     Default: 'https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe'
     Description: URL to the Python Installer Executable
+    Type: String
+  RootVolumeEncrypted:
+    AllowedValues:
+      - 'false'
+      - 'true'
+    Default: 'false'
+    Description: >-
+      Controls whether to encrypt the root volume.
     Type: String
   RootVolumeSize:
     Default: 30
@@ -780,6 +809,11 @@ Resources:
         - DeviceName: /dev/sda1
           Ebs:
             DeleteOnTermination: true
+            Encrypted: !Ref RootVolumeEncrypted
+            KmsKeyId: !If
+              - HasKmsKey
+              - !Ref KmsKeyId
+              - !Ref 'AWS::NoValue'
             VolumeSize: !Ref RootVolumeSize
             VolumeType: gp2
         - !If
@@ -787,6 +821,11 @@ Resources:
           - DeviceName: !Ref AppVolumeDevice
             Ebs:
               DeleteOnTermination: true
+              Encrypted: !Ref AppVolumeEncrypted
+              KmsKeyId: !If
+                - HasKmsKey
+                - !Ref KmsKeyId
+                - !Ref 'AWS::NoValue'
               SnapshotId: !If
                 - UseAppVolumeSnapshot
                 - !Ref AppVolumeSnapshotId

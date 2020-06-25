@@ -12,6 +12,8 @@ module "lx-instance-centos6" {
   Name                  = "${local.test_prefix}-lx-instance-centos6"
   AmiId                 = data.aws_ami.centos6.image_id
   AmiDistro             = "CentOS"
+  AppVolumeDevice       = true
+  AppVolumeEncrypted    = true
   AppVolumeSize         = "10"
   CloudWatchAgentUrl    = var.cloudwatch_agent_url_centos
   DisableRollback       = "true"
@@ -19,8 +21,10 @@ module "lx-instance-centos6" {
   InstanceRole          = var.instance_role
   InstanceType          = "t2.medium"
   KeyPairName           = local.keypair_name
+  KmsKeyId              = local.kmskey_id
   NoPublicIp            = "false"
   OnFailureAction       = ""
+  RootVolumeEncrypted   = true
   RootVolumeSize        = "25"
   SecurityGroupIds      = local.security_group
   SubnetId              = var.subnet_id
@@ -58,6 +62,8 @@ module "lx-autoscale-centos6" {
   Name                  = "${local.test_prefix}-lx-autoscale-centos6"
   AmiId                 = data.aws_ami.centos6.image_id
   AmiDistro             = "CentOS"
+  AppVolumeDevice       = true
+  AppVolumeEncrypted    = true
   AppVolumeSize         = "10"
   AsgMetrics            = var.AsgMetrics
   AsgNotificationTypes  = var.AsgNotificationTypes
@@ -70,6 +76,7 @@ module "lx-autoscale-centos6" {
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
   OnFailureAction       = ""
+  RootVolumeEncrypted   = true
   RootVolumeSize        = "25"
   SecurityGroupIds      = local.security_group
   SubnetIds             = var.subnet_id
@@ -109,6 +116,8 @@ module "win-instance-2012R2" {
 
   Name                  = "${local.test_prefix}-win-instance-2012R2"
   AmiId                 = data.aws_ami.windows2012R2.image_id
+  AppVolumeDevice       = "xvdf"
+  AppVolumeEncrypted    = true
   AppVolumeSize         = "10"
   CloudWatchAgentUrl    = var.cloudwatch_agent_url_win
   DisableRollback       = "true"
@@ -118,6 +127,7 @@ module "win-instance-2012R2" {
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
   OnFailureAction       = ""
+  RootVolumeEncrypted   = true
   RootVolumeSize        = "35"
   SecurityGroupIds      = local.security_group
   SubnetId              = var.subnet_id
@@ -130,6 +140,8 @@ module "win-instance-2016" {
 
   Name                  = "${local.test_prefix}-win-instance-2016"
   AmiId                 = data.aws_ami.windows2016.image_id
+  AppVolumeDevice       = "xvdf"
+  AppVolumeEncrypted    = true
   AppVolumeSize         = "10"
   CloudWatchAgentUrl    = var.cloudwatch_agent_url_win
   DisableRollback       = "true"
@@ -137,8 +149,10 @@ module "win-instance-2016" {
   InstanceRole          = var.instance_role
   InstanceType          = "t3.large"
   KeyPairName           = local.keypair_name
+  KmsKeyId              = local.kmskey_id
   NoPublicIp            = "false"
   OnFailureAction       = ""
+  RootVolumeEncrypted   = true
   RootVolumeSize        = "35"
   SecurityGroupIds      = local.security_group
   SubnetId              = var.subnet_id
@@ -172,6 +186,8 @@ module "win-autoscale-2012R2" {
 
   Name                  = "${local.test_prefix}-win-autoscale-2012R2"
   AmiId                 = data.aws_ami.windows2012R2.image_id
+  AppVolumeDevice       = "xvdf"
+  AppVolumeEncrypted    = true
   AppVolumeSize         = "10"
   AsgMetrics            = var.AsgMetrics
   AsgNotificationTypes  = var.AsgNotificationTypes
@@ -183,6 +199,7 @@ module "win-autoscale-2012R2" {
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
   OnFailureAction       = ""
+  RootVolumeEncrypted   = true
   RootVolumeSize        = "35"
   SecurityGroupIds      = local.security_group
   SubnetIds             = var.subnet_id
@@ -195,6 +212,8 @@ module "win-autoscale-2016" {
 
   Name                  = "${local.test_prefix}-win-autoscale-2016"
   AmiId                 = data.aws_ami.windows2016.image_id
+  AppVolumeDevice       = "xvdf"
+  AppVolumeEncrypted    = true
   AppVolumeSize         = "10"
   AsgMetrics            = var.AsgMetrics
   AsgNotificationTypes  = var.AsgNotificationTypes
@@ -206,6 +225,7 @@ module "win-autoscale-2016" {
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
   OnFailureAction       = ""
+  RootVolumeEncrypted   = true
   RootVolumeSize        = "35"
   SecurityGroupIds      = local.security_group
   SubnetIds             = var.subnet_id

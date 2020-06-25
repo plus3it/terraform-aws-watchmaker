@@ -4,4 +4,5 @@ locals {
   test_prefix    = "tf-wam-test-${local.build_id}"
   keypair_name   = var.keypair_name == null ? aws_key_pair.this.id : var.keypair_name
   security_group = var.security_group == null ? aws_security_group.this.id : var.security_group
+  kmskey_id      = var.kmskey_id == null ? aws_kms_key.this.key_id : var.kmskey_id
 }

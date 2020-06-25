@@ -31,6 +31,10 @@ Conditions:
     - !Equals
       - !Ref RootVolumeSize
       - "20"
+  HasKmsKey: !Not
+    - !Equals
+      - !Ref KmsKeyId
+      - ''
   InstallCloudWatchAgent: !Not
     - !Equals
       - !Ref CloudWatchAgentUrl
@@ -107,10 +111,12 @@ Metadata:
           - InstanceType
           - InstanceRole
           - KeyPairName
+          - KmsKeyId
           - NoPublicIp
           - NoReboot
           - NoUpdates
           - PatchGroup
+          - RootVolumeEncrypted
           - RootVolumeSize
           - SecurityGroupIds
       - Label:
@@ -136,6 +142,7 @@ Metadata:
           default: EC2 Application EBS Volume
         Parameters:
           - AppVolumeDevice
+          - AppVolumeEncrypted
           - AppVolumeMountPath
           - AppVolumeSize
           - AppVolumeSnapshotId
@@ -156,7 +163,7 @@ Metadata:
     ParameterLabels:
       ToggleCfnInitUpdate:
         default: Force Cfn Init Update
-  Version: 2.0.3
+  Version: 2.1.0
 Outputs:
   WatchmakerInstanceId:
     Description: Instance ID
@@ -207,6 +214,14 @@ Parameters:
     Description: >-
       Decision on whether to mount an extra EBS volume. Leave as default
       ("false") to launch without an extra application volume
+    Type: String
+  AppVolumeEncrypted:
+    AllowedValues:
+      - 'false'
+      - 'true'
+    Default: 'false'
+    Description: >-
+      Controls whether to encrypt the EBS volume.
     Type: String
   AppVolumeMountPath:
     AllowedPattern: /.*
@@ -303,6 +318,12 @@ Parameters:
       Public/private key pairs allow you to securely connect to your instance
       after it launches
     Type: 'AWS::EC2::KeyPair::KeyName'
+  KmsKeyId:
+    Default: ''
+    Description: >-
+      (Optional) The identifier (key ID, key alias, ID ARN, or alias ARN) for a
+      customer managed CMK to use for EBS encryption.
+    Type: String
   NoPublicIp:
     AllowedValues:
       - 'false'
@@ -346,6 +367,14 @@ Parameters:
     AllowedPattern: '^http[s]?://.*$'
     Default: 'https://pypi.org/simple'
     Description: URL to the PyPi Index
+    Type: String
+  RootVolumeEncrypted:
+    AllowedValues:
+      - 'false'
+      - 'true'
+    Default: 'false'
+    Description: >-
+      Controls whether to encrypt the root volume.
     Type: String
   RootVolumeSize:
     Default: "20"
@@ -759,6 +788,11 @@ Resources:
             - local_Distro2RootDevice: !FindInMap [Distro2RootDevice, !Ref AmiDistro, DeviceName]
           Ebs:
             DeleteOnTermination: true
+            Encrypted: !Ref RootVolumeEncrypted
+            KmsKeyId: !If
+              - HasKmsKey
+              - !Ref KmsKeyId
+              - !Ref 'AWS::NoValue'
             VolumeSize: !Ref RootVolumeSize
             VolumeType: gp2
         - !If
@@ -766,6 +800,11 @@ Resources:
           - DeviceName: /dev/xvdf
             Ebs:
               DeleteOnTermination: true
+              Encrypted: !Ref AppVolumeEncrypted
+              KmsKeyId: !If
+                - HasKmsKey
+                - !Ref KmsKeyId
+                - !Ref 'AWS::NoValue'
               SnapshotId: !If
                 - UseAppVolumeSnapshot
                 - !Ref AppVolumeSnapshotId

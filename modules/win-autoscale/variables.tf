@@ -88,6 +88,12 @@ variable "AppVolumeDevice" {
   default     = null
 }
 
+variable "AppVolumeEncrypted" {
+  type        = bool
+  description = "(Optional) Controls whether the EBS volume will be encrypted"
+  default     = false
+}
+
 variable "AppVolumeType" {
   type        = string
   description = "(Optional) Type of EBS volume to create. Ignored if AppVolumeDevice is blank"
@@ -139,6 +145,12 @@ variable "DesiredCapacity" {
   type        = string
   description = "(Optional) Desired number of instances in the Autoscaling Group"
   default     = "1"
+}
+
+variable "RootVolumeEncrypted" {
+  type        = bool
+  description = "(Optional) Controls whether the root volume will be encrypted"
+  default     = false
 }
 
 variable "RootVolumeSize" {

@@ -55,6 +55,12 @@ variable "PolicyUrl" {
   default     = null
 }
 
+variable "RootVolumeEncrypted" {
+  type        = bool
+  description = "(Optional) Controls whether the root volume will be encrypted. When KmsKeyId is specified, EBS encryption will be done using that, otherwise encrypted using AWS managed CMK"
+  default     = false
+}
+
 variable "RootVolumeSize" {
   type        = string
   description = "(Optional) Root Volume Size in GB **NOTE** This value can be set larger than the default (20GB) but NOT smaller. If set larger than default value partition will need to be expanded manually."
@@ -107,6 +113,12 @@ variable "AppVolumeDevice" {
   default     = false
 }
 
+variable "AppVolumeEncrypted" {
+  type        = bool
+  description = "(Optional) Controls whether the EBS volume will be encrypted. When KmsKeyId is specified, EBS encryption will be done using that, otherwise encrypted using AWS managed CMK"
+  default     = false
+}
+
 variable "AppVolumeMountPath" {
   type        = string
   description = "(Optional) Filesystem path to mount the extra app volume. Ignored if AppVolumeDevice is false"
@@ -145,6 +157,12 @@ variable "InstanceType" {
 variable "InstanceRole" {
   type        = string
   description = "(Optional) IAM instance role to apply to the instance"
+  default     = null
+}
+
+variable "KmsKeyId" {
+  type        = string
+  description = "(Optional) Identifier (key ID, key alias, ID ARN, or alias ARN) for a customer managed CMK under which the EBS volume is encrypted. If this is unspecified and encryption is requested, AWS managed CMK for EBS is used to encrypt the volume"
   default     = null
 }
 
