@@ -867,13 +867,13 @@ Resources:
               #!/bin/bash -xe
 
               # Format and mount app volume
-              APPVOL_DEVICE="$(ls /dev/xvdf /dev/nvme1n1 2> /dev/null || true)"
-              if [[ -n "$APPVOL_DEVICE" && "${AppVolumeDevice}" == "true" ]]
+		$/dev/xvdf
+              if [[ -n "$/dev/xvdf" && "${AppVolumeDevice}" == "true" ]]
               then
                 MOUNT_VFSTYPE="auto"
                 MOUNT_OPTS="defaults,nofail"
-                cloud-init-per instance mkfsappvolume mkfs -t ext4 "$APPVOL_DEVICE"
-                grep -q "$APPVOL_DEVICE" /etc/fstab || printf "%s\t%s\t%s\t%s\t0\t2\n" "$APPVOL_DEVICE" "${AppVolumeMountPath}" "$MOUNT_VFSTYPE" "$MOUNT_OPTS" >> /etc/fstab
+                cloud-init-per instance mkfsappvolume mkfs -t ext4 "$/dev/xvdf"
+                grep -q "$/dev/xvdf" /etc/fstab || printf "%s\t%s\t%s\t%s\t0\t2\n" "$/dev/xvdf" "${AppVolumeMountPath}" "$MOUNT_VFSTYPE" "$MOUNT_OPTS" >> /etc/fstab
                 mkdir -p "${AppVolumeMountPath}"
                 mount -a
               fi
