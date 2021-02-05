@@ -22,6 +22,7 @@ resource "aws_cloudformation_stack" "watchmaker-lx-instance" {
     AppScriptShell          = var.AppScriptShell
     AppScriptUrl            = var.AppScriptUrl
     AppVolumeDevice         = var.AppVolumeDevice
+    AppVolumeDeviceName     = var.AppVolumeDeviceName
     AppVolumeEncrypted      = var.AppVolumeEncrypted
     AppVolumeMountPath      = var.AppVolumeMountPath
     AppVolumeSize           = var.AppVolumeSize
