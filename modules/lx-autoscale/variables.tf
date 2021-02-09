@@ -113,6 +113,12 @@ variable "AppVolumeDevice" {
   default     = false
 }
 
+variable "AppVolumeDeviceName" {
+  type        = string
+  description = "(Optional) Device name to give to the extra EBS volume. Ignored if AppVolumeDevice is false"
+  default     = "/dev/xvdf"
+}
+
 variable "AppVolumeEncrypted" {
   type        = bool
   description = "(Optional) Controls whether the EBS volume will be encrypted"

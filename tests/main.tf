@@ -6,33 +6,6 @@ resource "aws_sns_topic" "tf-aws-wam" {
   name = "${local.test_prefix}-topic"
 }
 
-module "lx-instance-centos6" {
-  source = "../modules/lx-instance"
-
-  Name                  = "${local.test_prefix}-lx-instance-centos6"
-  AmiId                 = data.aws_ami.centos6.image_id
-  AmiDistro             = "CentOS"
-  AppVolumeDevice       = true
-  AppVolumeEncrypted    = true
-  AppVolumeSize         = "10"
-  CloudWatchAgentUrl    = var.cloudwatch_agent_url_centos
-  DisableRollback       = "true"
-  EbsOptimized          = "false"
-  InstanceRole          = var.instance_role
-  InstanceType          = "t2.medium"
-  KeyPairName           = local.keypair_name
-  KmsKeyId              = local.kmskey_id
-  NoPublicIp            = "false"
-  OnFailureAction       = ""
-  RootVolumeEncrypted   = true
-  RootVolumeSize        = "25"
-  SecurityGroupIds      = local.security_group
-  SubnetId              = var.subnet_id
-  WatchmakerConfig      = var.watchmaker_config
-  WatchmakerEnvironment = var.watchmaker_env
-  EnableRepos           = "epel"
-}
-
 module "lx-instance-centos7" {
   source = "../modules/lx-instance"
 
@@ -47,39 +20,10 @@ module "lx-instance-centos7" {
   InstanceType          = "t3.medium"
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
-  OnFailureAction       = ""
+  OnFailureAction       = null
   RootVolumeSize        = "25"
   SecurityGroupIds      = local.security_group
   SubnetId              = var.subnet_id
-  WatchmakerConfig      = var.watchmaker_config
-  WatchmakerEnvironment = var.watchmaker_env
-  EnableRepos           = "epel"
-}
-
-module "lx-autoscale-centos6" {
-  source = "../modules/lx-autoscale"
-
-  Name                  = "${local.test_prefix}-lx-autoscale-centos6"
-  AmiId                 = data.aws_ami.centos6.image_id
-  AmiDistro             = "CentOS"
-  AppVolumeDevice       = true
-  AppVolumeEncrypted    = true
-  AppVolumeSize         = "10"
-  AsgMetrics            = var.AsgMetrics
-  AsgNotificationTypes  = var.AsgNotificationTypes
-  AsgSnsArn             = aws_sns_topic.tf-aws-wam.arn
-  CloudWatchAgentUrl    = var.cloudwatch_agent_url_centos
-  DisableRollback       = "true"
-  EbsOptimized          = "false"
-  InstanceRole          = var.instance_role
-  InstanceType          = "t2.medium"
-  KeyPairName           = local.keypair_name
-  NoPublicIp            = "false"
-  OnFailureAction       = ""
-  RootVolumeEncrypted   = true
-  RootVolumeSize        = "25"
-  SecurityGroupIds      = local.security_group
-  SubnetIds             = var.subnet_id
   WatchmakerConfig      = var.watchmaker_config
   WatchmakerEnvironment = var.watchmaker_env
   EnableRepos           = "epel"
@@ -102,7 +46,7 @@ module "lx-autoscale-centos7" {
   InstanceType          = "t3.medium"
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
-  OnFailureAction       = ""
+  OnFailureAction       = null
   RootVolumeSize        = "25"
   SecurityGroupIds      = local.security_group
   SubnetIds             = var.subnet_id
@@ -126,7 +70,7 @@ module "win-instance-2012R2" {
   InstanceType          = "t3.large"
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
-  OnFailureAction       = ""
+  OnFailureAction       = null
   RootVolumeEncrypted   = true
   RootVolumeSize        = "35"
   SecurityGroupIds      = local.security_group
@@ -151,7 +95,7 @@ module "win-instance-2016" {
   KeyPairName           = local.keypair_name
   KmsKeyId              = local.kmskey_id
   NoPublicIp            = "false"
-  OnFailureAction       = ""
+  OnFailureAction       = null
   RootVolumeEncrypted   = true
   RootVolumeSize        = "35"
   SecurityGroupIds      = local.security_group
@@ -173,7 +117,7 @@ module "win-instance-2019" {
   InstanceType          = "t3.large"
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
-  OnFailureAction       = ""
+  OnFailureAction       = null
   RootVolumeSize        = "35"
   SecurityGroupIds      = local.security_group
   SubnetId              = var.subnet_id
@@ -198,7 +142,7 @@ module "win-autoscale-2012R2" {
   InstanceType          = "t3.large"
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
-  OnFailureAction       = ""
+  OnFailureAction       = null
   RootVolumeEncrypted   = true
   RootVolumeSize        = "35"
   SecurityGroupIds      = local.security_group
@@ -224,7 +168,7 @@ module "win-autoscale-2016" {
   InstanceType          = "t3.large"
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
-  OnFailureAction       = ""
+  OnFailureAction       = null
   RootVolumeEncrypted   = true
   RootVolumeSize        = "35"
   SecurityGroupIds      = local.security_group
@@ -248,7 +192,7 @@ module "win-autoscale-2019" {
   InstanceType          = "t3.large"
   KeyPairName           = local.keypair_name
   NoPublicIp            = "false"
-  OnFailureAction       = ""
+  OnFailureAction       = null
   RootVolumeSize        = "35"
   SecurityGroupIds      = local.security_group
   SubnetIds             = var.subnet_id

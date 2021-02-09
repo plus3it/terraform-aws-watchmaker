@@ -10,6 +10,8 @@
   ParameterValue: __APPSCRIPTURL__
 - ParameterKey: AppVolumeDevice
   ParameterValue: __APPVOLUMEDEVICE__
+- ParameterKey: AppVolumeDeviceName
+  ParameterValue: __APPVOLUMEDEVICENAME__
 - ParameterKey: AppVolumeEncrypted
   ParameterValue: __APPVOLUMEENCRYPTED__
 - ParameterKey: AppVolumeMountPath

@@ -3,26 +3,6 @@ data "aws_vpc" "this" {
   default = "true"
 }
 
-data "aws_ami" "centos6" {
-  most_recent = true
-  owners      = ["701759196663"]
-
-  filter {
-    name   = "name"
-    values = ["*spel-minimal-centos-6*"]
-  }
-
-  filter {
-    name   = "is-public"
-    values = ["true"]
-  }
-
-  filter {
-    name   = "state"
-    values = ["available"]
-  }
-}
-
 data "aws_ami" "centos7" {
   most_recent = true
   owners      = ["701759196663"]

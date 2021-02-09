@@ -30,6 +30,7 @@ with an AWS CloudFormation template to deploy a Watchmaker Linux Instance.
 | AppScriptShell | (Optional) Shell with which to execute the application script. Ignored if AppScriptUrl is blank | `string` | `"bash"` | no |
 | AppScriptUrl | (Optional) S3 URL to the application script in an S3 bucket (s3://). Leave blank to launch without an application script. If specified, an appropriate InstanceRole is required | `string` | `null` | no |
 | AppVolumeDevice | (Optional) Decision whether to mount an extra EBS volume. Leave as default (false) to launch without an extra application volume | `bool` | `false` | no |
+| AppVolumeDeviceName | (Optional) Device name to be given to the extra EBS volume. Ignored if AppVolumeDevice is false | `string` | `"/dev/xvdf"` | no |
 | AppVolumeEncrypted | (Optional) Controls whether the EBS volume will be encrypted. When KmsKeyId is specified, EBS encryption will be done using that, otherwise encrypted using AWS managed CMK | `bool` | `false` | no |
 | AppVolumeMountPath | (Optional) Filesystem path to mount the extra app volume. Ignored if AppVolumeDevice is false | `string` | `"/opt/data"` | no |
 | AppVolumeSize | (Optional) Size in GB of the EBS volume to create. Ignored if AppVolumeDevice is false | `string` | `"1"` | no |

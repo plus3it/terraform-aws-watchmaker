@@ -148,7 +148,7 @@ Metadata:
     ParameterLabels:
       ToggleCfnInitUpdate:
         default: Force Cfn Init Update
-  Version: 2.1.0
+  Version: 2.1.1
 Outputs:
   WatchmakerInstanceId:
     Description: Instance ID
@@ -701,28 +701,24 @@ Resources:
                   - UseWamStandalone
                   - !Sub |
                       # Download watchmaker standalone pkg
-                      [Net.ServicePointManager]::SecurityProtocol = "Ssl3, Tls, Tls11, Tls12"
+                      [Net.ServicePointManager]::SecurityProtocol = "Tls12"
                       (New-Object System.Net.WebClient).DownloadFile("${WatchmakerStandaloneUrl}", "c:\cfn\scripts\watchmaker.exe")
                   - !Sub
                     - |
+                      [Net.ServicePointManager]::SecurityProtocol = "Tls12"
                       $BootstrapUrl = "${WatchmakerBootstrapper}"
                       $PythonUrl = "${PythonInstaller}"
                       $PypiUrl = "${PypiIndexUrl}"
-
                       # Get the host
                       $PypiHost="$(([System.Uri]$PypiUrl).Host)"
-
                       # Download bootstrap file
                       $BootstrapFile = "${!Env:Temp}\$(${!BootstrapUrl}.split('/')[-1])"
                       (New-Object System.Net.WebClient).DownloadFile("$BootstrapUrl", "$BootstrapFile")
-
                       # Install python
                       & "$BootstrapFile" -PythonUrl "$PythonUrl" -Verbose -ErrorAction Stop
-
                       # Install setup dependencies
                       python -m pip install --index-url="$PypiUrl" --trusted-host="$PypiHost" --upgrade pip setuptools
                       if (-not $?) { throw 'pip failed to install setup dependencies!' }
-
                       # Install watchmaker
                       pip install --index-url="$PypiUrl" --trusted-host="$PypiHost" --upgrade boto3 ${local_WatchmakerPkg}
                       if (-not $?) { throw 'pip failed to install watchmaker!' }

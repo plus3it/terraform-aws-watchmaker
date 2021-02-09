@@ -142,6 +142,7 @@ Metadata:
           default: EC2 Application EBS Volume
         Parameters:
           - AppVolumeDevice
+          - AppVolumeDeviceName
           - AppVolumeEncrypted
           - AppVolumeMountPath
           - AppVolumeSize
@@ -163,7 +164,7 @@ Metadata:
     ParameterLabels:
       ToggleCfnInitUpdate:
         default: Force Cfn Init Update
-  Version: 2.1.0
+  Version: 2.1.1
 Outputs:
   WatchmakerInstanceId:
     Description: Instance ID
@@ -214,6 +215,13 @@ Parameters:
     Description: >-
       Decision on whether to mount an extra EBS volume. Leave as default
       ("false") to launch without an extra application volume
+    Type: String
+  AppVolumeDeviceName:
+    AllowedPattern: '/dev/xvd[f-k]'
+    Default: '/dev/xvdf'
+    Description: >-
+      Device name to be given to the extra EBS volume. Ignored if
+      "AppVolumeDevice" is false
     Type: String
   AppVolumeEncrypted:
     AllowedValues:
@@ -797,7 +805,7 @@ Resources:
             VolumeType: gp2
         - !If
           - CreateAppVolume
-          - DeviceName: /dev/xvdf
+          - DeviceName: !Ref AppVolumeDeviceName
             Ebs:
               DeleteOnTermination: true
               Encrypted: !Ref AppVolumeEncrypted
@@ -867,13 +875,12 @@ Resources:
               #!/bin/bash -xe
 
               # Format and mount app volume
-              APPVOL_DEVICE="$(ls /dev/xvdf /dev/nvme1n1 2> /dev/null || true)"
-              if [[ -n "$APPVOL_DEVICE" && "${AppVolumeDevice}" == "true" ]]
+              if [[ "${AppVolumeDevice}" == "true" ]]
               then
                 MOUNT_VFSTYPE="auto"
                 MOUNT_OPTS="defaults,nofail"
-                cloud-init-per instance mkfsappvolume mkfs -t ext4 "$APPVOL_DEVICE"
-                grep -q "$APPVOL_DEVICE" /etc/fstab || printf "%s\t%s\t%s\t%s\t0\t2\n" "$APPVOL_DEVICE" "${AppVolumeMountPath}" "$MOUNT_VFSTYPE" "$MOUNT_OPTS" >> /etc/fstab
+                cloud-init-per instance mkfsappvolume mkfs -t ext4 "${AppVolumeDeviceName}"
+                grep -q "${AppVolumeDeviceName}" /etc/fstab || printf "%s\t%s\t%s\t%s\t0\t2\n" "${AppVolumeDeviceName}" "${AppVolumeMountPath}" "$MOUNT_VFSTYPE" "$MOUNT_OPTS" >> /etc/fstab
                 mkdir -p "${AppVolumeMountPath}"
                 mount -a
               fi
