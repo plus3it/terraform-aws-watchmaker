@@ -35,7 +35,7 @@ with an AWS CloudFormation template to deploy a Watchmaker Windows Instance.
 | Capabilities | (Optional) A list of capabilities. Valid values: CAPABILITY\_IAM or CAPABILITY\_NAMED\_IAM | `list(string)` | `[]` | no |
 | CfnEndpointUrl | (Optional) URL to the CloudFormation Endpoint. e.g. https://cloudformation.us-east-1.amazonaws.com | `string` | `"https://cloudformation.us-east-1.amazonaws.com"` | no |
 | CloudWatchAgentUrl | (Optional) S3 URL to CloudWatch Agent installer. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi | `string` | `null` | no |
-| CloudWatchAppLogs | (Optional) List of application log file paths to send to CloudWatch. Example: C:\dir1\file1,C:\dir2\file2,C:\dir3\file3 | `list(string)` | `[]` | no |
+| CloudWatchAppLogs | (Optional) List of application log file paths to send to CloudWatch. Example: C:\dir1ile1,C:\dir2ile2,C:\dir3ile3 | `list(string)` | `[]` | no |
 | DisableApiTermination | (Optional) Specifies whether the instance can be terminated through the API. | `bool` | `false` | no |
 | DisableRollback | (Optional) Set to true to disable rollback of the stack if stack creation failed. Conflicts with OnFailure | `string` | `false` | no |
 | EbsOptimized | (Optional) Specifies whether the instance is optimized for Amazon Elastic Block Store I/O. Warning: Stack creation will fail if set to true and the instance type does not support EBS Optimization. See complete list of supported instances here: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html#ebs-optimization-support | `bool` | `false` | no |

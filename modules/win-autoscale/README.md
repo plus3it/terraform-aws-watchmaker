@@ -38,7 +38,7 @@ with an AWS CloudFormation template to deploy a Watchmaker Windows AutoScaling G
 | Capabilities | (Optional) A list of capabilities. Valid values: CAPABILITY\_IAM or CAPABILITY\_NAMED\_IAM | `list(string)` | `[]` | no |
 | CfnEndpointUrl | (Optional) URL to the CloudFormation Endpoint. e.g. https://cloudformation.us-east-1.amazonaws.com | `string` | `"https://cloudformation.us-east-1.amazonaws.com"` | no |
 | CloudWatchAgentUrl | (Optional) S3 URL to CloudWatch Agent installer. Example: s3://amazoncloudwatch-agent/windows/amd64/latest/amazon-cloudwatch-agent.msi | `string` | `null` | no |
-| CloudWatchAppLogs | (Optional) List of application log file paths to send to CloudWatch. Example: C:\dir1\file1,C:\dir2\file2,C:\dir3\file3 | `list(string)` | `[]` | no |
+| CloudWatchAppLogs | (Optional) List of application log file paths to send to CloudWatch. Example: C:\dir1ile1,C:\dir2ile2,C:\dir3ile3 | `list(string)` | `[]` | no |
 | DesiredCapacity | (Optional) Desired number of instances in the Autoscaling Group | `string` | `"1"` | no |
 | DisableRollback | (Optional) Set to true to disable rollback of the stack if stack creation failed. Conflicts with OnFailure | `string` | `false` | no |
 | EbsOptimized | (Optional) Specifies whether the launch configuration is optimized for EBS I/O. This optimization provides dedicated throughput to Amazon EBS and an optimized configuration stack to provide optimal EBS I/O performance. Warning: Stack creation will fail if set to true and the instance type does not support EBS Optimization. See complete list of supported instances here: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSOptimized.html#ebs-optimization-support | `bool` | `false` | no |
@@ -60,8 +60,8 @@ with an AWS CloudFormation template to deploy a Watchmaker Windows AutoScaling G
 | PythonInstaller | (Optional) URL to the Python Installer Executable | `string` | `"https://www.python.org/ftp/python/3.6.4/python-3.6.4-amd64.exe"` | no |
 | RootVolumeEncrypted | (Optional) Controls whether the root volume will be encrypted | `bool` | `false` | no |
 | RootVolumeSize | (Optional) Root Volume Size in GB **NOTE** This value can be set larger than the default (30GB) but NOT smaller. | `string` | `"30"` | no |
-| ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down to MinCapacity; ignored if empty or ScaleUpSchedule is unset (E.g. "0 0 \* \* \*") | `string` | `null` | no |
-| ScaleUpSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale up to MaxCapacity; ignored if empty or ScaleDownSchedule is unset (E.g. "0 10 \* \* Mon-Fri") | `string` | `null` | no |
+| ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down to MinCapacity; ignored if empty or ScaleUpSchedule is unset (E.g. "0 0 * * *") | `string` | `null` | no |
+| ScaleUpSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale up to MaxCapacity; ignored if empty or ScaleDownSchedule is unset (E.g. "0 10 * * Mon-Fri") | `string` | `null` | no |
 | StackTags | (Optional) A map of tag keys/values to associate with this stack | `map(string)` | `{}` | no |
 | TargetGroupArns | (Optional) Comma-separated string of Target Group ARNs to associate with the Autoscaling Group; conflicts with LoadBalancerNames | `string` | `null` | no |
 | TimeoutInMinutes | (Optional) The amount of time that can pass before the stack status becomes CREATE\_FAILED | `string` | `"30"` | no |
