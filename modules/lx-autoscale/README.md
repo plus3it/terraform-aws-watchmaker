@@ -65,8 +65,8 @@ with an AWS CloudFormation template to deploy a Watchmaker Linux AutoScaling Gro
 | PypiIndexUrl | (Optional) URL to the PyPi Index | `string` | `"https://pypi.org/simple"` | no |
 | RootVolumeEncrypted | (Optional) Controls whether the root volume will be encrypted | `bool` | `false` | no |
 | RootVolumeSize | (Optional) Root Volume Size in GB **NOTE** This value can be set larger than the default (20GB) but NOT smaller. If set larger than default value partition will need to be expanded manually. | `string` | `"20"` | no |
-| ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down to MinCapacity; ignored if empty or ScaleUpSchedule is unset (E.g. "0 0 \* \* \*") | `string` | `null` | no |
-| ScaleUpSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale up to MaxCapacity; ignored if empty or ScaleDownSchedule is unset (E.g. "0 10 \* \* Mon-Fri") | `string` | `null` | no |
+| ScaleDownSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale down to MinCapacity; ignored if empty or ScaleUpSchedule is unset (E.g. "0 0 * * *") | `string` | `null` | no |
+| ScaleUpSchedule | (Optional) Scheduled Action in cron-format (UTC) to scale up to MaxCapacity; ignored if empty or ScaleDownSchedule is unset (E.g. "0 10 * * Mon-Fri") | `string` | `null` | no |
 | StackTags | (Optional) A map of tag keys/values to associate with this stack | `map(string)` | `{}` | no |
 | TargetGroupArns | (Optional) Comma-separated string of Target Group ARNs to associate with the Autoscaling Group; conflicts with LoadBalancerNames | `string` | `null` | no |
 | TimeoutInMinutes | (Optional) The amount of time that can pass before the stack status becomes CREATE\_FAILED | `string` | `"30"` | no |
