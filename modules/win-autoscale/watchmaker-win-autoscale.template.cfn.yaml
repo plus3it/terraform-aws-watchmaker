@@ -108,7 +108,7 @@ Conditions:
       - !Ref WatchmakerStandaloneUrl
       - ''
 Description: >-
-  This template creates an Autoscaling Group and Launch Configuration that
+  This template creates an Autoscaling Group and Launch Template that
   deploys Windows instances with Watchmaker, which applies the DISA STIG.
 Mappings:
   ShellCommandMap:
@@ -207,9 +207,9 @@ Outputs:
   WatchmakerAutoScalingGroupId:
     Description: Autoscaling Group ID
     Value: !Ref WatchmakerAutoScalingGroup
-  WatchmakerLaunchConfigId:
-    Description: Launch Configuration ID
-    Value: !Ref WatchmakerLaunchConfig
+  WatchmakerLaunchTemplateId:
+    Description: Launch Template ID
+    Value: !Ref WatchmakerLaunchTemplate
   WatchmakerLaunchConfigLogGroupName:
     Condition: InstallCloudWatchAgent
     Description: Log Group Name
@@ -562,7 +562,9 @@ Resources:
         - UseElbHealthCheck
         - ELB
         - EC2
-      LaunchConfigurationName: !Ref WatchmakerLaunchConfig
+      LaunchTemplate:
+        LaunchTemplateId: !Ref WatchmakerLaunchTemplate
+        Version: !GetAtt WatchmakerLaunchTemplate.LatestVersionNumber
       LoadBalancerNames: !If
         - UseLoadBalancerNames
         - !Ref LoadBalancerNames
@@ -607,7 +609,7 @@ Resources:
     UpdatePolicy:
       AutoScalingReplacingUpdate:
         WillReplace: true
-  WatchmakerLaunchConfig:
+  WatchmakerLaunchTemplate:
     Metadata:
       'AWS::CloudFormation::Init':
         configSets:
@@ -870,8 +872,8 @@ Resources:
                 - |
                   [cfn-auto-reloader-hook]
                   triggers=post.update
-                  path=Resources.WatchmakerLaunchConfig.Metadata
-                  action=cfn-init.exe -v -c update --stack ${AWS::StackName} --resource WatchmakerLaunchConfig --region ${AWS::Region} ${local_AssignInstanceRole} ${local_UseCfnUrl}
+                  path=Resources.WatchmakerLaunchTemplate.Metadata
+                  action=cfn-init.exe -v -c update --stack ${AWS::StackName} --resource WatchmakerLaunchTemplate --region ${AWS::Region} ${local_AssignInstanceRole} ${local_UseCfnUrl}
                 -
                   local_AssignInstanceRole: !If [AssignInstanceRole, !Sub '--role ${InstanceRole}','']
                   local_UseCfnUrl: !If [UseCfnUrl, !Sub '--url ${CfnEndpointUrl}', '']
@@ -977,67 +979,76 @@ Resources:
               waitAfterCompletion: '0'
       ToggleCfnInitUpdate: !Ref ToggleCfnInitUpdate
     Properties:
-      AssociatePublicIpAddress: !If
-        - AssignPublicIp
-        - true
-        - false
-      BlockDeviceMappings:
-        - DeviceName: /dev/sda1
-          Ebs:
-            DeleteOnTermination: true
-            Encrypted: !Ref RootVolumeEncrypted
-            VolumeSize: !Ref RootVolumeSize
-            VolumeType: gp2
-        - !If
-          - CreateAppVolume
-          - DeviceName: !Ref AppVolumeDevice
+      LaunchTemplateData:
+        BlockDeviceMappings:
+          - DeviceName: /dev/sda1
             Ebs:
               DeleteOnTermination: true
-              Encrypted: !Ref AppVolumeEncrypted
-              SnapshotId: !If
-                - UseAppVolumeSnapshot
-                - !Ref AppVolumeSnapshotId
-                - !Ref 'AWS::NoValue'
-              VolumeSize: !Ref AppVolumeSize
-              VolumeType: !Ref AppVolumeType
+              Encrypted: !Ref RootVolumeEncrypted
+              VolumeSize: !Ref RootVolumeSize
+              VolumeType: gp2
+          - !If
+            - CreateAppVolume
+            - DeviceName: !Ref AppVolumeDevice
+              Ebs:
+                DeleteOnTermination: true
+                Encrypted: !Ref AppVolumeEncrypted
+                SnapshotId: !If
+                  - UseAppVolumeSnapshot
+                  - !Ref AppVolumeSnapshotId
+                  - !Ref 'AWS::NoValue'
+                VolumeSize: !Ref AppVolumeSize
+                VolumeType: !Ref AppVolumeType
+            - !Ref 'AWS::NoValue'
+        EbsOptimized: !Ref EbsOptimized
+        IamInstanceProfile: !If
+          - AssignInstanceRole
+          - Name: !Ref InstanceRole
           - !Ref 'AWS::NoValue'
-      EbsOptimized: !Ref EbsOptimized
-      IamInstanceProfile: !If
-        - AssignInstanceRole
-        - !Ref InstanceRole
-        - !Ref 'AWS::NoValue'
-      ImageId: !Ref AmiId
-      InstanceType: !Ref InstanceType
-      KeyName: !Ref KeyPairName
-      SecurityGroups: !Ref SecurityGroupIds
-      UserData:
-        !Base64
-          Fn::Sub:
-            - |
-              <script>
-              REM CFN LaunchConfig Update Toggle: ${ToggleNewInstances}
-              REM Export AWS ENVs
-              IF EXIST %SystemDrive%\cfn\endpoints-override.json ( set AWS_DATA_PATH=%SystemDrive%\cfn )
-              IF EXIST %SystemDrive%\cfn\ca-override.pem (
-                set AWS_CA_BUNDLE=%SystemDrive%\cfn\ca-override.pem
-                set REQUESTS_CA_BUNDLE=%SystemDrive%\cfn\ca-override.pem
-              )
-              set AWS_DEFAULT_REGION=${AWS::Region}
+        ImageId: !Ref AmiId
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref KeyPairName
+        NetworkInterfaces:
+          - AssociatePublicIpAddress: !If
+              - AssignPublicIp
+              - true
+              - false
+            DeviceIndex: 0
+            Groups: !Ref SecurityGroupIds
+        UserData:
+          !Base64
+            Fn::Sub:
+              - |
+                <script>
+                REM CFN LaunchTemplate Update Toggle: ${ToggleNewInstances}
+                REM Export AWS ENVs
+                IF EXIST %SystemDrive%\cfn\endpoints-override.json ( set AWS_DATA_PATH=%SystemDrive%\cfn )
+                IF EXIST %SystemDrive%\cfn\ca-override.pem (
+                  set AWS_CA_BUNDLE=%SystemDrive%\cfn\ca-override.pem
+                  set REQUESTS_CA_BUNDLE=%SystemDrive%\cfn\ca-override.pem
+                )
+                set AWS_DEFAULT_REGION=${AWS::Region}
 
-              cfn-init.exe -v -c launch --stack ${AWS::StackName} --resource WatchmakerLaunchConfig --region ${AWS::Region} ${local_AssignInstanceRole} ${local_UseCfnUrl}
-              if %ERRORLEVEL% equ 0 goto success
+                cfn-init.exe -v -c launch --stack ${AWS::StackName} --resource WatchmakerLaunchTemplate --region ${AWS::Region} ${local_AssignInstanceRole} ${local_UseCfnUrl}
+                if %ERRORLEVEL% equ 0 goto success
 
-              :error
-              cfn-signal.exe -e 1 --stack ${AWS::StackName} --resource WatchmakerAutoScalingGroup --region ${AWS::Region} ${local_AssignInstanceRole} ${local_UseCfnUrl}
-              echo "ERROR: cfn-init failed! Aborting!"
-              exit /b 1
+                :error
+                cfn-signal.exe -e 1 --stack ${AWS::StackName} --resource WatchmakerAutoScalingGroup --region ${AWS::Region} ${local_AssignInstanceRole} ${local_UseCfnUrl}
+                echo "ERROR: cfn-init failed! Aborting!"
+                exit /b 1
 
-              :success
-              </script>
-            -
-              local_AssignInstanceRole: !If [AssignInstanceRole, !Sub '--role ${InstanceRole}', '']
-              local_UseCfnUrl: !If [UseCfnUrl, !Sub '--url ${CfnEndpointUrl}', '']
-    Type: 'AWS::AutoScaling::LaunchConfiguration'
+                :success
+                </script>
+              -
+                local_AssignInstanceRole: !If [AssignInstanceRole, !Sub '--role ${InstanceRole}', '']
+                local_UseCfnUrl: !If [UseCfnUrl, !Sub '--url ${CfnEndpointUrl}', '']
+      LaunchTemplateName: !Ref AWS::StackName
+      TagSpecifications:
+        - ResourceType: launch-template
+          Tags:
+            - Key: Name
+              Value: !Ref AWS::StackName
+    Type: AWS::EC2::LaunchTemplate
   WatchmakerLaunchConfigLogGroup:
     Condition: InstallCloudWatchAgent
     Properties:

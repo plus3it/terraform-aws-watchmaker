@@ -835,7 +835,7 @@ Resources:
             - AssignPublicIp
             - true
             - false
-          DeviceIndex: '0'
+          DeviceIndex: 0
           GroupSet: !Ref SecurityGroupIds
           PrivateIpAddress: !If
             - AssignStaticPrivateIp
