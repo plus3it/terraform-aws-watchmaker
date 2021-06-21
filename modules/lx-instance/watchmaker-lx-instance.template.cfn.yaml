@@ -164,7 +164,7 @@ Metadata:
     ParameterLabels:
       ToggleCfnInitUpdate:
         default: Force Cfn Init Update
-  Version: 2.1.1
+  Version: 2.2.0
 Outputs:
   WatchmakerInstanceId:
     Description: Instance ID
@@ -835,7 +835,7 @@ Resources:
             - AssignPublicIp
             - true
             - false
-          DeviceIndex: 0
+          DeviceIndex: '0'
           GroupSet: !Ref SecurityGroupIds
           PrivateIpAddress: !If
             - AssignStaticPrivateIp

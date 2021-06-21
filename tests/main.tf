@@ -27,6 +27,7 @@ module "lx-instance-centos7" {
   WatchmakerConfig      = var.watchmaker_config
   WatchmakerEnvironment = var.watchmaker_env
   EnableRepos           = "epel"
+  TimeoutInMinutes      = 45
 }
 
 module "lx-autoscale-centos7" {
@@ -53,6 +54,7 @@ module "lx-autoscale-centos7" {
   WatchmakerConfig      = var.watchmaker_config
   WatchmakerEnvironment = var.watchmaker_env
   EnableRepos           = "epel"
+  TimeoutInMinutes      = 45
 }
 
 module "win-instance-2012R2" {
@@ -77,6 +79,7 @@ module "win-instance-2012R2" {
   SubnetId              = var.subnet_id
   WatchmakerConfig      = var.watchmaker_config
   WatchmakerEnvironment = var.watchmaker_env
+  TimeoutInMinutes      = 45
 }
 
 module "win-instance-2016" {
@@ -102,6 +105,7 @@ module "win-instance-2016" {
   SubnetId              = var.subnet_id
   WatchmakerConfig      = var.watchmaker_config
   WatchmakerEnvironment = var.watchmaker_env
+  TimeoutInMinutes      = 45
 }
 
 module "win-instance-2019" {
@@ -123,6 +127,7 @@ module "win-instance-2019" {
   SubnetId              = var.subnet_id
   WatchmakerConfig      = var.watchmaker_config
   WatchmakerEnvironment = var.watchmaker_env
+  TimeoutInMinutes      = 45
 }
 
 module "win-autoscale-2012R2" {
@@ -149,6 +154,7 @@ module "win-autoscale-2012R2" {
   SubnetIds             = var.subnet_id
   WatchmakerConfig      = var.watchmaker_config
   WatchmakerEnvironment = var.watchmaker_env
+  TimeoutInMinutes      = 45
 }
 
 module "win-autoscale-2016" {
@@ -175,6 +181,7 @@ module "win-autoscale-2016" {
   SubnetIds             = var.subnet_id
   WatchmakerConfig      = var.watchmaker_config
   WatchmakerEnvironment = var.watchmaker_env
+  TimeoutInMinutes      = 45
 }
 
 module "win-autoscale-2019" {
@@ -198,4 +205,5 @@ module "win-autoscale-2019" {
   SubnetIds             = var.subnet_id
   WatchmakerConfig      = var.watchmaker_config
   WatchmakerEnvironment = var.watchmaker_env
+  TimeoutInMinutes      = 45
 }

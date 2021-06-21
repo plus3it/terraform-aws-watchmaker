@@ -99,6 +99,7 @@ htmlcov
 *.tfvars
 *.tfstate
 *.tfstate.backup
+*.lock.hcl
 .terraform/
 terraform.log
 

@@ -24,7 +24,7 @@ phases:
       - terraform apply -no-color -input=false tfplan                        # apply terraform
   post_build:
     commands:
-      - if [ "${DESTROY_AFTER_TEST}" = "true" ]; then terraform destroy -no-color -input=false -force; fi
+      - if [ "${DESTROY_AFTER_TEST}" = "true" ]; then terraform destroy -no-color -input=false -auto-approve; fi
 artifacts:
   files:
     - tests/terraform.tfstate
