@@ -119,7 +119,7 @@ Conditions:
       - !Ref WatchmakerStandaloneUrl
       - ''
 Description: >-
-  This template creates an Autoscaling Group and Launch Configuration that
+  This template creates an Autoscaling Group and Launch Template that
   deploys Linux instances with Watchmaker, which applies the DISA STIG.
 Mappings:
   Distro2RootDevice:
@@ -208,7 +208,7 @@ Metadata:
         default: Force Cfn Init Update
       ToggleNewInstances:
         default: Force New Instances
-  Version: 2.1.1
+  Version: 2.2.0
 Outputs:
   ScaleDownScheduledAction:
     Condition: UseScheduledAction
@@ -221,9 +221,9 @@ Outputs:
   WatchmakerAutoScalingGroupId:
     Description: Autoscaling Group ID
     Value: !Ref WatchmakerAutoScalingGroup
-  WatchmakerLaunchConfigId:
-    Description: Launch Configuration ID
-    Value: !Ref WatchmakerLaunchConfig
+  WatchmakerLaunchTemplateId:
+    Description: Launch Template ID
+    Value: !Ref WatchmakerLaunchTemplate
   WatchmakerLaunchConfigLogGroupName:
     Condition: InstallCloudWatchAgent
     Description: Log Group Name
@@ -377,7 +377,7 @@ Parameters:
       - 'false'
     Default: 'false'
     Description: >-
-      Specifies whether the launch configuration is optimized for EBS I/O. This optimization provides
+      Specifies whether the launch template is optimized for EBS I/O. This optimization provides
       dedicated throughput to Amazon EBS and an optimized configuration stack to provide optimal EBS I/O performance.
       Warning: Stack creation will fail if set to true and the instance type does not support EBS Optimization.
       See complete list of supported instances here:
@@ -603,7 +603,9 @@ Resources:
         - UseElbHealthCheck
         - ELB
         - EC2
-      LaunchConfigurationName: !Ref WatchmakerLaunchConfig
+      LaunchTemplate:
+        LaunchTemplateId: !Ref WatchmakerLaunchTemplate
+        Version: !GetAtt WatchmakerLaunchTemplate.LatestVersionNumber
       LoadBalancerNames: !If
         - UseLoadBalancerNames
         - !Ref LoadBalancerNames
@@ -648,9 +650,9 @@ Resources:
     UpdatePolicy:
       AutoScalingReplacingUpdate:
         WillReplace: true
-  WatchmakerLaunchConfig:
+  WatchmakerLaunchTemplate:
     Metadata:
-      AWS::CloudFormation::Init:
+      'AWS::CloudFormation::Init':
         configSets:
           launch:
             - setup
@@ -872,7 +874,7 @@ Resources:
                     [cfn-auto-reloader-hook]
                     triggers=post.update
                     path=Resources.WatchmakerInstance.Metadata
-                    action=cfn-init -v -c update --stack ${AWS::StackName} --resource WatchmakerLaunchConfig --region ${AWS::Region} ${local_AssignInstanceRole} ${local_UseCfnUrl}
+                    action=cfn-init -v -c update --stack ${AWS::StackName} --resource WatchmakerLaunchTemplate --region ${AWS::Region} ${local_AssignInstanceRole} ${local_UseCfnUrl}
                     runas=root
                 -
                   local_AssignInstanceRole: !If [AssignInstanceRole, !Sub '--role ${InstanceRole}', '']
@@ -962,122 +964,131 @@ Resources:
                   local_UseAdminUsers: !If [UseAdminUsers, !Sub '--admin-users ${WatchmakerAdminUsers}', '']
       ToggleCfnInitUpdate: !Ref ToggleCfnInitUpdate
     Properties:
-      AssociatePublicIpAddress: !If
-        - AssignPublicIp
-        - true
-        - false
-      BlockDeviceMappings:
-        - DeviceName: !Sub
-            - '/dev/${local_Distro2RootDevice}'
-            - local_Distro2RootDevice: !FindInMap [Distro2RootDevice, !Ref AmiDistro, DeviceName]
-          Ebs:
-            DeleteOnTermination: true
-            Encrypted: !Ref RootVolumeEncrypted
-            VolumeSize: !Ref RootVolumeSize
-            VolumeType: gp2
-        - !If
-          - CreateAppVolume
-          - DeviceName: !Ref AppVolumeDeviceName
+      LaunchTemplateData:
+        BlockDeviceMappings:
+          - DeviceName: !Sub
+              - '/dev/${local_Distro2RootDevice}'
+              - local_Distro2RootDevice: !FindInMap [Distro2RootDevice, !Ref AmiDistro, DeviceName]
             Ebs:
               DeleteOnTermination: true
-              Encrypted: !Ref AppVolumeEncrypted
-              SnapshotId: !If
-                - UseAppVolumeSnapshot
-                - !Ref AppVolumeSnapshotId
-                - !Ref 'AWS::NoValue'
-              VolumeSize: !Ref AppVolumeSize
-              VolumeType: !Ref AppVolumeType
-          - !Ref 'AWS::NoValue'
-      EbsOptimized: !Ref EbsOptimized
-      IamInstanceProfile: !If
-        - AssignInstanceRole
-        - !Ref InstanceRole
-        - !Ref 'AWS::NoValue'
-      ImageId: !Ref AmiId
-      InstanceType: !Ref InstanceType
-      KeyName: !Ref KeyPairName
-      SecurityGroups: !Ref SecurityGroupIds
-      UserData:
-        !Base64
-          Fn::Sub:
-            - |
-              Content-Type: multipart/mixed; boundary="===============3585321300151562773=="
-              MIME-Version: 1.0
-              --===============3585321300151562773==
-              Content-Type: text/cloud-config; charset="us-ascii"
-              MIME-Version: 1.0
-              Content-Transfer-Encoding: 7bit
-              Content-Disposition: attachment; filename="cloud.cfg"
+              Encrypted: !Ref RootVolumeEncrypted
+              VolumeSize: !Ref RootVolumeSize
+              VolumeType: gp2
+          - !If
+            - CreateAppVolume
+            - DeviceName: !Ref AppVolumeDeviceName
+              Ebs:
+                DeleteOnTermination: true
+                Encrypted: !Ref AppVolumeEncrypted
+                SnapshotId: !If
+                  - UseAppVolumeSnapshot
+                  - !Ref AppVolumeSnapshotId
+                  - !Ref 'AWS::NoValue'
+                VolumeSize: !Ref AppVolumeSize
+                VolumeType: !Ref AppVolumeType
+            - !Ref 'AWS::NoValue'
+        EbsOptimized: !Ref EbsOptimized
+        IamInstanceProfile: !If
+          - AssignInstanceRole
+          - Name: !Ref InstanceRole
+          - !Ref AWS::NoValue
+        ImageId: !Ref AmiId
+        InstanceType: !Ref InstanceType
+        KeyName: !Ref KeyPairName
+        NetworkInterfaces:
+          - AssociatePublicIpAddress: !If
+              - AssignPublicIp
+              - true
+              - false
+            DeviceIndex: 0
+            Groups: !Ref SecurityGroupIds
+        UserData:
+          !Base64
+            Fn::Sub:
+              - |
+                Content-Type: multipart/mixed; boundary="===============3585321300151562773=="
+                MIME-Version: 1.0
+                --===============3585321300151562773==
+                Content-Type: text/cloud-config; charset="us-ascii"
+                MIME-Version: 1.0
+                Content-Transfer-Encoding: 7bit
+                Content-Disposition: attachment; filename="cloud.cfg"
 
-              #cloud-config
-              ${local_ExpandRootVolume}
+                #cloud-config
+                ${local_ExpandRootVolume}
 
-              --===============3585321300151562773==
-              Content-Type: text/x-shellscript; charset="us-ascii"
-              MIME-Version: 1.0
-              Content-Transfer-Encoding: 7bit
-              Content-Disposition: attachment; filename="script.sh"
+                --===============3585321300151562773==
+                Content-Type: text/x-shellscript; charset="us-ascii"
+                MIME-Version: 1.0
+                Content-Transfer-Encoding: 7bit
+                Content-Disposition: attachment; filename="script.sh"
 
-              #!/bin/bash -xe
+                #!/bin/bash -xe
 
-              # Format and mount app volume
-              if [[ "${AppVolumeDevice}" == "true" ]]
-              then
-                MOUNT_VFSTYPE="auto"
-                MOUNT_OPTS="defaults,nofail"
-                cloud-init-per instance mkfsappvolume mkfs -t ext4 "${AppVolumeDeviceName}"
-                grep -q "${AppVolumeDeviceName}" /etc/fstab || printf "%s\t%s\t%s\t%s\t0\t2\n" "${AppVolumeDeviceName}" "${AppVolumeMountPath}" "$MOUNT_VFSTYPE" "$MOUNT_OPTS" >> /etc/fstab
-                mkdir -p "${AppVolumeMountPath}"
-                mount -a
-              fi
+                # Format and mount app volume
+                if [[ "${AppVolumeDevice}" == "true" ]]
+                then
+                  MOUNT_VFSTYPE="auto"
+                  MOUNT_OPTS="defaults,nofail"
+                  cloud-init-per instance mkfsappvolume mkfs -t ext4 "${AppVolumeDeviceName}"
+                  grep -q "${AppVolumeDeviceName}" /etc/fstab || printf "%s\t%s\t%s\t%s\t0\t2\n" "${AppVolumeDeviceName}" "${AppVolumeMountPath}" "$MOUNT_VFSTYPE" "$MOUNT_OPTS" >> /etc/fstab
+                  mkdir -p "${AppVolumeMountPath}"
+                  mount -a
+                fi
 
-              # Suppress erroneous LVM file descriptor warnings
-              # https://access.redhat.com/solutions/49144
-              export LVM_SUPPRESS_FD_WARNINGS=1
+                # Suppress erroneous LVM file descriptor warnings
+                # https://access.redhat.com/solutions/49144
+                export LVM_SUPPRESS_FD_WARNINGS=1
 
-              # Extend any available LVM PVs
-              if [[ -x $( which pvs ) ]]
-              then
-                LVMPVS=($(pvs --noheadings -o pv_name))
-                for PV in "${!LVMPVS[@]}"
-                do
-                    pvresize ${!PV}
-                done
-              fi
+                # Extend any available LVM PVs
+                if [[ -x $( which pvs ) ]]
+                then
+                  LVMPVS=($(pvs --noheadings -o pv_name))
+                  for PV in "${!LVMPVS[@]}"
+                  do
+                      pvresize ${!PV}
+                  done
+                fi
 
-              # CFN LaunchConfig Update Toggle: ${ToggleNewInstances}
+                # CFN LaunchTemplate Update Toggle: ${ToggleNewInstances}
 
-              # Setup terminal support for UTF-8
-              export LC_ALL=en_US.UTF-8
-              export LANG=en_US.UTF-8
+                # Setup terminal support for UTF-8
+                export LC_ALL=en_US.UTF-8
+                export LANG=en_US.UTF-8
 
-              # Export AWS ENVs
-              test -r /etc/aws/models/endpoints.json && export AWS_DATA_PATH=/etc/aws/models || true
-              export AWS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
-              export REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
-              export AWS_DEFAULT_REGION=${AWS::Region}
+                # Export AWS ENVs
+                test -r /etc/aws/models/endpoints.json && export AWS_DATA_PATH=/etc/aws/models || true
+                export AWS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
+                export REQUESTS_CA_BUNDLE=/etc/pki/tls/certs/ca-bundle.crt
+                export AWS_DEFAULT_REGION=${AWS::Region}
 
-              # Ensure cfn utils are in path
-              hash cfn-signal 2> /dev/null || PATH="${!PATH}:/usr/local/bin:/opt/aws/bin"
+                # Ensure cfn utils are in path
+                hash cfn-signal 2> /dev/null || PATH="${!PATH}:/usr/local/bin:/opt/aws/bin"
 
-              # Execute cfn-init
-              cfn-init -v -c launch --stack ${AWS::StackName} --resource WatchmakerLaunchConfig --region ${AWS::Region} \
-                ${local_AssignInstanceRole} ${local_UseCfnUrl} || \
-                ( echo 'ERROR: cfn-init failed! Aborting!'; cfn-signal -e 1 --stack ${AWS::StackName} --resource WatchmakerAutoScalingGroup --region ${AWS::Region} \
-                ${local_AssignInstanceRole} ${local_UseCfnUrl}; exit 1)
-              --===============3585321300151562773==--
-            -
-              local_AssignInstanceRole: !If [AssignInstanceRole, !Sub '--role ${InstanceRole}', '']
-              local_ExpandRootVolume: !If
-                - ExpandRootVolume
-                - |+
-                  growpart:
-                    mode: auto
-                    devices: [ '/dev/xvda', '/dev/xvda2', '/dev/nvme0n1', '/dev/nvme0n1p2' ]
-                    ignore_growroot_disabled: false
-                - ''
-              local_UseCfnUrl: !If [UseCfnUrl, !Sub '--url ${CfnEndpointUrl}', '']
-    Type: AWS::AutoScaling::LaunchConfiguration
+                # Execute cfn-init
+                cfn-init -v -c launch --stack ${AWS::StackName} --resource WatchmakerLaunchTemplate --region ${AWS::Region} \
+                  ${local_AssignInstanceRole} ${local_UseCfnUrl} || \
+                  ( echo 'ERROR: cfn-init failed! Aborting!'; cfn-signal -e 1 --stack ${AWS::StackName} --resource WatchmakerAutoScalingGroup --region ${AWS::Region} \
+                  ${local_AssignInstanceRole} ${local_UseCfnUrl}; exit 1)
+                --===============3585321300151562773==--
+              -
+                local_AssignInstanceRole: !If [AssignInstanceRole, !Sub '--role ${InstanceRole}', '']
+                local_ExpandRootVolume: !If
+                  - ExpandRootVolume
+                  - |+
+                    growpart:
+                      mode: auto
+                      devices: [ '/dev/xvda', '/dev/xvda2', '/dev/nvme0n1', '/dev/nvme0n1p2' ]
+                      ignore_growroot_disabled: false
+                  - ''
+                local_UseCfnUrl: !If [UseCfnUrl, !Sub '--url ${CfnEndpointUrl}', '']
+      LaunchTemplateName: !Ref AWS::StackName
+      TagSpecifications:
+        - ResourceType: launch-template
+          Tags:
+            - Key: Name
+              Value: !Ref AWS::StackName
+    Type: AWS::EC2::LaunchTemplate
   WatchmakerLaunchConfigLogGroup:
     Condition: InstallCloudWatchAgent
     Properties:
