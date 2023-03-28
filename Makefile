@@ -1,7 +1,7 @@
 BIN_DIR ?= ${HOME}/bin
 PATH := $(BIN_DIR):$(PATH)
 
-VERSION ?= $$(grep -E '^current_version' .bumpversion.cfg | sed 's/^.*= //')
+VERSION ?= $(shell grep -E '^current_version' .bumpversion.cfg | sed 's/^.*= //')
 
 SHELL := /bin/bash
 

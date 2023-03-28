@@ -1,0 +1,21 @@
+name: CFN Version Validation
+on:
+  pull_request:
+  workflow_call:
+
+concurrency:
+  group: cfn-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  makecfn:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout repo
+      uses: actions/checkout@v2
+    - name: check cfn version
+      run: echo "RELEASE_VERSION=$(grep -E '^current_version' .bumpversion.cfg | sed 's/^.*= //')"  >>  "$GITHUB_ENV"
+      shell: bash
+    - name: test release version
+      run: make cfn/version VERSION="$RELEASE_VERSION"
+      shell: bash
