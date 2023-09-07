@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Conditions:
   AsgNotificationsDefined: !Not
     - !Equals
-      - !Join [ ",", !Ref AsgNotificationTypes]
+      - !Join [",", !Ref AsgNotificationTypes]
       - ''
   AsgSnsArnDefined: !Not
     - !Equals
@@ -26,7 +26,7 @@ Conditions:
       - ''
   UseAsgMetricsCollection: !Not
     - !Equals
-      - !Join [ "," , !Ref AsgMetrics]
+      - !Join [",", !Ref AsgMetrics]
       - ''
   UseAsgNotifications: !And
     - !Condition AsgNotificationsDefined
@@ -97,7 +97,7 @@ Conditions:
       - ''
   UseTerminationPolicies: !Not
     - !Equals
-      - !Join [ "," , !Ref InstanceTerminationPolicies]
+      - !Join [",", !Ref InstanceTerminationPolicies]
       - ''
   UseWamConfig: !Not
     - !Equals
@@ -865,7 +865,7 @@ Resources:
                   interval=1
                   verbose=true
                 -
-                  local_AssignInstanceRole: !If [AssignInstanceRole, !Sub 'role=${InstanceRole}','']
+                  local_AssignInstanceRole: !If [AssignInstanceRole, !Sub 'role=${InstanceRole}', '']
                   local_UseCfnUrl: !If [UseCfnUrl, !Sub 'url=${CfnEndpointUrl}', '']
             'c:\cfn\hooks.d\cfn-auto-reloader.conf':
               content: !Sub
@@ -875,11 +875,11 @@ Resources:
                   path=Resources.WatchmakerLaunchTemplate.Metadata
                   action=cfn-init.exe -v -c update --stack ${AWS::StackName} --resource WatchmakerLaunchTemplate --region ${AWS::Region} ${local_AssignInstanceRole} ${local_UseCfnUrl}
                 -
-                  local_AssignInstanceRole: !If [AssignInstanceRole, !Sub '--role ${InstanceRole}','']
+                  local_AssignInstanceRole: !If [AssignInstanceRole, !Sub '--role ${InstanceRole}', '']
                   local_UseCfnUrl: !If [UseCfnUrl, !Sub '--url ${CfnEndpointUrl}', '']
             'c:\cfn\scripts\watchmaker-install.ps1':
               content:
-                !If
+                Fn::If:
                   - UseWamStandalone
                   - !Sub |
                       # Download watchmaker standalone pkg
@@ -907,16 +907,16 @@ Resources:
                     -
                       local_WatchmakerPkg: !If [PinWatchmakerVersion, !Sub 'watchmaker==${WatchmakerVersion}', 'watchmaker']
             'c:\cfn\scripts\update-path.ps1':
-                content: |
-                    foreach( $Level in "Machine", "User" ) {
-                      [Environment]::GetEnvironmentVariables(${Level}).GetEnumerator() | % {
-                        # For Path variables, append the new values, if they're not already in there.
-                        if($_.Name -match 'Path$') {
-                          $_.Value = ($((Get-Content "Env:$($_.Name)") + ";$($_.Value)") -split ';' | Select -unique) -join ';'
-                        }
-                        $_
-                      } | Set-Content -Path { "Env:$($_.Name)" }
+              content: |
+                foreach( $Level in "Machine", "User" ) {
+                  [Environment]::GetEnvironmentVariables(${Level}).GetEnumerator() | % {
+                    # For Path variables, append the new values, if they're not already in there.
+                    if($_.Name -match 'Path$') {
+                      $_.Value = ($((Get-Content "Env:$($_.Name)") + ";$($_.Value)") -split ';' | Select -unique) -join ';'
                     }
+                    $_
+                  } | Set-Content -Path { "Env:$($_.Name)" }
+                }
           services:
             windows:
               cfn-hup:
@@ -945,7 +945,7 @@ Resources:
                   } -Verbose -ErrorAction Stop"
                 -
                   local_ShellCommandMap: !FindInMap [ShellCommandMap, powershell, command]
-                  local_UseWamConfig: !If [UseWamConfig, !Sub "--config '${WatchmakerConfig}'" , ""]
+                  local_UseWamConfig: !If [UseWamConfig, !Sub "--config '${WatchmakerConfig}'", ""]
                   local_UseEnvironment: !If [UseEnvironment, !Sub "--env '${WatchmakerEnvironment}'", ""]
                   local_UseOuPath: !If [UseOuPath, !Sub "--ou-path '${WatchmakerOuPath}'", ""]
                   local_UseAdminGroups: !If [UseAdminGroups, !Sub "--admin-groups '${WatchmakerAdminGroups}'", ""]
@@ -954,7 +954,7 @@ Resources:
         watchmaker-update:
           commands:
             10-watchmaker-update:
-              command:  !Sub
+              command: !Sub
                 - >-
                   ${local_ShellCommandMap} -Command "Invoke-Command -ScriptBlock {
                   $ErrorActionPreference = 'Stop';
@@ -1016,7 +1016,7 @@ Resources:
             DeviceIndex: 0
             Groups: !Ref SecurityGroupIds
         UserData:
-          !Base64
+          Fn::Base64:
             Fn::Sub:
               - |
                 <script>

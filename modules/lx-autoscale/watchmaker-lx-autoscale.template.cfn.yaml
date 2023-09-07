@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Conditions:
   AsgNotificationsDefined: !Not
     - !Equals
-      - !Join [ ",", !Ref AsgNotificationTypes]
+      - !Join [",", !Ref AsgNotificationTypes]
       - ''
   AsgSnsArnDefined: !Not
     - !Equals
@@ -65,7 +65,7 @@ Conditions:
       - ''
   UseAsgMetricsCollection: !Not
     - !Equals
-      - !Join [ "," , !Ref AsgMetrics]
+      - !Join [",", !Ref AsgMetrics]
       - ''
   UseAsgNotifications: !And
     - !Condition AsgNotificationsDefined
@@ -108,7 +108,7 @@ Conditions:
       - ''
   UseTerminationPolicies: !Not
     - !Equals
-      - !Join [ "," , !Ref InstanceTerminationPolicies]
+      - !Join [",", !Ref InstanceTerminationPolicies]
       - ''
   UseWamConfig: !Not
     - !Equals
@@ -884,7 +884,7 @@ Resources:
               owner: root
             /etc/cfn/scripts/watchmaker-install.sh:
               content:
-                !If
+                Fn::If:
                   - UseWamStandalone
                   - !Sub |
                       #!/bin/bash
@@ -1003,7 +1003,7 @@ Resources:
             DeviceIndex: 0
             Groups: !Ref SecurityGroupIds
         UserData:
-          !Base64
+          Fn::Base64:
             Fn::Sub:
               - |
                 Content-Type: multipart/mixed; boundary="===============3585321300151562773=="

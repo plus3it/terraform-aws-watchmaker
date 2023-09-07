@@ -706,7 +706,7 @@ Resources:
               owner: root
             /etc/cfn/scripts/watchmaker-install.sh:
               content:
-                !If
+                Fn::If:
                   - UseWamStandalone
                   - !Sub |
                       #!/bin/bash
@@ -852,7 +852,7 @@ Resources:
             Value: !Ref PatchGroup
           - !Ref 'AWS::NoValue'
       UserData:
-        !Base64
+        Fn::Base64:
           Fn::Sub:
             - |
               Content-Type: multipart/mixed; boundary="===============3585321300151562773=="
