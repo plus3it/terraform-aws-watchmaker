@@ -30,4 +30,4 @@ artifacts:
     - tests/terraform.tfstate
     - tests/terraform.log
     - tests/terraform_output.log
-  discard-paths: yes
+  discard-paths: true

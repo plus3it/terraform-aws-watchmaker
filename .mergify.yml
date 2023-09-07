@@ -2,7 +2,6 @@ pull_request_rules:
   - name: approve dependabot pull requests
     conditions:
       - author=dependabot[bot]
-      - label!=terraform
     actions:
       review:
         type: APPROVE
@@ -14,4 +13,3 @@ pull_request_rules:
     actions:
       merge:
         method: merge
-
