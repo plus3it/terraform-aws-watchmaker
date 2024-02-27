@@ -5,7 +5,7 @@ data "aws_vpc" "this" {
 
 data "aws_ami" "centos7" {
   most_recent = true
-  owners      = ["701759196663"]
+  owners      = ["174003430611"]
 
   filter {
     name   = "name"
@@ -23,13 +23,18 @@ data "aws_ami" "centos7" {
   }
 }
 
-data "aws_ami" "windows2012R2" {
+data "aws_ami" "ol8" {
   most_recent = true
-  owners      = ["amazon"]
+  owners      = ["174003430611"]
 
   filter {
     name   = "name"
-    values = ["Windows_Server-2012-R2_RTM-English-64Bit-Base*"]
+    values = ["*spel-minimal-ol-8*"]
+  }
+
+  filter {
+    name   = "is-public"
+    values = ["true"]
   }
 
   filter {

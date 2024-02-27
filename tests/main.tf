@@ -57,31 +57,6 @@ module "lx-autoscale-centos7" {
   TimeoutInMinutes      = 45
 }
 
-module "win-instance-2012R2" {
-  source = "../modules/win-instance"
-
-  Name                  = "${local.test_prefix}-win-instance-2012R2"
-  AmiId                 = data.aws_ami.windows2012R2.image_id
-  AppVolumeDevice       = "xvdf"
-  AppVolumeEncrypted    = true
-  AppVolumeSize         = "10"
-  CloudWatchAgentUrl    = var.cloudwatch_agent_url_win
-  DisableRollback       = "true"
-  EbsOptimized          = "true"
-  InstanceRole          = var.instance_role
-  InstanceType          = "t3.large"
-  KeyPairName           = local.keypair_name
-  NoPublicIp            = "false"
-  OnFailureAction       = null
-  RootVolumeEncrypted   = true
-  RootVolumeSize        = "35"
-  SecurityGroupIds      = local.security_group
-  SubnetId              = var.subnet_id
-  WatchmakerConfig      = var.watchmaker_config
-  WatchmakerEnvironment = var.watchmaker_env
-  TimeoutInMinutes      = 45
-}
-
 module "win-instance-2016" {
   source = "../modules/win-instance"
 
@@ -125,33 +100,6 @@ module "win-instance-2019" {
   RootVolumeSize        = "35"
   SecurityGroupIds      = local.security_group
   SubnetId              = var.subnet_id
-  WatchmakerConfig      = var.watchmaker_config
-  WatchmakerEnvironment = var.watchmaker_env
-  TimeoutInMinutes      = 45
-}
-
-module "win-autoscale-2012R2" {
-  source = "../modules/win-autoscale"
-
-  Name                  = "${local.test_prefix}-win-autoscale-2012R2"
-  AmiId                 = data.aws_ami.windows2012R2.image_id
-  AppVolumeDevice       = "xvdf"
-  AppVolumeEncrypted    = true
-  AppVolumeSize         = "10"
-  AsgMetrics            = var.AsgMetrics
-  AsgNotificationTypes  = var.AsgNotificationTypes
-  AsgSnsArn             = aws_sns_topic.tf-aws-wam.arn
-  CloudWatchAgentUrl    = var.cloudwatch_agent_url_win
-  DisableRollback       = "true"
-  InstanceRole          = var.instance_role
-  InstanceType          = "t3.large"
-  KeyPairName           = local.keypair_name
-  NoPublicIp            = "false"
-  OnFailureAction       = null
-  RootVolumeEncrypted   = true
-  RootVolumeSize        = "35"
-  SecurityGroupIds      = local.security_group
-  SubnetIds             = var.subnet_id
   WatchmakerConfig      = var.watchmaker_config
   WatchmakerEnvironment = var.watchmaker_env
   TimeoutInMinutes      = 45
