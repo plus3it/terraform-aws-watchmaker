@@ -16,7 +16,7 @@ variable "build_id" {
   default     = null
 }
 
-variable "cloudwatch_agent_url_centos" {
+variable "cloudwatch_agent_url_lx" {
   type        = string
   description = "(Optional) CloudWatch agent CentOS URL"
   default     = "s3://amazoncloudwatch-agent/centos/amd64/latest/amazon-cloudwatch-agent.rpm"
