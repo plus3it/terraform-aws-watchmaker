@@ -23,7 +23,7 @@ data "aws_ami" "centos7" {
   }
 }
 
-data "aws_ami" "ol8" {
+data "aws_ami" "oracle8" {
   most_recent = true
   owners      = ["174003430611"]
 

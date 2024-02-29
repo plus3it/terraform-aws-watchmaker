@@ -11,9 +11,9 @@ module "lx-instance-centos7" {
 
   Name                  = "${local.test_prefix}-lx-instance-centos7"
   AmiId                 = data.aws_ami.centos7.image_id
-  AmiDistro             = "CentOS"
+  AmiDistro             = "Linux"
   AppVolumeSize         = "10"
-  CloudWatchAgentUrl    = var.cloudwatch_agent_url_centos
+  CloudWatchAgentUrl    = var.cloudwatch_agent_url_lx
   DisableRollback       = "true"
   EbsOptimized          = "true"
   InstanceRole          = var.instance_role
@@ -35,12 +35,63 @@ module "lx-autoscale-centos7" {
 
   Name                  = "${local.test_prefix}-lx-autoscale-centos7"
   AmiId                 = data.aws_ami.centos7.image_id
-  AmiDistro             = "CentOS"
+  AmiDistro             = "Linux"
   AppVolumeSize         = "10"
   AsgMetrics            = var.AsgMetrics
   AsgNotificationTypes  = var.AsgNotificationTypes
   AsgSnsArn             = aws_sns_topic.tf-aws-wam.arn
-  CloudWatchAgentUrl    = var.cloudwatch_agent_url_centos
+  CloudWatchAgentUrl    = var.cloudwatch_agent_url_lx
+  DisableRollback       = "true"
+  EbsOptimized          = "true"
+  InstanceRole          = var.instance_role
+  InstanceType          = "t3.medium"
+  KeyPairName           = local.keypair_name
+  NoPublicIp            = "false"
+  OnFailureAction       = null
+  RootVolumeSize        = "25"
+  SecurityGroupIds      = local.security_group
+  SubnetIds             = var.subnet_id
+  WatchmakerConfig      = var.watchmaker_config
+  WatchmakerEnvironment = var.watchmaker_env
+  EnableRepos           = "epel"
+  TimeoutInMinutes      = 45
+}
+
+module "lx-instance-oracle8" {
+  source = "../modules/lx-instance"
+
+  Name                  = "${local.test_prefix}-lx-instance-oracle8"
+  AmiId                 = data.aws_ami.oracle8.image_id
+  AmiDistro             = "Linux"
+  AppVolumeSize         = "10"
+  CloudWatchAgentUrl    = var.cloudwatch_agent_url_lx
+  DisableRollback       = "true"
+  EbsOptimized          = "true"
+  InstanceRole          = var.instance_role
+  InstanceType          = "t3.medium"
+  KeyPairName           = local.keypair_name
+  NoPublicIp            = "false"
+  OnFailureAction       = null
+  RootVolumeSize        = "25"
+  SecurityGroupIds      = local.security_group
+  SubnetId              = var.subnet_id
+  WatchmakerConfig      = var.watchmaker_config
+  WatchmakerEnvironment = var.watchmaker_env
+  EnableRepos           = "epel"
+  TimeoutInMinutes      = 45
+}
+
+module "lx-autoscale-oracle8" {
+  source = "../modules/lx-autoscale"
+
+  Name                  = "${local.test_prefix}-lx-autoscale-oracle8"
+  AmiId                 = data.aws_ami.oracle8.image_id
+  AmiDistro             = "Linux"
+  AppVolumeSize         = "10"
+  AsgMetrics            = var.AsgMetrics
+  AsgNotificationTypes  = var.AsgNotificationTypes
+  AsgSnsArn             = aws_sns_topic.tf-aws-wam.arn
+  CloudWatchAgentUrl    = var.cloudwatch_agent_url_lx
   DisableRollback       = "true"
   EbsOptimized          = "true"
   InstanceRole          = var.instance_role

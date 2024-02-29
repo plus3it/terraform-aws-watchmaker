@@ -125,9 +125,7 @@ Mappings:
   Distro2RootDevice:
     AmazonLinux:
       DeviceName: xvda
-    CentOS:
-      DeviceName: sda1
-    RedHat:
+    Linux:
       DeviceName: sda1
 Metadata:
   AWS::CloudFormation::Interface:
@@ -232,9 +230,8 @@ Parameters:
   AmiDistro:
     AllowedValues:
       - AmazonLinux
-      - CentOS
-      - RedHat
-    Description: Linux distro of the AMI
+      - Linux
+    Description: Parameter used to determine the mapping to set the EBS device name
     Type: String
   AmiId:
     Description: ID of the AMI to launch
